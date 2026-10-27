@@ -1,6 +1,6 @@
 footer {
   background: var(--ink); 
-  padding: 70px 0 0;
+  padding: 35px 0 0; /* 👈 Reducido a la mitad para quitar el espacio superior excesivo */
 }
 
 /* --- CONTROL DEL NUEVO LOGO EN EL FOOTER --- */
@@ -12,15 +12,15 @@ footer .logo {
 }
 
 footer .footer-logo-img {
-  height: 42px; /* Tamaño elegante y proporcional */
+  height: 36px; /* 👈 Ligeramente más compacto */
   width: auto;
   object-fit: contain;
-  filter: brightness(0) invert(1); /* Convierte el logo a blanco si la imagen original es oscura */
+  filter: brightness(0) invert(1);
 }
 
 footer .logo-text {
   font-family: 'Fraunces', serif;
-  font-size: 20px;
+  font-size: 18px; /* 👈 Ajustado proporcionalmente */
   font-weight: 600;
   letter-spacing: 1.5px;
   line-height: 1.1;
@@ -31,7 +31,7 @@ footer .logo-text {
 
 footer .logo-sub {
   font-family: system-ui, -apple-system, sans-serif;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 400;
   letter-spacing: 0.5px;
   color: var(--ivory-dim);
@@ -39,12 +39,12 @@ footer .logo-sub {
   margin-top: 2px;
 }
 
-/* --- ESTRUCTURA DE LA GRILLA --- */
+/* --- ESTRUCTURA DE LA GRILLA MÁS COMPACTA --- */
 .footer-grid {
   display: grid; 
   grid-template-columns: 1.2fr 1fr 1fr 1.1fr; 
-  gap: 40px; 
-  padding-bottom: 50px;
+  gap: 24px; /* 👈 Reducido de 40px a 24px para juntar las columnas */
+  padding-bottom: 25px; /* 👈 Reducido a la mitad */
 }
 
 footer h4 {
@@ -52,20 +52,20 @@ footer h4 {
   font-style: normal; 
   font-weight: 500; 
   text-transform: none;
-  font-size: 18px; 
+  font-size: 16px; /* 👈 Letra un poco más estilizada */
   color: var(--ivory); 
-  margin-bottom: 20px;
+  margin-bottom: 10px; /* 👈 Menos separación con el contenido de abajo */
 }
 
 footer ul {
   list-style: none; 
   display: flex; 
   flex-direction: column; 
-  gap: 12px;
+  gap: 6px; /* 👈 Reducido el espacio entre enlaces de lista */
 }
 
 footer a {
-  font-size: 14.5px; 
+  font-size: 14px; 
   color: var(--ivory-dim);
   text-decoration: none;
   transition: color 0.3s ease;
@@ -77,25 +77,25 @@ footer a:focus-visible {
 }
 
 .footer-about p {
-  font-size: 14.5px; 
+  font-size: 13.5px; 
   color: var(--ivory-dim); 
   max-width: 270px; 
-  margin: 16px 0 22px; 
-  line-height: 1.75;
+  margin: 10px 0 14px; /* 👈 Márgenes verticales mucho más cortos */
+  line-height: 1.5;
 }
 
 .social-row {
   display: flex; 
-  gap: 14px;
+  gap: 12px;
 }
 
 .social-row a {
-  width: 32px; 
-  height: 32px; 
+  width: 28px; 
+  height: 28px; 
   display: flex; 
   align-items: center; 
   justify-content: center; 
-  font-size: 13px; 
+  font-size: 12px; 
   color: var(--ivory-dim);
 }
 
@@ -104,33 +104,33 @@ footer a:focus-visible {
 }
 
 .footer-contact p {
-  font-size: 14.5px; 
+  font-size: 13.5px; 
   color: var(--ivory-dim); 
-  line-height: 1.75; 
-  margin-bottom: 16px;
+  line-height: 1.5; 
+  margin-bottom: 8px; /* 👈 Reducido */
 }
 
 .footer-hours .hour-row {
-  font-size: 14.5px; 
+  font-size: 13.5px; 
   color: var(--ivory-dim); 
-  margin-bottom: 14px; 
-  line-height: 1.6;
+  margin-bottom: 6px; /* 👈 Mucho más compacto para los horarios */
+  line-height: 1.4;
 }
 
-/* --- FORMULARIO DE SUSCRIPCIÓN --- */
+/* --- FORMULARIO DE SUSCRIPCIÓN COMPACTO --- */
 .subscribe-form {
   display: flex; 
   flex-direction: column; 
-  gap: 12px;
+  gap: 8px; /* 👈 Más pegado el input y el botón */
 }
 
 .subscribe-form input {
   background: var(--charcoal-2); 
   border: 1px solid var(--line); 
   color: var(--ivory);
-  padding: 14px 16px; 
+  padding: 10px 14px; /* 👈 Padding interno reducido */
   font-family: 'Fraunces', serif; 
-  font-size: 14px;
+  font-size: 13.5px;
   outline: none;
   transition: border-color 0.3s ease;
 }
@@ -146,6 +146,7 @@ footer a:focus-visible {
 .subscribe-form button {
   border: none; 
   width: 100%;
+  padding: 10px; /* 👈 Botón más estilizado y menos alto */
 }
 
 .subscribe-form button:disabled {
@@ -156,11 +157,11 @@ footer a:focus-visible {
 /* --- BARRA INFERIOR COPYRIGHT --- */
 .footer-bottom {
   border-top: 1px solid var(--line); 
-  padding: 24px 0;
+  padding: 16px 0; /* 👈 Reducido a 16px arriba y abajo */
   display: flex; 
   justify-content: space-between; 
   align-items: center;
-  font-size: 13px; 
+  font-size: 12.5px; 
   color: var(--ivory-dim); 
   flex-wrap: wrap; 
   gap: 14px;
@@ -168,13 +169,13 @@ footer a:focus-visible {
 
 .footer-legal-links {
   display: flex; 
-  gap: 26px; 
+  gap: 20px; 
   flex-direction: row !important;
 }
 
 .footer-legal-links a {
   font-family: 'Oswald', sans-serif; 
-  font-size: 12px; 
+  font-size: 11.5px; 
   letter-spacing: 1px;
 }
 
@@ -182,7 +183,7 @@ footer a:focus-visible {
 @media (max-width: 880px) {
   .footer-grid {
     grid-template-columns: 1fr 1fr; 
-    gap: 36px;
+    gap: 24px;
   }
 }
 
@@ -190,4 +191,41 @@ footer a:focus-visible {
   .footer-grid {
     grid-template-columns: 1fr;
   }
+}
+.btn-subscribe-footer {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background-color: transparent;
+  color: var(--tan);
+  border: 1px solid var(--tan);
+  border-radius: 4px; 
+  font-family: 'Oswald', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.btn-subscribe-footer:hover {
+  background-color: var(--tan);
+  color: var(--ink);
+  transform: translateY(-1px); 
+}
+
+.subscribe-form input {
+  background: var(--charcoal-2); 
+  border: 1px solid var(--line); 
+  border-radius: 4px;
+  color: var(--ivory);
+  padding: 10px 14px; 
+  font-family: 'Fraunces', serif; 
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.3s ease;
 }

@@ -174,14 +174,23 @@
   background: #fdfbf7;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid #c4ab80(197, 160, 89, 0.2);
+  border: 1px solid rgba(197, 160, 89, 0.2);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: center !important; /* Fuerza el centrado vertical */
+  align-items: center !important;     /* Fuerza el centrado horizontal */
   padding: 30px 20px;
   position: relative;
+  height: 100%;                      
+}
+
+.barber-pole-banner img, 
+.barber-pole-banner .image-container {
+  margin: auto !important;           
+  display: block;
+  max-width: 85%;
+  height: auto;
 }
 
 /* Creamos la onda o franja lateral formal en tono café (inspirado en tu referencia) */
@@ -389,5 +398,6 @@
     grid-template-columns: 1fr;
     max-width: 450px;
     margin: 0 auto;
+    
   }
 }
