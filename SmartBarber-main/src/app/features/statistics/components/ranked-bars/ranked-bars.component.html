@@ -1,0 +1,20 @@
+@if (hasData()) {
+  <ol class="ranked-list">
+    @for (item of items(); track item.id) {
+      <li class="ranked-item">
+        <div class="ranked-copy">
+          <span class="ranked-label">{{ item.label }}</span>
+          <span class="ranked-value">{{ item.valueLabel }}</span>
+        </div>
+        <div class="track" aria-hidden="true">
+          <span class="fill" [style.width.%]="width(item)"></span>
+        </div>
+        @if (item.detail) {
+          <span class="ranked-detail">{{ item.detail }}</span>
+        }
+      </li>
+    }
+  </ol>
+} @else {
+  <p class="empty">{{ emptyMessage() }}</p>
+}

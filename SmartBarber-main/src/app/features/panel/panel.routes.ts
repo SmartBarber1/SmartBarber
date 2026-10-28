@@ -210,6 +210,31 @@ export const PANEL_ROUTES: Routes = [
 
 
       // ========================================================
+      // ESTADÍSTICAS
+      // ========================================================
+
+      {
+        path: 'statistics',
+
+        canActivate: [
+          authGuard,
+          roleGuard
+        ],
+
+        data: {
+          roles: ['ADMIN']
+        },
+
+        loadChildren: () =>
+          import(
+            '../statistics/statistics.routes'
+          ).then(
+            m => m.STATISTICS_ROUTES
+          )
+      },
+
+
+      // ========================================================
       // RESERVAS
       // ========================================================
 

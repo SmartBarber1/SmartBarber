@@ -1,0 +1,75 @@
+@if (hasRevenue()) {
+  <figure class="trend-chart">
+    <div class="plot" (mouseleave)="activeIndex.set(null)">
+      <div class="grid" aria-hidden="true">
+        @for (line of gridLines(); track line.ratio) {
+          <div class="grid-line" [style.bottom.%]="line.ratio * 100">
+            <span>{{ line.label }}</span>
+          </div>
+        }
+      </div>
+
+      <div
+        class="bars"
+        role="img"
+        [attr.aria-label]="caption() + '. Consulta la tabla de datos para ver los valores exactos.'"
+        [class.bars--dense]="points().length > 60">
+        @for (point of points(); track point.key; let i = $index) {
+          <div
+            class="bar-slot"
+            (mouseenter)="activeIndex.set(i)">
+            <span
+              class="bar"
+              [class.bar--active]="activeIndex() === i"
+              [class.bar--dim]="activeIndex() !== null && activeIndex() !== i"
+              [style.height.%]="barHeight(point)"></span>
+          </div>
+        }
+      </div>
+
+      @if (activePoint(); as point) {
+        <div
+          class="tooltip"
+          role="status"
+          [style.left.%]="tooltipLeft(activeIndex() ?? 0)">
+          <strong>{{ point.label }}</strong>
+          <span>{{ formatCurrency(point.revenue) }}</span>
+          <small>{{ formatInteger(point.services) }} servicios finalizados</small>
+        </div>
+      }
+    </div>
+
+    <div class="x-axis" aria-hidden="true">
+      @for (point of points(); track point.key; let i = $index) {
+        <span>{{ showLabel(i) ? point.label : '' }}</span>
+      }
+    </div>
+
+    <details class="data-table">
+      <summary>Ver datos en tabla</summary>
+      <div class="table-scroll">
+        <table>
+          <caption class="sr-only">{{ caption() }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Periodo</th>
+              <th scope="col">Servicios</th>
+              <th scope="col">Ingreso</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (point of points(); track point.key) {
+              <tr>
+                <th scope="row">{{ point.label }}</th>
+                <td>{{ formatInteger(point.services) }}</td>
+                <td>{{ formatCurrency(point.revenue) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </figure>
+} @else {
+  <p class="empty">No hay servicios finalizados en este periodo.</p>
+}

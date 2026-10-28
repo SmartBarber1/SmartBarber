@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+.ranked-list {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranked-copy {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+
+.ranked-label {
+  min-width: 0;
+  overflow: hidden;
+  color: #e6dfd5;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranked-value {
+  flex: 0 0 auto;
+  color: #fdfbf7;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(197, 168, 128, .12);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #c5a880;
+  transition: width .35s ease;
+}
+
+.ranked-detail {
+  display: block;
+  margin-top: 5px;
+  color: #9d8a77;
+  font-size: 12px;
+}
+
+.empty {
+  margin: 0;
+  padding: 32px 0;
+  color: #bfa893;
+  text-align: center;
+}

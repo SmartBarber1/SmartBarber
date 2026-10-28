@@ -473,24 +473,24 @@ export class PanelNavigationService {
           },
 
           {
-            id: 'reports',
+            id: 'statistics',
 
-            label: 'Reportes',
+            label: 'Estadísticas',
 
             description:
-              'Consulta indicadores y estadísticas del negocio.',
+              'Ingresos, ocupación, desempeño del equipo y comportamiento de los clientes.',
 
             icon: 'chart',
 
             route:
-              '/panel/reports',
+              '/panel/statistics',
 
             roles: [
               'ADMIN'
             ],
 
             status:
-              'COMING_SOON',
+              'AVAILABLE',
 
             visible:
               true

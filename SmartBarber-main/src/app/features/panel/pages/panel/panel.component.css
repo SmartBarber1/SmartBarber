@@ -675,6 +675,11 @@ button {
     color:
         var(--ink);
 
+    font-family:
+        'Fraunces',
+        Georgia,
+        serif;
+
     font-size:
         13px;
 
@@ -1307,7 +1312,7 @@ button {
         var(--ink);
 
     font-family:
-        'Playfair Display',
+        'Fraunces',
         Georgia,
         serif !important;
 
@@ -1485,7 +1490,7 @@ button {
         var(--ink);
 
     font-family:
-        'Playfair Display',
+        'Fraunces',
         Georgia,
         serif;
 
@@ -1557,7 +1562,7 @@ button {
         var(--ink);
 
     font-family:
-        'Playfair Display',
+        'Fraunces',
         Georgia,
         serif !important;
 
@@ -1578,6 +1583,25 @@ button {
 
     white-space:
         nowrap;
+}
+
+
+.card-link--action {
+    font-weight:
+        700;
+
+    text-decoration:
+        none;
+}
+
+
+.card-link--action:hover,
+.card-link--action:focus-visible {
+    color:
+        #6f5129;
+
+    text-decoration:
+        underline;
 }
 
 
@@ -2078,7 +2102,7 @@ button {
         7px 0;
 
     font-family:
-        'Playfair Display',
+        'Fraunces',
         Georgia,
         serif !important;
 }

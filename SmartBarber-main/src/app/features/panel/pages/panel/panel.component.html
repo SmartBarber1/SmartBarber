@@ -730,9 +730,16 @@
 
                             </div>
 
-                            <span class="card-link">
-                                Reportes
-                            </span>
+                            <a *ngIf="isAdminUser; else reportsLabel" routerLink="/panel/statistics"
+                                class="card-link card-link--action">
+                                Ver estadísticas →
+                            </a>
+
+                            <ng-template #reportsLabel>
+                                <span class="card-link">
+                                    Reportes
+                                </span>
+                            </ng-template>
 
                         </div>
 

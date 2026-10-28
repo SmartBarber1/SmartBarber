@@ -1,0 +1,349 @@
+<main class="statistics-dashboard" [attr.aria-busy]="loading()">
+  <header class="dashboard-heading">
+    <div class="heading-copy">
+      <span class="kicker"><span aria-hidden="true">💈</span> PANEL DE ADMINISTRACIÓN</span>
+      <h1>Estadísticas</h1>
+      <p>Ingresos, ocupación, desempeño del equipo y comportamiento de tus clientes en un solo lugar.</p>
+    </div>
+  </header>
+
+  <!-- ===================== FILTROS ===================== -->
+  <section class="filter-bar" aria-label="Filtros de periodo">
+    <div class="period-options" role="group" aria-label="Periodo">
+      @for (option of periods; track option.id) {
+        <button
+          type="button"
+          class="period-option"
+          [class.period-option--active]="period() === option.id"
+          [attr.aria-pressed]="period() === option.id"
+          (click)="selectPeriod(option.id)">
+          {{ option.label }}
+        </button>
+      }
+    </div>
+
+    @if (period() === 'RANGE') {
+      <form class="range-form" (ngSubmit)="applyRange()">
+        <label>
+          <span>Desde</span>
+          <input
+            type="date"
+            name="from"
+            required
+            [max]="today"
+            [ngModel]="customFrom()"
+            (ngModelChange)="customFrom.set($event)" />
+        </label>
+        <label>
+          <span>Hasta</span>
+          <input
+            type="date"
+            name="to"
+            required
+            [max]="today"
+            [ngModel]="customTo()"
+            (ngModelChange)="customTo.set($event)" />
+        </label>
+        <button type="submit" class="apply-button" [disabled]="loading()">Aplicar</button>
+      </form>
+    }
+
+    <p class="range-label" aria-live="polite">
+      @if (loading()) {
+        Actualizando…
+      } @else {
+        {{ rangeLabel() }}
+      }
+    </p>
+
+    @if (rangeError()) {
+      <p class="inline-error range-error" role="alert">{{ rangeError() }}</p>
+    }
+  </section>
+
+  @if (errorMessage()) {
+    <section class="state-card error-card" role="alert">
+      <span class="state-icon" aria-hidden="true">!</span>
+      <div>
+        <h2>No fue posible mostrar las estadísticas</h2>
+        <p>{{ errorMessage() }}</p>
+      </div>
+      <button type="button" class="apply-button" (click)="load()">Reintentar</button>
+    </section>
+  } @else if (!dashboard()) {
+    <section class="state-card" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Calculando los indicadores de tu barbería…</p>
+    </section>
+  } @else {
+    @if (dashboard(); as data) {
+      <div class="dashboard-body" [class.dashboard-body--loading]="loading()">
+
+        @if (data.isSample) {
+          <aside class="integration-note">
+            <span class="note-icon" aria-hidden="true">i</span>
+            <p>
+              <strong>Datos de demostración.</strong>
+              Las cifras son de ejemplo para mostrar el funcionamiento del módulo; se reemplazarán por la información real de tu barbería cuando el servicio de estadísticas esté disponible.
+            </p>
+          </aside>
+        }
+
+        <!-- ===================== KPIs ===================== -->
+        <section class="kpi-grid" aria-label="Indicadores principales">
+          @for (kpi of data.kpis; track kpi.id) {
+            <article class="kpi-card">
+              <span class="kpi-label">{{ kpi.label }}</span>
+              <strong class="kpi-value">{{ formatKpiValue(kpi) }}</strong>
+              <div class="kpi-footer">
+                @if (kpiDelta(kpi); as delta) {
+                  <span
+                    class="kpi-delta"
+                    [class.kpi-delta--good]="delta.favorable"
+                    [class.kpi-delta--bad]="!delta.favorable">
+                    <span aria-hidden="true">{{ delta.direction === 'up' ? '▲' : delta.direction === 'down' ? '▼' : '■' }}</span>
+                    {{ delta.label }}
+                    <span class="sr-only">frente al periodo anterior</span>
+                  </span>
+                } @else {
+                  <span class="kpi-delta">Sin periodo previo</span>
+                }
+                <span class="kpi-hint">{{ kpi.hint }}</span>
+              </div>
+            </article>
+          }
+        </section>
+
+        <!-- ===================== INGRESOS ===================== -->
+        <section class="dashboard-section" aria-labelledby="revenue-title">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">INGRESOS</span>
+              <h2 id="revenue-title">Ingresos operacionales</h2>
+            </div>
+            <p>Solo se contabilizan los servicios finalizados, desglosados por día o mes, por servicio y por barbero.</p>
+          </div>
+
+          <div class="panel-grid panel-grid--wide">
+            <article class="panel">
+              <header class="panel-header">
+                <h3>Evolución de ingresos</h3>
+                <div class="segmented" role="group" aria-label="Agrupar ingresos">
+                  <button type="button" [class.active]="granularity() === 'DAY'" [attr.aria-pressed]="granularity() === 'DAY'" (click)="granularity.set('DAY')">Por día</button>
+                  <button type="button" [class.active]="granularity() === 'MONTH'" [attr.aria-pressed]="granularity() === 'MONTH'" (click)="granularity.set('MONTH')">Por mes</button>
+                </div>
+              </header>
+              <app-revenue-trend-chart
+                [points]="trendPoints()"
+                [caption]="granularity() === 'DAY' ? 'Ingresos por día' : 'Ingresos por mes'" />
+            </article>
+
+            <article class="panel">
+              <header class="panel-header">
+                <h3>Distribución</h3>
+                <div class="segmented" role="group" aria-label="Desglose de ingresos">
+                  <button type="button" [class.active]="breakdown() === 'SERVICE'" [attr.aria-pressed]="breakdown() === 'SERVICE'" (click)="breakdown.set('SERVICE')">Servicio</button>
+                  <button type="button" [class.active]="breakdown() === 'BARBER'" [attr.aria-pressed]="breakdown() === 'BARBER'" (click)="breakdown.set('BARBER')">Barbero</button>
+                </div>
+              </header>
+              <app-ranked-bars [items]="breakdownItems()" emptyMessage="No hay ingresos en este periodo." />
+            </article>
+          </div>
+        </section>
+
+        <!-- ===================== OCUPACIÓN ===================== -->
+        <section class="dashboard-section" aria-labelledby="occupancy-title">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">OCUPACIÓN</span>
+              <h2 id="occupancy-title">Ocupación y demanda</h2>
+            </div>
+            <p>Porcentaje de la jornada laboral ocupado por cada barbero y franjas horarias con más reservas.</p>
+          </div>
+
+          <div class="panel-grid">
+            <article class="panel">
+              <header class="panel-header">
+                <h3>Ocupación por barbero</h3>
+              </header>
+              <app-ranked-bars [items]="occupancyItems()" [scaleMax]="1" />
+            </article>
+
+            <article class="panel">
+              <header class="panel-header">
+                <h3>Franjas de mayor demanda</h3>
+              </header>
+              <app-demand-heatmap [cells]="data.demand" />
+
+              @if (peakSlots().length) {
+                <ol class="peak-list" aria-label="Franjas con más reservas">
+                  @for (slot of peakSlots(); track slot.key; let i = $index) {
+                    <li>
+                      <span class="peak-rank">{{ i + 1 }}</span>
+                      <span class="peak-label">{{ slot.label }}</span>
+                      <span class="peak-value">{{ slot.reservations }} reservas</span>
+                    </li>
+                  }
+                </ol>
+              }
+            </article>
+          </div>
+        </section>
+
+        <!-- ===================== SERVICIOS Y CLIENTES ===================== -->
+        <section class="dashboard-section" aria-labelledby="services-title">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">INDICADORES</span>
+              <h2 id="services-title">Servicios y clientes</h2>
+            </div>
+            <p>Qué piden más tus clientes y cuántas reservas terminan en una atención efectiva.</p>
+          </div>
+
+          <div class="panel-grid">
+            <article class="panel">
+              <header class="panel-header">
+                <h3>Servicios más solicitados</h3>
+              </header>
+              <app-ranked-bars [items]="topServiceItems()" />
+            </article>
+
+            <article class="panel">
+              <header class="panel-header">
+                <h3>Comportamiento del cliente</h3>
+                <span class="panel-meta">{{ formatInteger(data.customerBehavior.total) }} reservas programadas</span>
+              </header>
+
+              @if (behaviorSegments().length) {
+                <div class="stacked-bar" role="img"
+                  [attr.aria-label]="'Efectivas ' + behaviorSegments()[0].shareLabel + ', canceladas ' + behaviorSegments()[1].shareLabel + ', inasistencias ' + behaviorSegments()[2].shareLabel">
+                  @for (segment of behaviorSegments(); track segment.id) {
+                    <span
+                      class="stacked-segment"
+                      [attr.data-segment]="segment.id"
+                      [style.flex-grow]="segment.value"></span>
+                  }
+                </div>
+
+                <ul class="behavior-legend">
+                  @for (segment of behaviorSegments(); track segment.id) {
+                    <li>
+                      <span class="legend-dot" [attr.data-segment]="segment.id" aria-hidden="true"></span>
+                      <span class="legend-label">{{ segment.label }}</span>
+                      <strong>{{ segment.shareLabel }}</strong>
+                      <span class="legend-count">{{ segment.valueLabel }}</span>
+                    </li>
+                  }
+                </ul>
+
+                <p class="panel-note">
+                  Las cancelaciones y las inasistencias liberan espacios que la cola virtual puede recuperar.
+                </p>
+              } @else {
+                <p class="empty">No hay reservas programadas en este periodo.</p>
+              }
+            </article>
+          </div>
+        </section>
+
+        <!-- ===================== DESEMPEÑO ===================== -->
+        <section class="dashboard-section" aria-labelledby="performance-title">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">EQUIPO</span>
+              <h2 id="performance-title">Desempeño por barbero</h2>
+            </div>
+            <p>Clientes atendidos, ingreso generado, calificación promedio y tiempo promedio por servicio.</p>
+          </div>
+
+          <article class="panel panel--table">
+            <div class="table-scroll">
+              <table class="performance-table">
+                <caption class="sr-only">Desempeño por barbero en el periodo seleccionado</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Barbero</th>
+                    <th scope="col">Clientes atendidos</th>
+                    <th scope="col">Servicios</th>
+                    <th scope="col">Ingreso generado</th>
+                    <th scope="col">Calificación</th>
+                    <th scope="col">Tiempo promedio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (barber of data.barberPerformance; track barber.barberId) {
+                    <tr>
+                      <th scope="row">
+                        <span class="barber-name">
+                          <span class="barber-avatar" aria-hidden="true">{{ barber.name.charAt(0) }}</span>
+                          {{ barber.name }}
+                        </span>
+                      </th>
+                      <td>{{ formatInteger(barber.customersServed) }}</td>
+                      <td>{{ formatInteger(barber.servicesCompleted) }}</td>
+                      <td>{{ formatCurrency(barber.revenue) }}</td>
+                      <td>
+                        @if (barber.rating !== null) {
+                          <span class="rating"><span aria-hidden="true">★</span> {{ formatRating(barber.rating) }}</span>
+                          <small>{{ formatInteger(barber.ratingCount) }} reseñas</small>
+                        } @else {
+                          <small>Sin calificaciones</small>
+                        }
+                      </td>
+                      <td>{{ formatMinutes(barber.averageMinutes) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===================== COLA VIRTUAL ===================== -->
+        <section class="dashboard-section" aria-labelledby="queue-title">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">COLA VIRTUAL</span>
+              <h2 id="queue-title">Cola virtual</h2>
+            </div>
+            <p>Espacios liberados por cancelaciones o inasistencias que se recuperaron con turnos de la cola, y la espera promedio.</p>
+          </div>
+
+          <div class="panel-grid">
+            <div class="queue-metrics">
+              <article class="metric-card metric-card--featured">
+                <span class="kpi-label">Espacios recuperados</span>
+                <strong class="kpi-value">{{ formatInteger(data.virtualQueue.recoveredSlots) }}</strong>
+                <span class="kpi-hint">
+                  de {{ formatInteger(data.virtualQueue.freedSlots) }} espacios liberados · {{ formatPercent(recoveryRate()) }}
+                </span>
+                <div class="track" aria-hidden="true">
+                  <span class="fill" [style.width.%]="recoveryRate() * 100"></span>
+                </div>
+              </article>
+
+              <article class="metric-card">
+                <span class="kpi-label">Espera promedio</span>
+                <strong class="kpi-value">{{ formatMinutes(data.virtualQueue.averageWaitMinutes) }}</strong>
+                <span class="kpi-hint">Desde el ingreso a la cola hasta la atención</span>
+              </article>
+
+              <article class="metric-card">
+                <span class="kpi-label">Turnos atendidos</span>
+                <strong class="kpi-value">{{ formatInteger(data.virtualQueue.turnsServed) }}</strong>
+                <span class="kpi-hint">Clientes atendidos desde la cola</span>
+              </article>
+            </div>
+
+            <article class="panel">
+              <header class="panel-header">
+                <h3>Espera promedio por franja</h3>
+              </header>
+              <app-ranked-bars [items]="queueWaitItems()" emptyMessage="No hubo turnos de cola en este periodo." />
+            </article>
+          </div>
+        </section>
+      </div>
+    }
+  }
+</main>

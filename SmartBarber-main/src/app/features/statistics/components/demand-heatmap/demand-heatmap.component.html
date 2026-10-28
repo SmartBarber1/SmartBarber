@@ -1,0 +1,50 @@
+<div class="heatmap" (mouseleave)="activeCell.set(null)">
+  <div
+    class="heatmap-grid"
+    role="grid"
+    aria-label="Reservas por día de la semana y hora de inicio"
+    [style.--cols]="hours().length">
+    <div class="heatmap-row heatmap-head" role="row">
+      <span class="corner" role="columnheader"></span>
+      @for (hour of hours(); track hour) {
+        <span class="hour-label" role="columnheader">{{ hour }}h</span>
+      }
+    </div>
+
+    @for (row of rows(); track row.weekday) {
+      <div class="heatmap-row" role="row">
+        <span class="day-label" role="rowheader">{{ row.label }}</span>
+        @for (cell of row.cells; track cell.hour) {
+          <span
+            class="cell"
+            role="gridcell"
+            tabindex="0"
+            [class.cell--active]="activeCell() === cell"
+            [style.background-color]="color(cell)"
+            [attr.aria-label]="describe(cell)"
+            (mouseenter)="activeCell.set(cell)"
+            (focus)="activeCell.set(cell)"
+            (blur)="activeCell.set(null)"></span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="heatmap-footer">
+    <p class="readout" aria-live="polite">
+      @if (activeCell(); as cell) {
+        {{ describe(cell) }}
+      } @else {
+        Pasa el cursor o navega con Tab por las celdas para ver el detalle.
+      }
+    </p>
+
+    <div class="legend" aria-hidden="true">
+      <span>Menos</span>
+      @for (step of ramp; track step) {
+        <span class="legend-swatch" [style.background-color]="step"></span>
+      }
+      <span>Más</span>
+    </div>
+  </div>
+</div>

@@ -137,6 +137,11 @@ img{max-width:100%; display:block;}
   --admin-accent-soft: #e8eff3;
 }
 
+.panel-shell--admin[data-module="statistics"] {
+  --admin-accent: #9a6a34;
+  --admin-accent-soft: #f5ebdc;
+}
+
 .panel-module-stage--enabled {
   --admin-accent: #8b683b;
   --admin-accent-contrast: #fffdfa;
@@ -153,6 +158,23 @@ img{max-width:100%; display:block;}
   display: block;
   width: 100%;
   min-width: 0;
+}
+
+.admin-module-stage--enabled {
+  font-family: Inter, "Segoe UI", sans-serif;
+}
+
+.admin-module-stage--enabled * {
+  font-family: Inter, "Segoe UI", sans-serif !important;
+}
+
+.admin-module-stage--enabled :is(h1, h2, h3, h4, h5, h6),
+.admin-module-stage--enabled :is(h1, h2, h3, h4, h5, h6) * {
+  font-family: "Fraunces", Georgia, serif !important;
+}
+
+.admin-module-stage--enabled :is(code, pre, kbd, samp) {
+  font-family: monospace !important;
 }
 
 .panel-module-stage--enabled[data-module="barbershop"] {
@@ -180,6 +202,11 @@ img{max-width:100%; display:block;}
   --admin-accent-soft: #e8eff3;
 }
 
+.panel-module-stage--enabled[data-module="statistics"] {
+  --admin-accent: #9a6a34;
+  --admin-accent-soft: #f5ebdc;
+}
+
 .panel-module-stage--enabled :is(
   .profile-container,
   .profile-page,
@@ -194,7 +221,8 @@ img{max-width:100%; display:block;}
   .barbershop-list,
   .service-management,
   .services-page,
-  .schedule-page
+  .schedule-page,
+  .statistics-dashboard
 ) {
   width: 100%;
   max-width: 1180px;
@@ -208,14 +236,15 @@ img{max-width:100%; display:block;}
   .barber-config-page,
   .subscription-dashboard,
   .subscription-page-container,
-  .renewal-page
+  .renewal-page,
+  .statistics-dashboard
 ) {
   min-width: 0;
   font-size: 15px;
 }
 
 .panel-module-stage--enabled :is(h1, h2, h3) {
-  font-family: Inter, "Segoe UI", sans-serif !important;
+  font-family: "Fraunces", Georgia, serif !important;
   letter-spacing: -0.02em;
 }
 
