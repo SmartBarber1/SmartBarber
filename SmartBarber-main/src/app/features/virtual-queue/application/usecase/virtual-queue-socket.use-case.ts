@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { QueueEvent } from '../../domain/model/queue-event.model';
@@ -10,22 +10,26 @@ import { EventQueueRepository } from '../../domain/repository/event-queue.reposi
 })
 export class VirtualQueueWebSocketUseCase extends EventQueueRepository {
 
+  private socket$?: Observable<QueueEvent>;
   private socket?: WebSocket;
 
   override connectWebsocket(
     employeeId: string
   ): Observable<QueueEvent> {
 
-    return new Observable<QueueEvent>(observer => {
+    if (this.socket$) {
+      return this.socket$;
+    }
 
-      if (this.socket?.readyState === WebSocket.OPEN) {
-        this.socket.close();
-      }
+    this.socket$ = new Observable<QueueEvent>(observer => {
+      console.log('Entree WS: ', environment.apiUrl)
 
       const wsUrl = environment.apiUrl
         .replace(/^http:/, 'ws:')
         .replace(/^https:/, 'wss:')
         .replace(/\/$/, '');
+      
+      console.log('Entree WS: ', wsUrl)
 
       this.socket = new WebSocket(
         `${wsUrl}/ws/virtual-queue?employeeId=${encodeURIComponent(employeeId)}`
@@ -61,7 +65,7 @@ export class VirtualQueueWebSocketUseCase extends EventQueueRepository {
         }
       };
 
-      /*this.socket.onerror = error => {
+      this.socket.onerror = error => {
 
         console.error(
           '[VirtualQueueWS] Error de conexión',
@@ -79,6 +83,9 @@ export class VirtualQueueWebSocketUseCase extends EventQueueRepository {
           event.reason
         );
 
+        this.socket = undefined;
+        this.socket$ = undefined;
+
         observer.complete();
       };
 
@@ -95,8 +102,13 @@ export class VirtualQueueWebSocketUseCase extends EventQueueRepository {
         }
 
         this.socket = undefined;
-      };*/
-    });
+        this.socket$ = undefined;
+      };
+    }).pipe(
+      shareReplay(1)
+    );
+
+    return this.socket$;
   }
 
   disconnect(): void {
@@ -112,5 +124,6 @@ export class VirtualQueueWebSocketUseCase extends EventQueueRepository {
     }
 
     this.socket = undefined;
+    this.socket$ = undefined;
   }
 }

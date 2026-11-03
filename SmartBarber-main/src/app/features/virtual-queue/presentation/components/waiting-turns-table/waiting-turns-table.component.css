@@ -1,0 +1,174 @@
+.queue-card {
+  min-width: 0;
+  padding: 25px;
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .2);
+}
+
+.waiting-card {
+  padding-bottom: 10px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e5e5e3;
+}
+
+.waiting-heading {
+  align-items: center;
+}
+
+.card-eyebrow {
+  margin-bottom: 6px;
+  color: #a87d35;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  color: #242424;
+  font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+  font-size: 24px;
+}
+
+.waiting-total {
+  padding: 6px 11px;
+  border: 1px solid #e5dfd4;
+  border-radius: 20px;
+  background: #fbf7ef;
+  color: #8d672c;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+}
+
+.waiting-table {
+  width: 100%;
+}
+
+.waiting-row {
+  display: grid;
+  grid-template-columns:
+    minmax(150px, 1.1fr)
+    minmax(130px, 1fr)
+    minmax(90px, .7fr)
+    minmax(100px, .7fr);
+
+  gap: 14px;
+  align-items: center;
+
+  min-height: 58px;
+  padding: 10px 12px;
+
+  border-bottom: 1px solid #eee;
+
+  color: #333;
+  font-size: 13px;
+}
+
+.waiting-table-header {
+  min-height: 40px;
+
+  color: #8d672c;
+
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.reservation-id {
+  color: #a87d35;
+  font-weight: 500;
+}
+
+.reservation-duration {
+  color: #707070;
+}
+
+.status-badge {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 11px;
+  border-radius: 20px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+}
+
+.status-waiting {
+  border: 1px solid #e5dfd4;
+  background: #f7f5f0;
+  color: #8d672c;
+}
+
+.empty-waiting {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  padding: 24px;
+
+  border: 1px dashed #d9d9d7;
+  border-radius: 8px;
+
+  background: #fafafa;
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid #e5dfd4;
+  border-radius: 50%;
+
+  color: #a87d35;
+}
+
+.empty-icon svg {
+  width: 20px;
+  height: 20px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+
+@media (max-width: 700px) {
+
+  .waiting-table-header {
+    display: none;
+  }
+
+  .waiting-row:not(.waiting-table-header) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 14px 4px;
+  }
+
+  .reservation-duration {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+  }
+
+  .status-waiting {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+  }
+
+}

@@ -1,0 +1,132 @@
+.queue-card {
+  min-width: 0;
+  padding: 25px;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+
+  background: #fff;
+
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .2);
+}
+
+.actions-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 18px;
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid #e5e5e3;
+}
+
+.card-eyebrow {
+  margin-bottom: 6px;
+
+  color: #a87d35;
+
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+
+  letter-spacing: 1.5px;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: #242424;
+
+  font-family:
+    'Fraunces',
+    'Playfair Display',
+    Georgia,
+    serif;
+
+  font-size: 24px;
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.action-button {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 0 14px;
+}
+
+.button-mark {
+  display: grid;
+  place-items: center;
+
+  width: 23px;
+  height: 23px;
+
+  flex: 0 0 23px;
+
+  border: 1px solid currentColor;
+  border-radius: 50%;
+
+  font-size: 15px;
+}
+
+.primary-button,
+.secondary-button,
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  min-height: 46px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.primary-button {
+  border: 1px solid #c49a55;
+  background: #c49a55;
+  color: #1b1612;
+  font-weight: 700;
+}
+
+.secondary-button {
+  border: 1px solid #dedede;
+  background: #f5f5f4;
+  color: #333;
+}
+
+.danger-button {
+  border: 1px solid #d8b7b3;
+  background: #fff8f7;
+  color: #9c3b2c;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.danger-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.actions-note {
+  margin-top: auto;
+  padding-top: 17px;
+
+  color: #777;
+
+  font-size: 11px;
+  line-height: 1.55;
+}
