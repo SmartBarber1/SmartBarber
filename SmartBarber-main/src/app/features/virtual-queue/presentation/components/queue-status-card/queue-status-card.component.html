@@ -1,0 +1,67 @@
+<section class="queue-card queue-closed-card">
+
+  <div class="section-heading">
+
+    <div>
+
+      <p class="card-eyebrow">
+        COLA VIRTUAL
+      </p>
+
+      <h2>
+        Habilitar cola virtual
+      </h2>
+
+    </div>
+
+  </div>
+
+  <div class="queue-closed-content">
+
+    <div class="queue-closed-icon">
+
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M12 8v8"></path>
+        <path d="M8 12h8"></path>
+      </svg>
+
+    </div>
+
+    <h3>
+      La cola está cerrada
+    </h3>
+
+    <p class="queue-closed-description">
+
+      Actualmente no se están aceptando nuevos clientes.
+      Presiona el botón para habilitar la cola virtual y comenzar
+      a recibir turnos.
+
+    </p>
+
+    <button
+      type="button"
+      class="primary-button queue-open-button"
+      [disabled]="actionLoading"
+      (click)="onOpenQueue()">
+
+      <span class="button-mark">
+        +
+      </span>
+
+      <span>
+
+        {{
+          actionLoading
+            ? 'Habilitando cola...'
+            : 'Habilitar cola virtual'
+        }}
+
+      </span>
+
+    </button>
+
+  </div>
+
+</section>

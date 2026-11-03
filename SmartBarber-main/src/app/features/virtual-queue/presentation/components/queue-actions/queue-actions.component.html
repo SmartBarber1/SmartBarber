@@ -1,0 +1,109 @@
+<section
+  class="queue-card actions-card"
+  aria-labelledby="actions-title">
+
+  <div class="section-heading">
+    <div>
+      <p class="card-eyebrow">
+        CONTROL DE COLA
+      </p>
+
+      <h2 id="actions-title">
+        Acciones
+      </h2>
+    </div>
+  </div>
+
+  <div class="actions-list">
+
+    @if (!acceptingClients) {
+
+      <button
+        type="button"
+        class="primary-button action-button"
+        [disabled]="actionLoading"
+        (click)="onOpenQueue()">
+
+        <span class="button-mark">
+          +
+        </span>
+
+        <span>
+          {{ actionLoading ? 'Abriendo cola...' : 'Abrir cola' }}
+        </span>
+
+      </button>
+
+    }
+
+    @if (acceptingClients) {
+
+      <button
+        type="button"
+        class="primary-button action-button"
+        [disabled]="actionLoading"
+        (click)="onNextCustomer()">
+
+        <span
+          class="button-mark"
+          aria-hidden="true">
+
+          ›
+
+        </span>
+
+        <span>
+          Llamar siguiente
+        </span>
+
+      </button>
+
+      <button
+        type="button"
+        class="secondary-button action-button"
+        [disabled]="actionLoading || !hasCurrentTurn"
+        (click)="onCompleteTurn()">
+
+        <span
+          class="button-mark"
+          aria-hidden="true">
+
+          ✓
+
+        </span>
+
+        <span>
+          Finalizar turno
+        </span>
+
+      </button>
+
+      <button
+        type="button"
+        class="danger-button action-button"
+        [disabled]="actionLoading"
+        (click)="onCloseQueue()">
+
+        <span
+          class="button-mark"
+          aria-hidden="true">
+
+          ×
+
+        </span>
+
+        <span>
+          Cerrar cola
+        </span>
+
+      </button>
+
+    }
+
+  </div>
+
+  <p class="actions-note">
+    Los cambios se reflejarán en el estado de la cola al completar cada acción.
+  </p>
+
+</section>

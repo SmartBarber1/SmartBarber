@@ -1,0 +1,129 @@
+<section
+  class="queue-card waiting-card"
+  aria-labelledby="waiting-title">
+
+  <div class="section-heading waiting-heading">
+
+    <div>
+      <p class="card-eyebrow">
+        PRÓXIMOS CLIENTES
+      </p>
+
+      <h2 id="waiting-title">
+        En espera
+      </h2>
+    </div>
+
+    <span class="waiting-total">
+      {{ waitingCount }}
+      {{ waitingCount === 1 ? 'turno' : 'turnos' }}
+    </span>
+
+  </div>
+
+  @if (waitingTurns.length === 0) {
+
+    <div class="empty-waiting">
+
+      <span
+        class="empty-icon"
+        aria-hidden="true">
+
+        <svg viewBox="0 0 24 24">
+          <path d="M4 7h16M7 12h10M10 17h4"></path>
+        </svg>
+
+      </span>
+
+      <div>
+
+        <strong>
+          No hay clientes en espera
+        </strong>
+
+        <p>
+          Los nuevos turnos aparecerán aquí cuando se unan a la cola.
+        </p>
+
+      </div>
+
+    </div>
+
+  } @else {
+
+    <div
+      class="waiting-table"
+      role="table"
+      aria-label="Turnos pendientes">
+
+      <div
+        class="waiting-row waiting-table-header"
+        role="row">
+
+        <span role="columnheader">
+          Reserva
+        </span>
+
+        <span role="columnheader">
+          Tipo de reserva
+        </span>
+
+        <span role="columnheader">
+          Duración
+        </span>
+
+        <span role="columnheader">
+          Estado
+        </span>
+
+      </div>
+
+      @for (turn of waitingTurns; track turn.customer.name) {
+
+        <div
+          class="waiting-row"
+          role="row">
+
+          <strong
+            class="reservation-id"
+            role="cell">
+
+            {{ turn.customer.name }}
+
+          </strong>
+
+          <!--
+          <span
+            class="reservation-type"
+            role="cell">
+
+            {{ turn.reservationType }}
+
+          </span>
+          -->
+
+          <span
+            class="reservation-duration"
+            role="cell">
+
+            {{ turn.durationMinutes }} min
+
+          </span>
+
+          <span
+            class="status-badge status-waiting"
+            role="cell">
+
+            En espera
+
+          </span>
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</section>

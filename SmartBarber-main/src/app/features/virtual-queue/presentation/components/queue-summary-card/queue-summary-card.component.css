@@ -1,0 +1,109 @@
+.queue-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.metric-card {
+  min-width: 0;
+  padding: 21px 22px;
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .2);
+}
+
+.metric-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 15px;
+}
+
+.metric-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border: 1px solid #e5dfd4;
+  border-radius: 8px;
+  background: #fbf8f2;
+  color: #a87d35;
+}
+
+.metric-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.metric-label {
+  color: #707070;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: .6px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #b68b78;
+  box-shadow: 0 0 0 4px rgba(182, 139, 120, .12);
+}
+
+.status-dot.is-open {
+  background: #91c99a;
+  box-shadow: 0 0 0 4px rgba(145, 201, 154, .12);
+}
+
+.metric-value {
+  display: block;
+  overflow: hidden;
+  color: #242424;
+  font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metric-value-open {
+  color: #8b6a30;
+}
+
+.metric-value-id {
+  font-size: 24px;
+}
+
+.metric-value-muted {
+  color: #707070;
+  font-size: 23px;
+}
+
+.metric-caption {
+  display: block;
+  margin-top: 7px;
+  color: #777;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+
+  .queue-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card {
+    padding: 18px;
+  }
+
+}

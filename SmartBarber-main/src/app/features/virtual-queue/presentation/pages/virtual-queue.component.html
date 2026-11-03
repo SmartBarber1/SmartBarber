@@ -1,70 +1,56 @@
 <section class="queue-page" aria-labelledby="queue-title">
   <div class="queue-container">
-    <header class="queue-header">
-      <div class="queue-heading">
-        <p class="eyebrow">GESTIÓN DE ATENCIÓN</p>
-        <h1 id="queue-title">Cola virtual</h1>
-        <p class="queue-subtitle">
-          Administra los turnos y mantén el flujo de atención de tu barbería al día.
-        </p>
-      </div>
- 
-      <button
-        type="button"
-        class="refresh-button"
-        [disabled]="loading() || actionLoading()"
-        (click)="consultStatusQueue()">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M20 7v5h-5M4 17v-5h5"></path>
-          <path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"></path>
-        </svg>
-        <span>Actualizar</span>
-      </button>
-    </header>
- 
+    
+    <app-queue-header [loading]="loading()" [actionLoading]="actionLoading()" (refresh)="consultStatusQueue()">
+    </app-queue-header>
     @if (errorMessage()) {
-      <div class="queue-alert" role="alert">
-        <span class="alert-icon" aria-hidden="true">!</span>
-        <div>
-          <strong>No fue posible actualizar la cola</strong>
-          <p>{{ errorMessage() }}</p>
-        </div>
+    <div class="queue-alert" role="alert">
+      <span class="alert-icon" aria-hidden="true">!</span>
+      <div>
+        <strong>No fue posible actualizar la cola</strong>
+        <p>{{ errorMessage() }}</p>
       </div>
+    </div>
     }
- 
+
     @if (loading() && !snapshot()) {
-      <div class="queue-state" role="status" aria-live="polite">
-        <span class="loading-spinner" aria-hidden="true"></span>
-        <h2>Cargando la cola</h2>
-        <p>Estamos consultando el estado de los turnos.</p>
-      </div>
+    <div class="queue-state" role="status" aria-live="polite">
+      <span class="loading-spinner" aria-hidden="true"></span>
+      <h2>Cargando la cola</h2>
+      <p>Estamos consultando el estado de los turnos.</p>
+    </div>
     } @else if (!snapshot()) {
-      <div class="queue-state">
-        <span class="state-icon" aria-hidden="true">!</span>
-        <h2>Actualmente no cuentas con una cola virtual</h2>
-        <p>Intenta iniciar la cola virtual</p>
-        <button type="button" class="primary-button" (click)="openQueue()">
-          Iniciar Cola virtual
-        </button>
-      </div>
-        } @else {
+    <div class="queue-state">
+      <span class="state-icon" aria-hidden="true">!</span>
+      <h2>Actualmente no cuentas con una cola virtual</h2>
+      <p>Intenta iniciar la cola virtual</p>
+      <button type="button" class="primary-button" (click)="openQueue()">
+        Iniciar Cola virtual
+      </button>
+    </div>
+    } @else {
 
-      @if (queueClosed()) {
+    @if (queueClosed()) {
+    <app-queue-status-card [actionLoading]="actionLoading()" (openQueue)="openQueue()">
+    </app-queue-status-card>
 
-        <section class="queue-card queue-closed-card">
+    } @else {
 
-          <div class="section-heading">
-            <div>
-              <p class="card-eyebrow">
-                COLA VIRTUAL
-              </p>
+    <app-queue-summary-card [acceptingClients]="acceptingClients()" [waitingCount]="waitingCount()"
+      [currentTurn]="currentTurn()">
+    </app-queue-summary-card>
 
-              <h2>
-                Habilitar cola virtual
-              </h2>
-            </div>
-          </div>
+    <div class="queue-workspace">
+     
+      <app-current-turn-card [currentTurn]="currentTurn()">
+      </app-current-turn-card>
+     
+      <app-queue-actions [acceptingClients]="acceptingClients()" [actionLoading]="actionLoading()"
+        [hasCurrentTurn]="!!currentTurn()" (openQueue)="openQueue()" (nextCustomer)="nextCustomer()"
+        (completeTurn)="completeTurn()" (closeQueue)="closeQueue()">
+      </app-queue-actions>
 
+<<<<<<< Updated upstream
           <div class="queue-closed-content">
 
             <div class="queue-closed-icon">
@@ -306,7 +292,12 @@
         }
         
       </section>
+=======
+    </div>
+    <app-waiting-turns-table [waitingTurns]="waitingTurns()" [waitingCount]="waitingCount()">
+    </app-waiting-turns-table>
     }
-  }
+>>>>>>> Stashed changes
+    }
   </div>
 </section>
