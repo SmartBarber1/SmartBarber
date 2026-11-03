@@ -39,8 +39,6 @@ export interface Customer {
   id: string;
   name: string;
   cell: string;
-<<<<<<< Updated upstream
-=======
 }
 
 export interface NotificationEvent {
@@ -54,5 +52,4 @@ export interface NotificationPayload {
   barberName: string;
   barberShopId: string;
   barberShopName: string;
->>>>>>> Stashed changes
 }
