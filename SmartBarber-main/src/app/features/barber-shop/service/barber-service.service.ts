@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, switchMap } from 'rxjs';
 import { BarberServicePayload } from '../components/crud-service/crud-servicios.component';
-import { getAuth } from 'firebase/auth'; // Asegúrate de importar esto si usas Firebase Modular
+import { getAuth } from 'firebase/auth'; 
 
 @Injectable({
   providedIn: 'root'
