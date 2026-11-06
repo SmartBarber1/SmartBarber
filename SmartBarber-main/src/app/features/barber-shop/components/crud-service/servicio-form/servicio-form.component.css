@@ -1,0 +1,142 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-section {
+  flex: 1;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #fbf9f4;
+}
+
+/* Etiqueta superior formal */
+.badge-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: #fbf9f4;
+  background: #594435;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #3b2c20;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: #7d6b5b;
+  margin-bottom: 1.5rem;
+}
+
+.styled-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.input-group label {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #594435;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #c9bcab;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.input-wrapper:focus-within {
+  border-color: #594435;
+  box-shadow: 0 0 0 3px rgba(89, 68, 53, 0.12);
+}
+
+.prefix-icon {
+  padding: 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.styled-input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  background: transparent;
+  border: none;
+  color: #3b2c20;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+/* Checkbox y botones */
+.checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f3efe6;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d4c9b3;
+}
+
+.styled-checkbox {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #594435;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #594435;
+  cursor: pointer;
+}
+
+.btn-submit,
+.btn-secondary {
+  width: 100%;
+  padding: 0.9rem;
+  background: #594435;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(89, 68, 53, 0.2);
+}
+
+.btn-submit:hover {
+  background: #463428;
+  box-shadow: 0 6px 16px rgba(89, 68, 53, 0.3);
+  transform: translateY(-1px);
+}

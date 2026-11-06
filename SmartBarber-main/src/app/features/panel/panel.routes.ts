@@ -177,7 +177,7 @@ export const PANEL_ROUTES: Routes = [
 
         loadComponent: () =>
           import(
-            '../barber-shop/components/crud-service/Create-service/crud-servicios.component'
+            '../barber-shop/components/crud-service/crud-servicios.component'
           ).then(
             m => m.BarberServiConfigComponent
           )

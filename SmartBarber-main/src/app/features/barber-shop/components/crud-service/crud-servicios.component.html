@@ -1,0 +1,36 @@
+<div class="crud-wrapper">
+
+  <!-- Tarjeta dividida en 2 columnas -->
+  <main class="crud-card">
+
+    <!-- Lado izquierdo: formulario de creación / modificación -->
+    <app-servicio-form
+      [barberiaId]="currentBarberiaId"
+      [editando]="editando"
+      (guardar)="saveService($event)"
+      (cancelar)="cancelEdit()">
+    </app-servicio-form>
+
+    <!-- Lado derecho: catálogo de servicios -->
+    <section class="list-section">
+      <div class="list-header">
+        <h2>Catálogo de Servicios</h2>
+        <span class="counter-badge">{{ servicesList.length }} registrados</span>
+      </div>
+
+      <app-barberia-select
+        [barberias]="barberiasList"
+        [selectedId]="currentBarberiaId"
+        (barberiaSeleccionada)="onBarberiaSelected($event)">
+      </app-barberia-select>
+
+      <app-catalogo-servicios
+        [servicios]="servicesList"
+        (editar)="editService($event)"
+        (alternarEstado)="toggleServiceStatus($event)"
+        (eliminar)="deleteService($event)">
+      </app-catalogo-servicios>
+    </section>
+
+  </main>
+</div>

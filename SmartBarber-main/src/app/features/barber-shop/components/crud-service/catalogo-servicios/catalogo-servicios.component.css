@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+.services-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
