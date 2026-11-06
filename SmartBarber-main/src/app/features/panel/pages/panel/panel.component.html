@@ -12,7 +12,9 @@
          SIDEBAR
     ====================================================== -->
 
-    <aside class="panel-sidebar" [class.collapsed]="sidebarCollapsed()" [class.mobile-open]="mobileMenuOpen()">
+    <aside id="panel-sidebar" class="panel-sidebar" [class.collapsed]="sidebarCollapsed()" [class.mobile-open]="mobileMenuOpen()"
+        [attr.inert]="isMobileViewport() && !mobileMenuOpen() ? '' : null"
+        [attr.aria-label]="'Menú del panel'">
 
 
         <!-- USUARIO + BOTÓN MENÚ -->
@@ -45,14 +47,18 @@
 
             <!-- TRES RAYAS -->
 
-            <button type="button" class="sidebar-toggle" (click)="toggleSidebar()" [attr.aria-label]="
-                    sidebarCollapsed()
-                        ? 'Expandir menú'
-                        : 'Contraer menú'
+            <button #sidebarToggle type="button" class="sidebar-toggle" (click)="toggleSidebar()" [attr.aria-label]="
+                    isMobileViewport()
+                        ? 'Cerrar menú'
+                        : sidebarCollapsed()
+                            ? 'Expandir menú'
+                            : 'Contraer menú'
                 " [attr.title]="
-                    sidebarCollapsed()
-                        ? 'Expandir menú'
-                        : 'Contraer menú'
+                    isMobileViewport()
+                        ? 'Cerrar menú'
+                        : sidebarCollapsed()
+                            ? 'Expandir menú'
+                            : 'Contraer menú'
                 ">
 
                 <span></span>
@@ -161,7 +167,10 @@
 
                 <!-- MENÚ MOBILE -->
 
-                <button type="button" class="mobile-menu-button" (click)="toggleMobileMenu()" aria-label="Abrir menú">
+                <button #mobileMenuButton type="button" class="mobile-menu-button" (click)="toggleMobileMenu()"
+                    [attr.aria-label]="mobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+                    [attr.aria-expanded]="mobileMenuOpen()"
+                    aria-controls="panel-sidebar">
 
                     <span></span>
                     <span></span>

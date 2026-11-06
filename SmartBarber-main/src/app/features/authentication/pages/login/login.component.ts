@@ -19,6 +19,10 @@ import {
     AuthSession
 } from '../../../../core/auth/model/auth-session.model';
 
+import {
+    AuthLegalNoticeComponent
+} from '../../../../shared/components/legal-consent/auth-legal-notice.component';
+
 
 @Component({
     selector: 'app-login',
@@ -26,7 +30,8 @@ import {
     standalone: true,
 
     imports: [
-        CommonModule
+        CommonModule,
+        AuthLegalNoticeComponent
     ],
 
     templateUrl:

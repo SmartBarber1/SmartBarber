@@ -1,22 +1,31 @@
 import {
   Component,
+  ElementRef,
   HostListener,
   OnDestroy,
   OnInit,
+  ViewChild,
   computed,
+  effect,
   inject,
   signal
 } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 
 import {
+  NavigationEnd,
   Router,
   RouterLink,
   RouterOutlet
 } from '@angular/router';
 
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
+
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+/** Por debajo de este ancho la barra lateral funciona como panel deslizable (coincide con el CSS). */
+const MOBILE_MAX_WIDTH = 860;
 
 import { SessionService } from '../../../../core/auth/services/session.service';
 import { LogoutService } from '../../../../core/auth/services/logout.service';
@@ -82,6 +91,57 @@ export class PanelComponent
 
   readonly mobileMenuOpen =
     signal(false);
+
+
+  /** true cuando la barra lateral se muestra como panel deslizable (celular y tableta). */
+  readonly isMobileViewport =
+    signal(this.matchesMobile());
+
+
+  private readonly document =
+    inject(DOCUMENT);
+
+
+  @ViewChild('mobileMenuButton')
+  private mobileMenuButton?: ElementRef<HTMLButtonElement>;
+
+
+  @ViewChild('sidebarToggle')
+  private sidebarToggleButton?: ElementRef<HTMLButtonElement>;
+
+
+  constructor() {
+
+    // Bloquea el desplazamiento del fondo mientras el panel lateral está abierto.
+    effect(() => {
+      this.document.body.style.overflow =
+        this.mobileMenuOpen() && this.isMobileViewport() ? 'hidden' : '';
+    });
+
+    // Cualquier navegación (incluido "atrás") cierra el panel lateral.
+    inject(Router).events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntilDestroyed()
+      )
+      .subscribe(() => this.closeMobileMenu());
+  }
+
+
+  @HostListener('window:resize')
+  onResize(): void {
+
+    this.isMobileViewport.set(this.matchesMobile());
+
+    if (!this.isMobileViewport()) {
+      this.closeMobileMenu();
+    }
+  }
+
+
+  private matchesMobile(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= MOBILE_MAX_WIDTH;
+  }
 
 
   readonly sidebarCollapsed =
@@ -223,6 +283,9 @@ export class PanelComponent
 
     this.sessionSubscription?.unsubscribe();
 
+    // Si se sale del panel con el menú abierto, el resto del sitio debe poder desplazarse.
+    this.document.body.style.overflow = '';
+
   }
 
 
@@ -230,6 +293,27 @@ export class PanelComponent
   onDocumentClick(): void {
 
     this.userMenuOpen.set(false);
+
+  }
+
+
+  /** Escape cierra, en orden, el modal, el menú de usuario y el menú móvil. */
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+
+    if (this.selectedComingSoon()) {
+      this.closeComingSoon();
+      return;
+    }
+
+    if (this.userMenuOpen()) {
+      this.closeUserMenu();
+      return;
+    }
+
+    if (this.mobileMenuOpen()) {
+      this.closeMobileMenu(true);
+    }
 
   }
 
@@ -391,6 +475,12 @@ export class PanelComponent
 
   toggleSidebar(): void {
 
+    // En celular el botón del panel lateral lo cierra en lugar de contraerlo.
+    if (this.isMobileViewport()) {
+      this.closeMobileMenu(true);
+      return;
+    }
+
     this.sidebarCollapsed.update(
       value => !value
     );
@@ -399,15 +489,30 @@ export class PanelComponent
 
   toggleMobileMenu(): void {
 
-    this.mobileMenuOpen.update(
-      value => !value
-    );
+    if (this.mobileMenuOpen()) {
+      this.closeMobileMenu(true);
+      return;
+    }
+
+    this.mobileMenuOpen.set(true);
+
+    // Lleva el foco al panel cuando deja de estar inerte.
+    setTimeout(() => this.sidebarToggleButton?.nativeElement.focus());
   }
 
 
-  closeMobileMenu(): void {
+  /** Cierra el panel lateral; con returnFocus devuelve el foco al botón que lo abrió. */
+  closeMobileMenu(returnFocus = false): void {
+
+    if (!this.mobileMenuOpen()) {
+      return;
+    }
 
     this.mobileMenuOpen.set(false);
+
+    if (returnFocus) {
+      this.mobileMenuButton?.nativeElement.focus();
+    }
   }
 
 

@@ -42,6 +42,12 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/authentication/authentication.routes')
             .then(m => m.AUTHENTICATION_ROUTES)
+      },
+      {
+        path: 'legal',
+        loadChildren: () =>
+          import('./features/legal/legal.routes')
+            .then(m => m.LEGAL_ROUTES)
       }
     ]
   },

@@ -22,12 +22,14 @@
 
         <button type="button" class="google-button" [disabled]="loading" (click)="loginWithGoogle()">
 
-            <span class="google-icon">G</span>
+            <span class="google-icon" aria-hidden="true">G</span>
 
             <span>
                 {{ loading ? 'Conectando...' : 'Continuar con Google' }}
             </span>
         </button>
+
+        <app-auth-legal-notice />
 
         <div class="login-divider">
             <span>¿Aún no tienes una cuenta?</span>
@@ -40,11 +42,6 @@
         <button type="button" class="admin-register-button" (click)="goToAdminRegister()">
             Registrar una barbería
         </button>
-
-        <p class="login-terms">
-            Al continuar, aceptas las condiciones de uso
-            y la política de privacidad de SmartBarber.
-        </p>
 
     </div>
 </section>

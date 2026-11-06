@@ -1,0 +1,176 @@
+<app-legal-document
+  title="Política de tratamiento de datos personales"
+  summary="Explicamos qué datos personales recolectamos al usar SmartBarber, para qué los usamos, con quién los compartimos y cómo puedes ejercer tus derechos como titular, de acuerdo con la Ley 1581 de 2012."
+  [sections]="sections"
+  currentRoute="/legal/privacidad">
+
+  <section id="responsable" tabindex="-1" aria-labelledby="h-responsable">
+    <h2 id="h-responsable">1. Responsables del tratamiento</h2>
+    <p>{{ info.brand }} es un proyecto de grado del programa de {{ info.academicProgram }} de la {{ info.institution }}. Los responsables del tratamiento de los datos personales recolectados a través de la plataforma son, de forma conjunta, las siguientes personas naturales, integrantes del equipo del proyecto:</p>
+    <ul>
+      @for (name of info.responsibles; track name) {
+        <li>{{ name }}</li>
+      }
+    </ul>
+    <p>Datos de contacto de los responsables:</p>
+    <ul>
+      <li><strong>Domicilio:</strong> {{ info.city }}</li>
+      <li><strong>Dirección:</strong> {{ info.address }}</li>
+      <li><strong>Correo para protección de datos:</strong> {{ info.privacyEmail }}</li>
+      <li><strong>Teléfono:</strong> {{ info.phone }}</li>
+    </ul>
+    <h3>Atención de peticiones, consultas y reclamos</h3>
+    <p>Los responsables atienden las solicitudes de los titulares de manera conjunta, a través del correo para protección de datos. Puedes dirigir tu solicitud a cualquiera de ellos: se tramitará una sola vez y la responderá el equipo dentro de los plazos legales.</p>
+  </section>
+
+  <section id="alcance" tabindex="-1" aria-labelledby="h-alcance">
+    <h2 id="h-alcance">2. Alcance y marco legal</h2>
+    <p>Esta política aplica a los datos personales de administradores de barberías, barberos y clientes que se registran o son registrados en la plataforma, y a las personas que nos contactan. Se rige por la Ley Estatutaria 1581 de 2012, el Decreto 1377 de 2013 (compilado en el Decreto 1074 de 2015) y las demás normas que los modifiquen o complementen.</p>
+    <div class="legal-callout">
+      <p>{{ info.brand }} es un producto mínimo viable desarrollado con fines académicos. No es una empresa constituida ni presta servicios comerciales. Algunas funciones, como el cobro de suscripciones, operan en un entorno de pruebas y no generan cargos reales.</p>
+    </div>
+    <p>La {{ info.institution }} y el docente tutor del proyecto no son responsables ni encargados del tratamiento de los datos recolectados por la plataforma.</p>
+  </section>
+
+  <section id="roles" tabindex="-1" aria-labelledby="h-roles">
+    <h2 id="h-roles">3. Responsable y encargado</h2>
+    <p>{{ info.brand }} es una plataforma de software como servicio que usan varias barberías. Por eso los responsables cumplimos dos papeles distintos:</p>
+    <ul>
+      <li><strong>Como responsable</strong>, tratamos los datos de las cuentas de usuario (registro, autenticación y perfil) y la información de las barberías que contratan una suscripción.</li>
+      <li><strong>Como encargado</strong>, tratamos por cuenta de cada barbería los datos de sus clientes y barberos asociados a reservas, turnos de la cola virtual, horarios y reseñas. En ese caso, la barbería es la responsable de esos datos y debe contar con la autorización de sus titulares.</li>
+    </ul>
+    <p>Cada barbería solo puede consultar la información relacionada con su propio establecimiento.</p>
+  </section>
+
+  <section id="datos" tabindex="-1" aria-labelledby="h-datos">
+    <h2 id="h-datos">4. Datos que tratamos</h2>
+    <div class="table-scroll">
+      <table>
+        <caption>Categorías de datos personales</caption>
+        <thead>
+          <tr>
+            <th scope="col">Categoría</th>
+            <th scope="col">Datos</th>
+            <th scope="col">Origen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Identificación y contacto</td>
+            <td>Nombre, tipo y número de documento, correo electrónico y número de celular.</td>
+            <td>El titular al registrarse, o la barbería al registrar a un barbero.</td>
+          </tr>
+          <tr>
+            <td>Cuenta y acceso</td>
+            <td>Identificador de la cuenta de Google o Firebase, rol (administrador, barbero o cliente) y estado de la cuenta.</td>
+            <td>El proceso de inicio de sesión.</td>
+          </tr>
+          <tr>
+            <td>Barbería</td>
+            <td>Nombre comercial, razón social, NIT o documento, dirección, teléfono y descripción.</td>
+            <td>El administrador de la barbería.</td>
+          </tr>
+          <tr>
+            <td>Operación</td>
+            <td>Reservas, servicios elegidos, horarios, turnos en la cola virtual, asistencia e inasistencias, cancelaciones y reseñas.</td>
+            <td>El uso de la plataforma.</td>
+          </tr>
+          <tr>
+            <td>Suscripción</td>
+            <td>Plan contratado, valor, estado y fechas del pago. No almacenamos datos de tarjetas.</td>
+            <td>La contratación del plan.</td>
+          </tr>
+          <tr>
+            <td>Técnicos</td>
+            <td>Datos de sesión guardados en el navegador y registros técnicos del servidor.</td>
+            <td>El navegador y nuestros servidores. Ver la <a routerLink="/legal/cookies">Política de cookies</a>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="finalidades" tabindex="-1" aria-labelledby="h-finalidades">
+    <h2 id="h-finalidades">5. Finalidades</h2>
+    <p>Usamos los datos personales únicamente para:</p>
+    <ol>
+      <li>Crear y administrar cuentas, verificar la identidad del usuario y controlar el acceso según su rol.</li>
+      <li>Permitir que las barberías gestionen su información, servicios, barberos, horarios y suscripción.</li>
+      <li>Gestionar reservas, la cola virtual, la asistencia y las políticas de cancelación e inasistencia que defina cada barbería.</li>
+      <li>Enviar comunicaciones transaccionales: confirmación, cambio o cancelación de reservas, avisos de turno y estado de la suscripción.</li>
+      <li>Generar indicadores agregados de la operación para el administrador de cada barbería.</li>
+      <li>Atender consultas, reclamos y solicitudes de soporte.</li>
+      <li>Mantener la seguridad de la plataforma, prevenir fraudes y cumplir obligaciones legales.</li>
+      <li>Validar el producto como parte del proyecto de grado: medir su funcionamiento y recoger, mediante un formulario voluntario, la opinión de los usuarios participantes.</li>
+    </ol>
+    <p>En el documento de grado, la sustentación y cualquier publicación académica derivada solo se usarán <strong>datos agregados o anonimizados</strong>, que no permitan identificar a ninguna persona ni barbería.</p>
+    <p>No vendemos datos personales ni los usamos para publicidad de terceros. Solo enviaremos comunicaciones comerciales si nos das una autorización independiente, que puedes revocar en cualquier momento.</p>
+  </section>
+
+  <section id="autorizacion" tabindex="-1" aria-labelledby="h-autorizacion">
+    <h2 id="h-autorizacion">6. Autorización</h2>
+    <p>Antes de recolectar tus datos te pedimos una autorización previa, expresa e informada, mediante una casilla que debes marcar al registrarte. Conservamos prueba de esa autorización.</p>
+    <p>Cuando una barbería registra los datos de un barbero o de un cliente, declara contar con la autorización de esa persona para tratarlos en la plataforma.</p>
+    <p>No se requiere autorización en los casos que señala el artículo 10 de la Ley 1581 de 2012, por ejemplo, cuando una autoridad la solicita en ejercicio de sus funciones o se trata de datos de naturaleza pública.</p>
+  </section>
+
+  <section id="sensibles" tabindex="-1" aria-labelledby="h-sensibles">
+    <h2 id="h-sensibles">7. Datos sensibles y de menores de edad</h2>
+    <p>{{ info.brand }} no solicita datos sensibles, como información de salud, origen étnico, orientación política o datos biométricos. Te pedimos no incluirlos en reseñas ni en notas de las reservas.</p>
+    <p>La plataforma está dirigida a mayores de 18 años. Si un menor de edad usa los servicios de una barbería, el registro debe hacerlo su representante legal, respetando el interés superior del menor.</p>
+  </section>
+
+  <section id="terceros" tabindex="-1" aria-labelledby="h-terceros">
+    <h2 id="h-terceros">8. Encargados y transferencias</h2>
+    <p>Para prestar el servicio compartimos datos con proveedores que actúan como encargados del tratamiento y solo pueden usarlos para los fines que les indicamos:</p>
+    <ul>
+      <li><strong>Google LLC (Firebase Authentication):</strong> autenticación de usuarios e inicio de sesión con Google.</li>
+      <li><strong>Proveedor de correo electrónico:</strong> envío de notificaciones transaccionales.</li>
+      <li><strong>Proveedores de infraestructura en la nube:</strong> alojamiento de la aplicación y de la base de datos.</li>
+      <li><strong>Google Fonts:</strong> entrega de las tipografías del sitio. Recibe la dirección IP del navegador, pero no datos de tu cuenta.</li>
+    </ul>
+    <p>Algunos de estos proveedores tienen servidores fuera de Colombia, incluido Estados Unidos. Esas transmisiones se realizan con las garantías que exige la ley colombiana. Además, compartiremos información con autoridades cuando una norma o una orden lo exijan.</p>
+  </section>
+
+  <section id="derechos" tabindex="-1" aria-labelledby="h-derechos">
+    <h2 id="h-derechos">9. Tus derechos como titular</h2>
+    <p>De acuerdo con el artículo 8 de la Ley 1581 de 2012, tienes derecho a:</p>
+    <ul>
+      <li>Conocer, actualizar y rectificar tus datos personales.</li>
+      <li>Solicitar prueba de la autorización que otorgaste.</li>
+      <li>Ser informado sobre el uso que se les ha dado a tus datos.</li>
+      <li>Presentar quejas ante la Superintendencia de Industria y Comercio, después de agotar el trámite de consulta o reclamo ante nosotros.</li>
+      <li>Revocar la autorización o solicitar la supresión de tus datos, salvo cuando exista un deber legal o contractual de conservarlos.</li>
+      <li>Acceder de forma gratuita a tus datos personales.</li>
+    </ul>
+  </section>
+
+  <section id="procedimiento" tabindex="-1" aria-labelledby="h-procedimiento">
+    <h2 id="h-procedimiento">10. Consultas y reclamos</h2>
+    <p>Puedes ejercer tus derechos escribiendo a <strong>{{ info.privacyEmail }}</strong>. Indica tu nombre, tu número de identificación, tu solicitud y un medio de respuesta.</p>
+    <h3>Consultas</h3>
+    <p>Responderemos en un máximo de <strong>diez (10) días hábiles</strong>. Si no es posible, te informaremos el motivo y la fecha de respuesta, que no superará cinco (5) días hábiles adicionales.</p>
+    <h3>Reclamos</h3>
+    <p>Para corregir, actualizar o suprimir datos, o para reportar un incumplimiento, responderemos en un máximo de <strong>quince (15) días hábiles</strong>, prorrogables hasta por ocho (8) días hábiles más con previo aviso. Si el reclamo está incompleto, te pediremos completarlo dentro de los cinco (5) días siguientes.</p>
+    <p>Si tus datos fueron registrados por una barbería, también puedes dirigirte directamente a ella como responsable.</p>
+  </section>
+
+  <section id="seguridad" tabindex="-1" aria-labelledby="h-seguridad">
+    <h2 id="h-seguridad">11. Seguridad de la información</h2>
+    <p>Aplicamos medidas técnicas y organizativas razonables para proteger los datos contra acceso no autorizado, pérdida o alteración. Entre ellas: cifrado de las comunicaciones, autenticación mediante un proveedor especializado (no almacenamos contraseñas), control de acceso por roles y separación lógica de la información de cada barbería.</p>
+    <p>Ningún sistema es completamente infalible. Si ocurre un incidente que afecte tus datos, lo informaremos a la Superintendencia de Industria y Comercio y a los titulares afectados, conforme a la ley.</p>
+  </section>
+
+  <section id="conservacion" tabindex="-1" aria-labelledby="h-conservacion">
+    <h2 id="h-conservacion">12. Conservación de los datos</h2>
+    <p>Las bases de datos de la plataforma estarán vigentes mientras dure el proyecto académico, previsto hasta el <strong>{{ info.projectEndDate }}</strong>. Durante ese periodo conservamos los datos mientras la cuenta esté activa o la barbería mantenga relación con la plataforma.</p>
+    <p>Al cierre del proyecto eliminaremos los datos personales o los anonimizaremos de forma irreversible, salvo que la plataforma continúe operando; en ese caso lo informaremos con anticipación, junto con quién asumirá la responsabilidad del tratamiento, y pediremos una nueva autorización.</p>
+  </section>
+
+  <section id="cambios" tabindex="-1" aria-labelledby="h-cambios">
+    <h2 id="h-cambios">13. Cambios y vigencia</h2>
+    <p>Esta política rige desde el {{ info.effectiveDate }}. Si hacemos cambios sustanciales, te los comunicaremos antes de aplicarlos o, a más tardar, al momento de su implementación, y pediremos una nueva autorización cuando cambien las finalidades.</p>
+    <p>Consulta también los <a routerLink="/legal/terminos">Términos y condiciones</a> y la <a routerLink="/legal/cookies">Política de cookies</a>.</p>
+  </section>
+
+</app-legal-document>

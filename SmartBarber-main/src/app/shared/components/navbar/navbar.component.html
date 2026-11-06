@@ -2,8 +2,8 @@
   <div class="wrap nav-inner">
 
     <!-- Logo -->
-    <div class="logo">
-      <img src="/logo.png" alt="SmartBarber Logo" class="logo-icon-img" />
+    <a routerLink="/" class="logo" aria-label="SmartBarber, ir al inicio" (click)="closeMenu()">
+      <img src="/logo.png" alt="" class="logo-icon-img" />
 
       <div class="logo-text">
         SMARTBARBER
@@ -11,19 +11,19 @@
           Barbería &amp; Salón desde 1992
         </span>
       </div>
-    </div>
+    </a>
 
-    <!-- Navegación principal -->
-    <nav aria-label="Navegación principal">
+    <!-- Navegación principal (escritorio) -->
+    <nav class="desktop-nav" aria-label="Navegación principal">
       <ul>
 
         <li *ngFor="let link of links" [class.has-dropdown]="link.sublinks">
 
           <a [routerLink]="link.route" [fragment]="link.fragment" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: !link.fragment }" (click)="closeMenu()">
+            [routerLinkActiveOptions]="{ exact: !link.fragment }">
             {{ link.label }}
 
-            <span *ngIf="link.sublinks" class="dropdown-arrow">
+            <span *ngIf="link.sublinks" class="dropdown-arrow" aria-hidden="true">
               ▾
             </span>
           </a>
@@ -32,7 +32,7 @@
           <ul *ngIf="link.sublinks" class="dropdown-menu">
             <li *ngFor="let sub of link.sublinks">
 
-              <a [routerLink]="sub.route" [fragment]="sub.fragment" (click)="closeMenu()">
+              <a [routerLink]="sub.route" [fragment]="sub.fragment">
                 {{ sub.label }}
               </a>
 
@@ -44,44 +44,78 @@
       </ul>
     </nav>
 
-   <!-- Botón CTA principal -->
-   <!-- Contenedor de los dos botones separados -->
+    <!-- Accesos de sesión (escritorio) -->
     <div class="auth-buttons-group">
-      <a [routerLink]="['/auth/login']" class="btn nav-cta" (click)="closeMenu()">
+      <a [routerLink]="['/auth/login']" class="btn nav-cta">
         Inicio
       </a>
-      <a [routerLink]="['/auth/register']" class="btn nav-cta" (click)="closeMenu()">
+      <a [routerLink]="['/auth/register']" class="btn nav-cta">
         Registro
       </a>
     </div>
 
-    <!-- Botón Hamburguesa para Mobile -->
-    <button class="menu-toggle" type="button" (click)="toggleMenu()" aria-label="Abrir menú">
-      ☰
+    <!-- Botón del menú lateral (celular y tableta) -->
+    <button #menuToggle class="menu-toggle" type="button" (click)="toggleMenu()"
+      [attr.aria-label]="isMenuOpen ? 'Cerrar menú' : 'Abrir menú'"
+      [attr.aria-expanded]="isMenuOpen"
+      aria-controls="mobile-nav">
+      <span class="menu-toggle__bars" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
     </button>
 
   </div>
+</header>
 
-  <!-- Navegación Mobile -->
-  <nav *ngIf="isMenuOpen" class="mobile-nav" aria-label="Navegación móvil">
+<!--
+  El menú lateral va fuera del <header>: el backdrop-filter del header
+  convertiría cualquier elemento fijo de adentro en relativo a su altura.
+-->
+<div class="mobile-backdrop" [class.is-visible]="isMenuOpen" (click)="closeMenu()" aria-hidden="true"></div>
+
+<aside #drawer id="mobile-nav" class="mobile-drawer" [class.is-open]="isMenuOpen"
+  role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title"
+  [attr.inert]="isMenuOpen ? null : ''"
+  (keydown)="onDrawerKeydown($event)">
+
+  <div class="drawer-header">
+    <p id="mobile-nav-title" class="drawer-title">Menú</p>
+    <button #closeButton type="button" class="drawer-close" (click)="closeMenu(true)" aria-label="Cerrar menú">
+      <span aria-hidden="true">✕</span>
+    </button>
+  </div>
+
+  <nav class="drawer-nav" aria-label="Navegación móvil">
     <ul>
-
       <ng-container *ngFor="let link of links">
-
         <li>
           <a [routerLink]="link.route" [fragment]="link.fragment" (click)="closeMenu()">
             {{ link.label }}
           </a>
         </li>
-
-        <li *ngFor="let sub of link.sublinks" class="mobile-sublink">
+        <li *ngFor="let sub of link.sublinks" class="drawer-sublink">
           <a [routerLink]="sub.route" [fragment]="sub.fragment" (click)="closeMenu()">
-            — {{ sub.label }}
+            {{ sub.label }}
           </a>
         </li>
-
       </ng-container>
-
     </ul>
   </nav>
-</header>
+
+  <div class="drawer-actions">
+    <a [routerLink]="['/auth/login']" class="btn btn-primary drawer-button" (click)="closeMenu()">
+      Iniciar sesión
+    </a>
+    <a [routerLink]="['/auth/register']" class="btn btn-ghost drawer-button" (click)="closeMenu()">
+      Crear cuenta
+    </a>
+  </div>
+
+  <nav class="drawer-legal" aria-label="Información legal">
+    <a routerLink="/legal/privacidad" (click)="closeMenu()">Privacidad</a>
+    <a routerLink="/legal/terminos" (click)="closeMenu()">Términos</a>
+    <a routerLink="/legal/cookies" (click)="closeMenu()">Cookies</a>
+  </nav>
+</aside>

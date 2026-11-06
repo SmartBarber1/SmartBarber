@@ -34,6 +34,8 @@
 
       </button>
 
+      <app-auth-legal-notice />
+
     </div>
 
     } @else {
@@ -115,19 +117,15 @@
             Nombre completo
           </label>
 
-          <input id="name" type="text" formControlName="name" autocomplete="name"
-            placeholder="Ingresa tu nombre completo">
+          <input id="name" type="text" formControlName="name" autocomplete="name" autocapitalize="words"
+            spellcheck="false" maxlength="100" required placeholder="Ej. Laura Gómez Pérez"
+            [attr.aria-invalid]="!!errorFor('name')"
+            [attr.aria-describedby]="errorFor('name') ? 'name-error' : 'name-help'">
 
-          @if (hasError('name', 'required')) {
-          <small>
-            El nombre completo es obligatorio.
-          </small>
-          }
-
-          @if (hasError('name', 'minlength')) {
-          <small>
-            El nombre debe contener al menos 3 caracteres.
-          </small>
+          @if (errorFor('name'); as message) {
+          <small id="name-error" role="alert">{{ message }}</small>
+          } @else {
+          <small id="name-help" class="help">Nombre y apellido, como aparecen en tu documento.</small>
           }
 
         </div>
@@ -138,9 +136,9 @@
             Cuenta de Google
           </label>
 
-          <input id="email" type="email" [value]="currentUser()?.email ?? ''" readonly>
+          <input id="email" type="email" [value]="currentUser()?.email ?? ''" readonly aria-describedby="email-help">
 
-          <small class="help">
+          <small id="email-help" class="help">
             Este correo proviene de tu cuenta de Google autenticada.
           </small>
 
@@ -152,20 +150,12 @@
             Tipo de documento
           </label>
 
-          <select id="documentType" formControlName="documentType">
-
-            <option value="CC">
-              Cédula de ciudadanía
+          <select id="documentType" formControlName="documentType" required>
+            @for (type of documentTypes; track type) {
+            <option [value]="type">
+              {{ type === 'CC' ? 'Cédula de ciudadanía' : 'Cédula de extranjería' }}
             </option>
-
-            <option value="CE">
-              Cédula de extranjería
-            </option>
-
-            <option value="NIT">
-              NIT
-            </option>
-
+            }
           </select>
 
         </div>
@@ -177,18 +167,14 @@
           </label>
 
           <input id="document" type="text" formControlName="document" inputmode="numeric" maxlength="15"
-            placeholder="Ingresa tu número de documento">
+            autocomplete="off" spellcheck="false" required placeholder="Ej. 1010172460"
+            [attr.aria-invalid]="!!errorFor('document')"
+            [attr.aria-describedby]="errorFor('document') ? 'document-error' : 'document-help'">
 
-          @if (hasError('document', 'required')) {
-          <small>
-            El número de documento es obligatorio.
-          </small>
-          }
-
-          @if (hasError('document', 'pattern')) {
-          <small>
-            Ingresa un número de documento válido.
-          </small>
+          @if (errorFor('document'); as message) {
+          <small id="document-error" role="alert">{{ message }}</small>
+          } @else {
+          <small id="document-help" class="help">Solo números; puedes escribirlo con o sin puntos.</small>
           }
 
         </div>
@@ -199,22 +185,20 @@
             Teléfono celular
           </label>
 
-          <input id="cell" type="tel" formControlName="cell" inputmode="numeric" maxlength="10"
-            placeholder="3001234567">
+          <input id="cell" type="tel" formControlName="cell" inputmode="tel" maxlength="16"
+            autocomplete="tel-national" required placeholder="Ej. 300 123 4567"
+            [attr.aria-invalid]="!!errorFor('cell')"
+            [attr.aria-describedby]="errorFor('cell') ? 'cell-error' : 'cell-help'">
 
-          @if (hasError('cell', 'required')) {
-          <small>
-            El número de celular es obligatorio.
-          </small>
-          }
-
-          @if (hasError('cell', 'pattern')) {
-          <small>
-            Ingresa un número de celular colombiano válido.
-          </small>
+          @if (errorFor('cell'); as message) {
+          <small id="cell-error" role="alert">{{ message }}</small>
+          } @else {
+          <small id="cell-help" class="help">Celular colombiano de 10 dígitos.</small>
           }
 
         </div>
+
+        <app-legal-consent [control]="legalConsent" purpose="account" [showError]="consentAttempted()" />
 
         <button type="submit" class="submit-button" [disabled]="submitting()">
 

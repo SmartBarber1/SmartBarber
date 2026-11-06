@@ -1,0 +1,17 @@
+@if (notice.visible()) {
+  <section class="cookie-notice" role="region" aria-labelledby="cookie-notice-title" aria-describedby="cookie-notice-text">
+    <div class="cookie-notice__body">
+      <h2 id="cookie-notice-title" class="cookie-notice__title">Tu privacidad</h2>
+      <p id="cookie-notice-text" class="cookie-notice__text">
+        Solo usamos almacenamiento estrictamente necesario para que puedas iniciar sesión y
+        mantener tu cuenta segura. No usamos cookies de analítica ni de publicidad.
+      </p>
+    </div>
+    <div class="cookie-notice__actions">
+      <a routerLink="/legal/cookies" class="cookie-notice__link">Política de cookies</a>
+      <button type="button" class="btn btn-primary cookie-notice__button" (click)="notice.acknowledge()">
+        Entendido
+      </button>
+    </div>
+  </section>
+}

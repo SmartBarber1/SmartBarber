@@ -1,6 +1,6 @@
 <div class="input-group">
-  <label class="input-label">Sede Barbería *</label>
-  <select class="styled-select" [ngModel]="selectedId" (ngModelChange)="barberiaChange.emit($event)">
+  <label class="input-label" for="reserva-barberia">Sede Barbería *</label>
+  <select id="reserva-barberia" class="styled-select" required aria-required="true" [ngModel]="selectedId" (ngModelChange)="barberiaChange.emit($event)">
     <option value="" disabled>-- Seleccionar Barbería --</option>
     <option *ngFor="let b of barberias" [value]="b.id">
       {{ b.name }} - {{ b.location }}

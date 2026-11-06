@@ -15,4 +15,10 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.css'
 })
-export class PublicLayoutComponent {}
+export class PublicLayoutComponent {
+  /** Lleva el foco al contenido sin cambiar la ruta (con base href, "#id" navegaría al inicio). */
+  skipToContent(event: Event): void {
+    event.preventDefault();
+    document.getElementById('contenido-principal')?.focus();
+  }
+}

@@ -38,6 +38,19 @@
   transform: translateY(-1px);
 }
 
+.service-card:focus-within {
+  border-color: #c5a059;
+  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.35);
+}
+
+.service-name,
+.service-desc,
+.service-duration,
+.price-amount,
+.old-price {
+  display: block;
+}
+
 .service-card.selected {
   border-color: #c5a059;
   background-color: #fdfbf7;

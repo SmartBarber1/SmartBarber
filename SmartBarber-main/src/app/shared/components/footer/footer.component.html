@@ -34,10 +34,18 @@
 
       <!-- Columna 4: Formulario de Suscripción -->
       <div>
-        <h4>Suscríbete a novedades</h4>
-        <form class="subscribe-form" [formGroup]="subscribeForm" (ngSubmit)="onSubscribe()">
-          <input formControlName="email" type="email" placeholder="Tu correo electrónico" />
-          <button type="submit" class="btn btn-primary" [disabled]="state === 'sending'">
+        <h4 id="newsletter-title">Suscríbete a novedades</h4>
+        <form class="subscribe-form" [formGroup]="subscribeForm" (ngSubmit)="onSubscribe()" aria-labelledby="newsletter-title" novalidate>
+          <label for="newsletter-email" class="visually-hidden">Correo electrónico</label>
+          <input id="newsletter-email" formControlName="email" type="email" autocomplete="email"
+            placeholder="Tu correo electrónico"
+            [attr.aria-invalid]="emailInvalid"
+            [attr.aria-describedby]="emailInvalid ? 'newsletter-email-error' : null" />
+          @if (emailInvalid) {
+            <small id="newsletter-email-error" class="subscribe-error" role="alert">Ingresa un correo electrónico válido.</small>
+          }
+          <app-legal-consent [control]="subscribeForm.controls.consent" purpose="newsletter" [showError]="submitted" />
+          <button type="submit" class="btn btn-primary" [disabled]="state === 'sending'" aria-live="polite">
             <ng-container [ngSwitch]="state">
               <ng-container *ngSwitchCase="'sending'">Enviando...</ng-container>
               <ng-container *ngSwitchCase="'success'">¡Listo, gracias!</ng-container>
@@ -53,11 +61,13 @@
     <!-- Barra Inferior -->
     <div class="footer-bottom">
       <span>© 2026 SmartBarber. Todos los derechos reservados.</span>
-      <ul class="footer-legal-links">
-        <li><a href="#">Pedidos</a></li>
-        <li><a href="#">Términos</a></li>
-        <li><a href="#">Reportar un problema</a></li>
-      </ul>
+      <nav aria-label="Información legal">
+        <ul class="footer-legal-links">
+          <li><a routerLink="/legal/privacidad">Privacidad</a></li>
+          <li><a routerLink="/legal/terminos">Términos y condiciones</a></li>
+          <li><a routerLink="/legal/cookies">Cookies</a></li>
+        </ul>
+      </nav>
     </div>
   </div>
 </footer>

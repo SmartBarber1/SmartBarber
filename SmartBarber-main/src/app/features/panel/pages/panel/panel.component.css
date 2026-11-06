@@ -2273,6 +2273,10 @@ button {
     .mobile-menu-button {
         display:
             grid;
+        width:
+            44px;
+        height:
+            44px;
     }
 
 

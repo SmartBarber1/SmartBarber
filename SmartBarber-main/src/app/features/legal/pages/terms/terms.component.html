@@ -1,0 +1,128 @@
+<app-legal-document
+  title="Términos y condiciones de uso"
+  summary="Estas condiciones regulan el acceso y el uso de la plataforma SmartBarber por parte de barberías, barberos y clientes. Léelas con atención: al crear una cuenta o usar el servicio, las aceptas."
+  [sections]="sections"
+  currentRoute="/legal/terminos">
+
+  <section id="objeto" tabindex="-1" aria-labelledby="h-objeto">
+    <h2 id="h-objeto">1. Objeto y aceptación</h2>
+    <p>{{ info.brand }} es una plataforma web que permite a las barberías gestionar sus servicios, barberos, horarios, reservas, cola virtual e indicadores de operación, y a los clientes reservar servicios o unirse a una cola de atención.</p>
+    <p>La plataforma es desarrollada y operada, de forma conjunta y como personas naturales, por {{ info.responsibles.join(', ') }}, estudiantes del programa de {{ info.academicProgram }} de la {{ info.institution }}, en el marco de su proyecto de grado (en adelante, "el equipo"). La institución educativa no opera la plataforma ni es parte de estos términos.</p>
+    <p>Al registrarte o usar la plataforma aceptas estos términos, la <a routerLink="/legal/privacidad">Política de tratamiento de datos personales</a> y la <a routerLink="/legal/cookies">Política de cookies</a>. Si no estás de acuerdo, no uses el servicio.</p>
+  </section>
+
+  <section id="estado" tabindex="-1" aria-labelledby="h-estado">
+    <h2 id="h-estado">2. Estado del servicio</h2>
+    <div class="legal-callout">
+      <p>{{ info.brand }} es un <strong>producto mínimo viable</strong> desarrollado con fines académicos y de validación. No es una empresa constituida ni ofrece servicios comerciales. Las funciones pueden cambiar, presentar fallas o no estar disponibles de forma continua. Los cobros de suscripción se procesan en un <strong>entorno de pruebas</strong> y no generan cargos reales.</p>
+    </div>
+    <p>Mientras el servicio esté en esta etapa, no garantizamos disponibilidad, tiempos de respuesta ni conservación indefinida de la información. La plataforma estará disponible, en principio, hasta el cierre del proyecto académico ({{ info.projectEndDate }}); antes de esa fecha te informaremos si continuará operando. Te recomendamos no depender de la plataforma como único registro de tu operación.</p>
+  </section>
+
+  <section id="definiciones" tabindex="-1" aria-labelledby="h-definiciones">
+    <h2 id="h-definiciones">3. Definiciones</h2>
+    <ul>
+      <li><strong>Barbería:</strong> establecimiento que contrata una suscripción y administra su información en la plataforma.</li>
+      <li><strong>Administrador:</strong> persona que registra la barbería y la gestiona en su nombre.</li>
+      <li><strong>Barbero:</strong> persona vinculada a una barbería que atiende reservas y turnos.</li>
+      <li><strong>Cliente:</strong> persona que reserva servicios o se une a la cola virtual de una barbería.</li>
+      <li><strong>Cola virtual:</strong> lista de espera en tiempo real para clientes que no tienen una reserva programada.</li>
+    </ul>
+  </section>
+
+  <section id="cuentas" tabindex="-1" aria-labelledby="h-cuentas">
+    <h2 id="h-cuentas">4. Registro y cuentas</h2>
+    <ul>
+      <li>Debes ser mayor de 18 años y suministrar información veraz, completa y actualizada.</li>
+      <li>El inicio de sesión se realiza con un proveedor de identidad (Google). Eres responsable de la seguridad de tu cuenta y de la actividad que se realice con ella.</li>
+      <li>Avísanos de inmediato si detectas un uso no autorizado de tu cuenta.</li>
+      <li>El administrador garantiza que tiene facultades para registrar la barbería y que cuenta con la autorización de los barberos y clientes cuyos datos registre.</li>
+    </ul>
+  </section>
+
+  <section id="suscripciones" tabindex="-1" aria-labelledby="h-suscripciones">
+    <h2 id="h-suscripciones">5. Suscripciones y pagos</h2>
+    <p>Las barberías acceden a las funciones de gestión mediante un plan de suscripción. Antes de contratarlo se informan su precio en pesos colombianos, su duración y sus condiciones.</p>
+    <ul>
+      <li>La suscripción se activa cuando el pago es aprobado y está vigente por el número de días del plan contratado.</li>
+      <li>Si la barbería activa la renovación automática, el cobro se generará antes del vencimiento. Puede desactivarla en cualquier momento antes de esa fecha.</li>
+      <li>Al vencer la suscripción, la barbería no podrá realizar nuevas operaciones de gestión hasta renovarla, pero conservará el acceso a su información durante el plazo que indica la Política de tratamiento de datos.</li>
+      <li>Los pagos se procesan a través de una pasarela de pagos. {{ info.brand }} no almacena datos de tarjetas.</li>
+    </ul>
+  </section>
+
+  <section id="reservas" tabindex="-1" aria-labelledby="h-reservas">
+    <h2 id="h-reservas">6. Reservas y cola virtual</h2>
+    <p>{{ info.brand }} es un <strong>intermediario tecnológico</strong>: los servicios de barbería los presta directamente cada barbería, que es responsable de su calidad, de sus precios y del cumplimiento de las citas.</p>
+    <ul>
+      <li>La disponibilidad que muestra la plataforma depende de la información que registra cada barbería.</li>
+      <li>Los tiempos de espera de la cola virtual son <strong>estimaciones</strong> calculadas con la duración de los servicios y pueden variar.</li>
+      <li>Las reservas programadas tienen prioridad sobre los turnos de la cola virtual.</li>
+    </ul>
+  </section>
+
+  <section id="politicas" tabindex="-1" aria-labelledby="h-politicas">
+    <h2 id="h-politicas">7. Cancelaciones e inasistencias</h2>
+    <p>Cada barbería define sus políticas de cancelación, reprogramación e inasistencia, que la plataforma aplica de forma automática. Esas políticas se informan al cliente antes de confirmar la reserva.</p>
+    <p>Cuando un cliente acumula el número de inasistencias que establece la barbería, la plataforma puede restringir temporalmente la creación de nuevas reservas en ese establecimiento. Cualquier cobro asociado a cancelaciones o inasistencias debe informarse de manera previa, clara y visible, y ajustarse a la Ley 1480 de 2011.</p>
+  </section>
+
+  <section id="uso" tabindex="-1" aria-labelledby="h-uso">
+    <h2 id="h-uso">8. Uso aceptable</h2>
+    <p>Al usar la plataforma te comprometes a no:</p>
+    <ul>
+      <li>Suplantar a otra persona o registrar datos de terceros sin su autorización.</li>
+      <li>Acceder o intentar acceder a información de otras barberías o usuarios.</li>
+      <li>Vulnerar, probar o eludir las medidas de seguridad, ni introducir código malicioso.</li>
+      <li>Extraer información de forma masiva o automatizada sin autorización.</li>
+      <li>Crear reservas o turnos falsos, o usar la plataforma con fines ilícitos.</li>
+    </ul>
+  </section>
+
+  <section id="contenido" tabindex="-1" aria-labelledby="h-contenido">
+    <h2 id="h-contenido">9. Contenido de los usuarios</h2>
+    <p>Las reseñas, calificaciones y comentarios deben reflejar experiencias reales y respetar a las personas. No se permite contenido ofensivo, discriminatorio, falso ni que incluya datos personales de terceros.</p>
+    <p>Conservas los derechos sobre tu contenido y nos autorizas a mostrarlo dentro de la plataforma mientras tu cuenta exista. Podremos retirar contenido que incumpla estos términos.</p>
+  </section>
+
+  <section id="propiedad" tabindex="-1" aria-labelledby="h-propiedad">
+    <h2 id="h-propiedad">10. Propiedad intelectual</h2>
+    <p>El software, el diseño y los textos de {{ info.brand }} son obra de los integrantes del equipo y están protegidos por las normas de derechos de autor, sin perjuicio de lo que disponga el reglamento de propiedad intelectual de la {{ info.institution }} para los trabajos de grado. No se permite copiarlos, modificarlos ni distribuirlos sin autorización.</p>
+    <p>Los nombres, logotipos e imágenes de cada barbería pertenecen a sus titulares, quienes garantizan que tienen derecho a usarlos en la plataforma.</p>
+  </section>
+
+  <section id="responsabilidad" tabindex="-1" aria-labelledby="h-responsabilidad">
+    <h2 id="h-responsabilidad">11. Responsabilidad</h2>
+    <p>Prestamos la plataforma con diligencia, pero no respondemos por:</p>
+    <ul>
+      <li>La calidad, el precio o la ejecución de los servicios que presta cada barbería.</li>
+      <li>Interrupciones causadas por fallas de internet, de los proveedores tecnológicos o por fuerza mayor.</li>
+      <li>Daños derivados del uso indebido de la plataforma o del incumplimiento de estos términos por parte del usuario.</li>
+    </ul>
+    <p>Estas limitaciones no excluyen la responsabilidad que la ley no permite limitar, ni afectan los derechos irrenunciables de los consumidores.</p>
+  </section>
+
+  <section id="terminacion" tabindex="-1" aria-labelledby="h-terminacion">
+    <h2 id="h-terminacion">12. Suspensión y terminación</h2>
+    <p>Puedes dejar de usar la plataforma y solicitar el cierre de tu cuenta en cualquier momento. Podremos suspender o cerrar cuentas que incumplan estos términos o que representen un riesgo para la seguridad, informando el motivo cuando sea posible.</p>
+  </section>
+
+  <section id="consumidor" tabindex="-1" aria-labelledby="h-consumidor">
+    <h2 id="h-consumidor">13. Derechos del consumidor</h2>
+    <p>Cuando el usuario tenga la calidad de consumidor, se aplicarán los derechos que reconoce la Ley 1480 de 2011 (Estatuto del Consumidor), entre ellos el derecho de retracto en las ventas a distancia y la reversión del pago en los casos que la ley prevé.</p>
+    <p>Puedes presentar peticiones, quejas o reclamos a <strong>{{ info.supportEmail }}</strong>.</p>
+  </section>
+
+  <section id="ley" tabindex="-1" aria-labelledby="h-ley">
+    <h2 id="h-ley">14. Ley aplicable, cambios y contacto</h2>
+    <p>Estos términos se rigen por las leyes de la República de Colombia. Las controversias se resolverán ante las autoridades competentes de Colombia, sin perjuicio de las acciones que correspondan ante la Superintendencia de Industria y Comercio.</p>
+    <p>Podemos actualizar estos términos. Si los cambios son relevantes, te los informaremos antes de que entren en vigencia; si continúas usando la plataforma después de esa fecha, se entenderá que los aceptas.</p>
+    <ul>
+      <li><strong>Responsables:</strong> {{ info.responsibles.join(', ') }}</li>
+      <li><strong>Dirección:</strong> {{ info.address }}, {{ info.city }}</li>
+      <li><strong>Correo de soporte:</strong> {{ info.supportEmail }}</li>
+      <li><strong>Teléfono:</strong> {{ info.phone }}</li>
+    </ul>
+  </section>
+
+</app-legal-document>

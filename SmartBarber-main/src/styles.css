@@ -43,6 +43,33 @@ nav a, .btn {
   text-transform: uppercase;
 }
 
+/* ---------- Accesibilidad ---------- */
+
+/* Foco visible y consistente para teclado en toda la aplicación.
+   Sobrescribe los "outline: none" de los componentes sin afectar el clic con mouse. */
+:focus-visible{
+  outline:2px solid var(--brass) !important;
+  outline-offset:3px !important;
+}
+
+/* Contenedores que reciben foco programático (salto de contenido, secciones) */
+[tabindex="-1"]:focus{outline:none;}
+
+.skip-link{
+  position:absolute; left:16px; top:-100px; z-index:2000;
+  padding:12px 20px; background:var(--tan); color:var(--ink);
+  font-family:'Inter', sans-serif; font-size:14px; font-weight:600;
+  border-radius:2px; text-decoration:none;
+  transition:top .15s ease;
+}
+.skip-link:focus{top:12px;}
+
+.visually-hidden{
+  position:absolute !important; width:1px !important; height:1px !important;
+  padding:0 !important; margin:-1px !important; overflow:hidden !important;
+  clip:rect(0,0,0,0) !important; white-space:nowrap !important; border:0 !important;
+}
+
 a{color:inherit; text-decoration:none;}
 img{max-width:100%; display:block;}
 .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;}

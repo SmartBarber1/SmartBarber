@@ -12,8 +12,8 @@
   </div>
 
   <div class="holiday-add-box">
-    <input type="date" [(ngModel)]="newHolidayDate" class="vintage-input" />
-    <input type="text" [(ngModel)]="newHolidayDesc" placeholder="Motivo (ej. Mantenimiento)" class="vintage-input" />
+    <input type="date" [(ngModel)]="newHolidayDate" class="vintage-input" aria-label="Fecha del día no laborable" />
+    <input type="text" [(ngModel)]="newHolidayDesc" placeholder="Motivo (ej. Mantenimiento)" class="vintage-input" aria-label="Motivo del día no laborable" />
     <button type="button" class="vintage-btn gold-sm" (click)="addHoliday()">Agregar</button>
   </div>
 

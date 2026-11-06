@@ -1,0 +1,30 @@
+<div class="legal-consent" [class.legal-consent--invalid]="invalid">
+  <input
+    type="checkbox"
+    class="legal-consent__check"
+    [id]="inputId"
+    [formControl]="control"
+    [attr.aria-invalid]="invalid"
+    [attr.aria-describedby]="invalid ? errorId : null"
+    required
+  />
+
+  <label class="legal-consent__label" [for]="inputId">
+    @if (purpose === 'account') {
+      He leído y acepto los
+      <a href="/legal/terminos" target="_blank" rel="noopener">Términos y condiciones<span class="visually-hidden"> (se abre en una pestaña nueva)</span></a>
+      y autorizo el tratamiento de mis datos personales conforme a la
+      <a href="/legal/privacidad" target="_blank" rel="noopener">Política de tratamiento de datos<span class="visually-hidden"> (se abre en una pestaña nueva)</span></a>.
+    } @else {
+      Autorizo el uso de mi correo para recibir novedades de SmartBarber, conforme a la
+      <a href="/legal/privacidad" target="_blank" rel="noopener">Política de tratamiento de datos<span class="visually-hidden"> (se abre en una pestaña nueva)</span></a>.
+      Puedo retirar esta autorización en cualquier momento.
+    }
+  </label>
+</div>
+
+@if (invalid) {
+  <small class="legal-consent__error" [id]="errorId" role="alert">
+    Debes aceptar para continuar.
+  </small>
+}

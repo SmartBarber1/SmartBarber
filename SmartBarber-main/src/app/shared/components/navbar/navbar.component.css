@@ -59,11 +59,12 @@ header {
   text-transform: none;
 }
 
-/* Margen exacto del 20% solicitado para empujar el menú hacia la derecha */
-header nav {
+/* El menú se alinea a la derecha del logo.
+   Se usa la clase (no "header nav") para que la regla del celular pueda ocultarla. */
+.desktop-nav {
   display: flex;
   align-items: center;
-  margin-left: 20%; 
+  margin-left: auto;
 }
 
 nav ul {
@@ -157,8 +158,9 @@ nav ul li .dropdown-menu li a:hover {
   padding-left: 20px;
 }
 
-/* Mostrar el submenú en Hover */
-nav ul li.has-dropdown:hover .dropdown-menu {
+/* Mostrar el submenú con mouse (hover) y con teclado (focus-within) */
+nav ul li.has-dropdown:hover .dropdown-menu,
+nav ul li.has-dropdown:focus-within .dropdown-menu {
   display: block !important;
 }
 
@@ -182,73 +184,236 @@ nav ul li.has-dropdown:hover .dropdown-menu {
   color: var(--ink);
 }
 
+/* =========================================================
+    BOTÓN DEL MENÚ LATERAL
+   ========================================================= */
 .menu-toggle {
-  display: none; 
-  background: none; 
-  border: none; 
-  color: var(--ivory); 
-  font-size: 26px; 
+  display: none;
+  margin-left: auto;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ivory);
   cursor: pointer;
 }
 
-.mobile-nav {
-  display: none;
+.menu-toggle:hover {
+  border-color: var(--line);
 }
 
-/* =========================================================
-    RESPONSIVE (MÓVILES Y TABLETS)
-   ========================================================= */
-@media (max-width: 1024px) {
-  header nav {
-    display: none;
-  }
-  
-  .nav-cta {
-    display: none;
-  }
-  
-  .logo-sub {
-    display: none;
-  }
-  
-  .menu-toggle {
-    display: block;
-  }
-  
-  .mobile-nav {
-    display: block;
-    background: var(--charcoal);
-    border-bottom: 1px solid var(--line);
-    padding: 20px 28px;
-  }
-  
-  .mobile-nav ul {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin: 0;
-    padding: 0;
-  }
-
-  .mobile-nav ul li a {
-    color: var(--ivory-dim);
-    text-decoration: none;
-    font-size: 14px;
-    letter-spacing: 1px;
-  }
-  
-  .mobile-sublink a {
-    padding-left: 16px;
-    font-size: 12px;
-    color: var(--ivory-dim);
-    opacity: 0.85;
-    border-left: 2px solid var(--brass);
-  }
+.menu-toggle__bars {
+  display: grid;
+  gap: 5px;
+  width: 24px;
+  margin: 0 auto;
 }
+
+.menu-toggle__bars span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
 .auth-buttons-group {
   display: flex;
   align-items: center;
-  gap: 20px; 
+  gap: 20px;
   flex-shrink: 0;
+}
+
+/* =========================================================
+    MENÚ LATERAL (CELULAR Y TABLETA)
+   ========================================================= */
+.mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.mobile-backdrop.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease, visibility 0s;
+}
+
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1101;
+  display: flex;
+  flex-direction: column;
+  width: min(86vw, 340px);
+  height: 100vh;
+  height: 100dvh;
+  padding: 0 0 max(20px, env(safe-area-inset-bottom));
+  background: var(--charcoal);
+  border-left: 1px solid var(--line);
+  box-shadow: -18px 0 48px rgba(0, 0, 0, 0.45);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateX(100%);
+  visibility: hidden;
+  /* Al cerrar, se oculta cuando termina el deslizamiento. */
+  transition: transform 0.28s ease, visibility 0s linear 0.28s;
+}
+
+.mobile-drawer.is-open {
+  transform: translateX(0);
+  visibility: visible;
+  /* Al abrir, es visible de inmediato para poder recibir el foco. */
+  transition: transform 0.28s ease, visibility 0s;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 14px 24px;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--charcoal);
+}
+
+.drawer-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--tan);
+}
+
+.drawer-close {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ivory);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.drawer-close:hover {
+  border-color: var(--line);
+}
+
+.drawer-nav ul {
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 10px 0;
+}
+
+.drawer-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ivory-dim);
+  border-left: 3px solid transparent;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.drawer-nav a:hover,
+.drawer-nav a:focus-visible {
+  color: var(--ivory);
+  background: rgba(239, 231, 216, 0.05);
+  border-left-color: var(--brass);
+}
+
+.drawer-sublink a {
+  padding-left: 40px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0.3px;
+}
+
+.drawer-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+  padding: 20px 24px 8px;
+  border-top: 1px solid var(--line);
+}
+
+.drawer-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.drawer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding: 12px 24px 0;
+}
+
+.drawer-legal a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  font-size: 12.5px;
+  color: var(--ivory-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* =========================================================
+    RESPONSIVE (MÓVILES Y TABLETAS)
+   ========================================================= */
+@media (max-width: 1199px) {
+  .desktop-nav,
+  .auth-buttons-group {
+    display: none;
+  }
+
+  .logo-sub {
+    display: none;
+  }
+
+  .nav-inner {
+    padding: 12px 20px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+}
+
+@media (min-width: 1200px) {
+  .mobile-backdrop,
+  .mobile-drawer {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .logo {
+    font-size: 17px;
+    letter-spacing: 2px;
+    gap: 8px;
+  }
+
+  .logo-icon-img {
+    height: 34px;
+  }
 }

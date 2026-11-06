@@ -1,0 +1,72 @@
+<div class="legal-page">
+
+  <header class="legal-hero">
+    <div class="wrap">
+      <p class="eyebrow">Información legal · {{ info.brand }}</p>
+      <h1>{{ title }}</h1>
+      <p class="legal-summary">{{ summary }}</p>
+
+      <dl class="legal-meta">
+        <div>
+          <dt>Vigente desde</dt>
+          <dd>{{ info.effectiveDate }}</dd>
+        </div>
+        <div>
+          <dt>Última actualización</dt>
+          <dd>{{ info.lastUpdate }}</dd>
+        </div>
+        <div>
+          <dt>Versión</dt>
+          <dd>{{ info.version }}</dd>
+        </div>
+      </dl>
+    </div>
+  </header>
+
+  <div class="pole-divider" aria-hidden="true"></div>
+
+  <div class="wrap legal-layout">
+
+    <aside class="legal-aside">
+      <nav class="legal-toc" aria-labelledby="legal-toc-title">
+        <h2 id="legal-toc-title" class="toc-title">En este documento</h2>
+        <ol>
+          <li *ngFor="let section of sections; let i = index">
+            <a [href]="'#' + section.id" (click)="goToSection($event, section.id)">
+              <span class="toc-number" aria-hidden="true">{{ i + 1 | number: '2.0-0' }}</span>
+              <span>{{ section.label }}</span>
+            </a>
+          </li>
+        </ol>
+      </nav>
+
+      <nav class="legal-related" aria-labelledby="legal-related-title">
+        <h2 id="legal-related-title" class="toc-title">Documentos legales</h2>
+        <ul>
+          <li *ngFor="let doc of documents">
+            <a [routerLink]="doc.route" [attr.aria-current]="doc.route === currentRoute ? 'page' : null">
+              {{ doc.label }}
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <button type="button" class="btn btn-ghost print-button" (click)="print()">
+        Imprimir o guardar en PDF
+      </button>
+    </aside>
+
+    <article class="legal-article">
+      <ng-content></ng-content>
+
+      <footer class="legal-article-footer">
+        <p>
+          ¿Tienes dudas sobre este documento? Escríbenos a
+          <strong>{{ info.privacyEmail }}</strong>. Responderemos dentro de los plazos
+          establecidos por la ley.
+        </p>
+      </footer>
+    </article>
+
+  </div>
+</div>

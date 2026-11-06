@@ -11,14 +11,40 @@ import {
 } from '@angular/common';
 
 import {
+  AbstractControl,
   FormBuilder,
+  FormControl,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
 
 import {
+  LegalConsentComponent
+} from '../../../../shared/components/legal-consent/legal-consent.component';
+
+import {
   Router
 } from '@angular/router';
+
+import {
+  takeUntilDestroyed
+} from '@angular/core/rxjs-interop';
+
+import {
+  BUSINESS_DOCUMENT_TYPES,
+  PERSON_DOCUMENT_TYPES,
+  businessNameValidator,
+  businessPhoneValidator,
+  colombianAddressValidator,
+  documentNumberValidator,
+  mobilePhoneValidator,
+  normalizeDocument,
+  normalizePhone,
+  normalizeText,
+  notBlankValidator,
+  personNameValidator,
+  validationMessage
+} from '../../../../shared/forms/colombia-validators';
 
 import {
   RegisterAdminUseCase
@@ -40,7 +66,8 @@ import {
 
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LegalConsentComponent
   ],
 
   templateUrl:
@@ -83,6 +110,19 @@ export class RegisterAdminComponent {
   readonly errorMessage =
     signal('');
 
+  /**
+   * Autorización de tratamiento de datos (Ley 1581 de 2012).
+   * Va separada del formulario para no alterar el cuerpo que recibe el backend.
+   */
+  readonly legalConsent =
+    new FormControl(false, {
+      nonNullable: true,
+      validators: [Validators.requiredTrue]
+    });
+
+  readonly consentAttempted =
+    signal(false);
+
 
   // =========================================================
   // USUARIO FIREBASE
@@ -114,7 +154,8 @@ export class RegisterAdminComponent {
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.maxLength(120)
+          Validators.maxLength(120),
+          businessNameValidator()
         ]
 
       ],
@@ -126,7 +167,8 @@ export class RegisterAdminComponent {
         [
           Validators.required,
           Validators.minLength(10),
-          Validators.maxLength(500)
+          Validators.maxLength(500),
+          notBlankValidator()
         ]
 
       ],
@@ -137,8 +179,9 @@ export class RegisterAdminComponent {
 
         [
           Validators.required,
-          Validators.minLength(5),
-          Validators.maxLength(200)
+          Validators.minLength(8),
+          Validators.maxLength(200),
+          colombianAddressValidator()
         ]
 
       ],
@@ -149,9 +192,7 @@ export class RegisterAdminComponent {
 
         [
           Validators.required,
-          Validators.pattern(
-            /^3[0-9]{9}$/
-          )
+          businessPhoneValidator()
         ]
 
       ],
@@ -162,9 +203,7 @@ export class RegisterAdminComponent {
 
         [
           Validators.required,
-          Validators.pattern(
-            /^[0-9]{5,20}$/
-          )
+          documentNumberValidator()
         ]
 
       ],
@@ -186,7 +225,8 @@ export class RegisterAdminComponent {
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.maxLength(150)
+          Validators.maxLength(150),
+          businessNameValidator()
         ]
 
       ]
@@ -207,8 +247,8 @@ export class RegisterAdminComponent {
 
         [
           Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(100)
+          Validators.maxLength(100),
+          personNameValidator()
         ]
 
       ],
@@ -219,9 +259,7 @@ export class RegisterAdminComponent {
 
         [
           Validators.required,
-          Validators.pattern(
-            /^[0-9]{6,20}$/
-          )
+          documentNumberValidator()
         ]
 
       ],
@@ -242,15 +280,41 @@ export class RegisterAdminComponent {
 
         [
           Validators.required,
-          Validators.pattern(
-            /^3[0-9]{9}$/
-          )
+          mobilePhoneValidator()
         ]
 
       ]
 
     });
 
+
+  /** La barbería puede registrarse con NIT o, si es persona natural comerciante, con su cédula. */
+  readonly businessDocumentTypes = BUSINESS_DOCUMENT_TYPES;
+
+  /** El administrador es una persona natural: solo cédula de ciudadanía o de extranjería. */
+  readonly personDocumentTypes = PERSON_DOCUMENT_TYPES;
+
+  readonly documentTypeLabels: Record<string, string> = {
+    NIT: 'NIT',
+    CC: 'Cédula de ciudadanía',
+    CE: 'Cédula de extranjería'
+  };
+
+  constructor() {
+    // El formato del número depende del tipo de documento elegido.
+    this.barberShopForm.controls.documentType.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.barberShopForm.controls.document.updateValueAndValidity());
+
+    this.adminForm.controls.documentType.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.adminForm.controls.document.updateValueAndValidity());
+  }
+
+  /** Mensaje de validación de un campo, o null si no hay error visible. */
+  errorFor(control: AbstractControl): string | null {
+    return validationMessage(control);
+  }
 
   // =========================================================
   // GETTERS ADMIN
@@ -471,6 +535,21 @@ export class RegisterAdminComponent {
     // VALIDAR ADMINISTRADOR
     // -------------------------------------------------------
 
+    this.consentAttempted.set(true);
+
+    if (
+      this.legalConsent.invalid
+    ) {
+
+      this.legalConsent.markAsTouched();
+
+      this.errorMessage.set(
+        'Debes aceptar los términos y autorizar el tratamiento de datos para continuar.'
+      );
+
+      return;
+    }
+
     if (
       this.adminForm.invalid
     ) {
@@ -516,6 +595,18 @@ export class RegisterAdminComponent {
 
     const barberShopData =
       this.barberShopForm.getRawValue();
+
+    // Se envían siempre en el mismo formato para que las validaciones de duplicados funcionen.
+    adminData.name = normalizeText(adminData.name);
+    adminData.document = normalizeDocument(adminData.documentType, adminData.document);
+    adminData.cell = normalizePhone(adminData.cell);
+
+    barberShopData.name = normalizeText(barberShopData.name);
+    barberShopData.companyName = normalizeText(barberShopData.companyName);
+    barberShopData.location = normalizeText(barberShopData.location);
+    barberShopData.description = barberShopData.description.trim();
+    barberShopData.document = normalizeDocument(barberShopData.documentType, barberShopData.document);
+    barberShopData.phone = normalizePhone(barberShopData.phone);
 
 
     this.registerAdminUseCase

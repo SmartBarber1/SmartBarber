@@ -1,0 +1,83 @@
+<app-legal-document
+  title="Política de cookies y almacenamiento local"
+  summary="Te explicamos qué información guarda SmartBarber en tu navegador, para qué sirve y cómo puedes controlarla. Hoy solo usamos almacenamiento estrictamente necesario para que puedas iniciar sesión."
+  [sections]="sections"
+  currentRoute="/legal/cookies">
+
+  <section id="que-son" tabindex="-1" aria-labelledby="h-que-son">
+    <h2 id="h-que-son">1. ¿Qué son las cookies?</h2>
+    <p>Las cookies son pequeños archivos que un sitio web guarda en tu navegador. Existen tecnologías similares, como el <strong>almacenamiento local</strong> (<code>localStorage</code>) y las bases de datos del navegador (<code>IndexedDB</code>), que cumplen funciones parecidas. En esta política usamos el término "cookies" para referirnos a todas ellas.</p>
+  </section>
+
+  <section id="que-usamos" tabindex="-1" aria-labelledby="h-que-usamos">
+    <h2 id="h-que-usamos">2. Qué usamos y para qué</h2>
+    <p>{{ info.brand }} usa únicamente elementos <strong>estrictamente necesarios</strong> para el funcionamiento del servicio. No usamos cookies de analítica, publicidad, perfilamiento ni redes sociales.</p>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Inventario de almacenamiento en el navegador</caption>
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Finalidad</th>
+            <th scope="col">Duración</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>smartbarber.session</code></td>
+            <td>Almacenamiento local · propio</td>
+            <td>Guarda tu rol y los identificadores de tu cuenta para mostrarte el panel que te corresponde.</td>
+            <td>Hasta que cierres sesión.</td>
+          </tr>
+          <tr>
+            <td><code>firebaseLocalStorageDb</code></td>
+            <td>IndexedDB · Firebase Authentication</td>
+            <td>Mantiene tu sesión iniciada de forma segura y renueva el token de acceso.</td>
+            <td>Hasta que cierres sesión.</td>
+          </tr>
+          <tr>
+            <td><code>smartbarber.cookie-notice</code></td>
+            <td>Almacenamiento local · propio</td>
+            <td>Recuerda que ya viste el aviso de cookies, para no mostrarlo en cada visita.</td>
+            <td>12 meses.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="terceros" tabindex="-1" aria-labelledby="h-terceros">
+    <h2 id="h-terceros">3. Servicios de terceros</h2>
+    <ul>
+      <li><strong>Firebase Authentication (Google LLC):</strong> gestiona el inicio de sesión con Google. Su tratamiento de datos se rige por las políticas de Google.</li>
+      <li><strong>Google Fonts:</strong> al cargar el sitio, tu navegador descarga las tipografías desde servidores de Google, que reciben tu dirección IP. Este servicio no instala cookies.</li>
+    </ul>
+  </section>
+
+  <section id="consentimiento" tabindex="-1" aria-labelledby="h-consentimiento">
+    <h2 id="h-consentimiento">4. Consentimiento</h2>
+    <p>Los elementos estrictamente necesarios no requieren tu consentimiento, porque sin ellos no es posible iniciar sesión ni usar la plataforma. Aun así, te los informamos mediante un aviso en tu primera visita.</p>
+    <div class="legal-callout">
+      <p>Si en el futuro incorporamos cookies de analítica u otras no esenciales, <strong>te pediremos autorización previa, expresa e informada</strong> antes de activarlas, tal como exige la Ley 1581 de 2012, y podrás retirarla en cualquier momento.</p>
+    </div>
+    <p>
+      <button type="button" class="btn btn-ghost legal-inline-button" (click)="showNoticeAgain()">
+        Ver de nuevo el aviso de cookies
+      </button>
+    </p>
+  </section>
+
+  <section id="gestion" tabindex="-1" aria-labelledby="h-gestion">
+    <h2 id="h-gestion">5. Cómo gestionarlas</h2>
+    <p>Puedes borrar las cookies y el almacenamiento del sitio desde la configuración de privacidad de tu navegador (Chrome, Edge, Firefox o Safari). Ten en cuenta que, si los eliminas, se cerrará tu sesión y tendrás que volver a ingresar.</p>
+    <p>Al cerrar sesión desde la plataforma, eliminamos automáticamente los datos de sesión guardados en tu navegador.</p>
+  </section>
+
+  <section id="cambios" tabindex="-1" aria-labelledby="h-cambios">
+    <h2 id="h-cambios">6. Cambios</h2>
+    <p>Actualizaremos esta política cuando cambien los elementos que usamos. Para más información sobre el tratamiento de tus datos, consulta la <a routerLink="/legal/privacidad">Política de tratamiento de datos personales</a>.</p>
+  </section>
+
+</app-legal-document>

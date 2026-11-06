@@ -1,5 +1,5 @@
 <div class="services-section mt-4">
-  <label class="section-title">Servicios Disponibles *</label>
+  <p class="section-title" id="servicios-titulo">Servicios Disponibles *</p>
 
   <!-- Estado de carga de servicios -->
   <div *ngIf="loading" class="text-center py-3">
@@ -12,35 +12,36 @@
   </div>
 
   <!-- Lista de servicios -->
-  <div *ngIf="!loading && servicios.length > 0" class="services-grid">
-    <div
+  <div *ngIf="!loading && servicios.length > 0" class="services-grid" role="group" aria-labelledby="servicios-titulo">
+    <label
       *ngFor="let servicio of servicios"
       class="service-card"
       [class.selected]="isSelected(servicio.id)"
-      (click)="servicioToggle.emit(servicio)"
+      [for]="'servicio-' + servicio.id"
     >
-      <div class="service-info">
-        <div class="service-name-row">
+      <span class="service-info">
+        <span class="service-name-row">
           <input
             type="checkbox"
+            [id]="'servicio-' + servicio.id"
             [checked]="isSelected(servicio.id)"
+            (change)="servicioToggle.emit(servicio)"
             class="service-checkbox"
-            readonly
           />
-          <h5 class="service-name">{{ servicio.name }}</h5>
-        </div>
-        <p class="service-desc" *ngIf="servicio.description">{{ servicio.description }}</p>
-        <span class="service-duration" *ngIf="servicio.duration">
-          ⏱️ {{ servicio.duration }} min
+          <span class="service-name">{{ servicio.name }}</span>
         </span>
-      </div>
+        <span class="service-desc" *ngIf="servicio.description">{{ servicio.description }}</span>
+        <span class="service-duration" *ngIf="servicio.duration">
+          <span aria-hidden="true">⏱️</span> {{ servicio.duration }} min
+        </span>
+      </span>
 
-      <div class="service-price-badge">
+      <span class="service-price-badge">
         <span class="price-amount">COP {{ (servicio.special_price || servicio.price) | number }}</span>
         <small class="old-price" *ngIf="servicio.offert && servicio.special_price && servicio.price > servicio.special_price">
-          COP {{ servicio.price | number }}
+          <span class="visually-hidden">Precio anterior: </span>COP {{ servicio.price | number }}
         </small>
-      </div>
-    </div>
+      </span>
+    </label>
   </div>
 </div>

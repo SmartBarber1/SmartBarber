@@ -8,6 +8,7 @@ import {
 
 import {
     FormBuilder,
+    FormControl,
     ReactiveFormsModule,
     Validators
 } from '@angular/forms';
@@ -15,8 +16,22 @@ import {
 import { Router } from '@angular/router';
 
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import {
+    PERSON_DOCUMENT_TYPES,
+    documentNumberValidator,
+    mobilePhoneValidator,
+    normalizeDocument,
+    normalizePhone,
+    normalizeText,
+    personNameValidator,
+    validationMessage
+} from '../../../../shared/forms/colombia-validators';
 
 import { FirebaseAuthService } from '../../../../core/auth/services/firebase-auth.service';
+import { LegalConsentComponent } from '../../../../shared/components/legal-consent/legal-consent.component';
+import { AuthLegalNoticeComponent } from '../../../../shared/components/legal-consent/auth-legal-notice.component';
 
 import { RegisterClientUseCase } from '../../application/use-cases/register-client.use-case';
 import {
@@ -28,7 +43,9 @@ import {
     standalone: true,
     imports: [
         CommonModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        LegalConsentComponent,
+        AuthLegalNoticeComponent
     ],
     templateUrl: './register.component.html',
     styleUrl: './register.component.css',
@@ -64,6 +81,19 @@ export class RegisterComponent {
     readonly errorMessage =
         signal('');
 
+    /**
+     * Autorización de tratamiento de datos (Ley 1581 de 2012).
+     * Va separada del formulario para no alterar el cuerpo que recibe el backend.
+     */
+    readonly legalConsent =
+        new FormControl(false, {
+            nonNullable: true,
+            validators: [Validators.requiredTrue]
+        });
+
+    readonly consentAttempted =
+        signal(false);
+
     readonly googleAuthenticated =
         computed(() => !!this.currentUser());
 
@@ -77,8 +107,8 @@ export class RegisterComponent {
                 '',
                 [
                     Validators.required,
-                    Validators.minLength(3),
-                    Validators.maxLength(100)
+                    Validators.maxLength(100),
+                    personNameValidator()
                 ]
             ],
 
@@ -94,7 +124,7 @@ export class RegisterComponent {
                 '',
                 [
                     Validators.required,
-                    Validators.pattern(/^[0-9]{6,15}$/)
+                    documentNumberValidator()
                 ]
             ],
 
@@ -102,10 +132,20 @@ export class RegisterComponent {
                 '',
                 [
                     Validators.required,
-                    Validators.pattern(/^3[0-9]{9}$/)
+                    mobilePhoneValidator()
                 ]
             ]
         });
+
+    /** Un cliente es una persona natural: solo cédula de ciudadanía o de extranjería. */
+    readonly documentTypes = PERSON_DOCUMENT_TYPES;
+
+    constructor() {
+        // El formato del número depende del tipo de documento.
+        this.clientForm.controls.documentType.valueChanges
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.clientForm.controls.document.updateValueAndValidity());
+    }
 
 
     async continueWithGoogle(): Promise<void> {
@@ -181,9 +221,12 @@ export class RegisterComponent {
             return;
         }
 
-        if (this.clientForm.invalid) {
+        this.consentAttempted.set(true);
+
+        if (this.clientForm.invalid || this.legalConsent.invalid) {
 
             this.clientForm.markAllAsTouched();
+            this.legalConsent.markAsTouched();
 
             this.errorMessage.set(
                 'Corrige los campos resaltados.'
@@ -194,8 +237,15 @@ export class RegisterComponent {
 
         this.submitting.set(true);
 
+        const raw = this.clientForm.getRawValue();
+
         this.registerClient
-            .execute(this.clientForm.getRawValue())
+            .execute({
+                ...raw,
+                name: normalizeText(raw.name),
+                document: normalizeDocument(raw.documentType, raw.document),
+                cell: normalizePhone(raw.cell)
+            })
             .subscribe({
 
                 next: () => {
@@ -231,6 +281,11 @@ export class RegisterComponent {
                     this.submitting.set(false);
                 }
             });
+    }
+
+    /** Mensaje de validación del campo, o null si no hay error visible. */
+    errorFor(controlName: 'name' | 'document' | 'cell'): string | null {
+        return validationMessage(this.clientForm.controls[controlName]);
     }
 
     hasError(
