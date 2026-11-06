@@ -1,0 +1,89 @@
+<section
+  class="queue-card current-turn-card"
+  aria-labelledby="current-turn-title">
+
+  <div class="section-heading">
+
+    <div>
+      <p class="card-eyebrow">
+        ATENCIÓN EN CURSO
+      </p>
+
+      <h2 id="current-turn-title">
+        Turno actual
+      </h2>
+    </div>
+
+    @if (currentTurn) {
+      <span class="status-badge status-in-progress">
+        En atención
+      </span>
+    }
+
+  </div>
+
+  @if (currentTurn; as turn) {
+
+    <div class="current-turn-content">
+
+      <div class="turn-number">
+        <span>Reserva</span>
+        <strong>#{{ turn.customer.name }}</strong>
+      </div>
+
+      <div class="turn-details">
+
+        <div class="detail-item">
+          <span>Duración estimada</span>
+          <strong>
+            {{ turn.durationMinutes }} min
+          </strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Tipo de reserva</span>
+          <!-- <strong>{{ turn.reservationType }}</strong> -->
+        </div>
+
+      </div>
+
+    </div>
+
+  } @else {
+
+    <div class="empty-current-turn">
+
+      <span
+        class="empty-icon"
+        aria-hidden="true">
+
+        <svg viewBox="0 0 24 24">
+          <circle
+            cx="12"
+            cy="12"
+            r="8.5">
+          </circle>
+
+          <path d="M12 7v5l3.5 2"></path>
+        </svg>
+
+      </span>
+
+      <div>
+
+        <strong>
+          Todo listo para el próximo cliente
+        </strong>
+
+        <p>
+          Cuando llames al siguiente turno,
+          su información aparecerá aquí.
+        </p>
+
+      </div>
+
+    </div>
+
+  }
+
+</section>

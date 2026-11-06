@@ -1,0 +1,184 @@
+.queue-card {
+  min-width: 0;
+  padding: 25px;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+
+  background: #fff;
+
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .2);
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 22px;
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid #e5e5e3;
+}
+
+.card-eyebrow {
+  margin-bottom: 6px;
+
+  color: #a87d35;
+
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+
+  letter-spacing: 1.5px;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: #242424;
+
+  font-family:
+    'Fraunces',
+    'Playfair Display',
+    Georgia,
+    serif;
+
+  font-size: 24px;
+}
+
+.status-badge {
+  display: inline-flex;
+
+  min-height: 28px;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 11px;
+
+  border-radius: 20px;
+
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+}
+
+.status-in-progress {
+  border: 1px solid #d8c49f;
+  background: #fbf7ef;
+  color: #8b6a30;
+}
+
+.current-turn-content {
+  display: grid;
+  grid-template-columns:
+    minmax(130px, .8fr)
+    minmax(0, 1.2fr);
+
+  gap: 20px;
+}
+
+.turn-number {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-height: 126px;
+
+  padding: 20px;
+
+  border: 1px solid #e4dfd5;
+  border-radius: 8px;
+
+  background: #f7f7f6;
+}
+
+.turn-number span,
+.detail-item span {
+  color: #707070;
+
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.turn-number strong {
+  margin-top: 8px;
+
+  color: #a87d35;
+
+  font-size: 23px;
+}
+
+.turn-details {
+  display: grid;
+  gap: 12px;
+  align-content: center;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 8px;
+
+  background: #fafafa;
+}
+
+.detail-item strong {
+  color: #242424;
+}
+
+.empty-current-turn {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+
+  padding: 20px;
+
+  border: 1px dashed #d9d9d7;
+  border-radius: 8px;
+
+  background: #fafafa;
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid #e5dfd4;
+  border-radius: 50%;
+
+  color: #a87d35;
+}
+
+.empty-icon svg {
+  width: 20px;
+  height: 20px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+
+@media (max-width: 700px) {
+
+  .current-turn-content {
+    grid-template-columns: 1fr;
+  }
+
+  .turn-number {
+    min-height: 100px;
+  }
+
+}

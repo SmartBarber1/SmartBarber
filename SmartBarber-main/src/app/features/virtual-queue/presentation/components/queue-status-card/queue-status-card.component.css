@@ -1,0 +1,184 @@
+.queue-card {
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .2);
+}
+
+.queue-closed-card {
+  padding: 40px;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 22px;
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid #e5e5e3;
+}
+
+.card-eyebrow {
+  margin: 0 0 6px;
+
+  color: #a87d35;
+
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+
+  letter-spacing: 1.5px;
+
+  text-transform: uppercase;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  color: #242424;
+
+  font-family:
+    'Fraunces',
+    'Playfair Display',
+    Georgia,
+    serif;
+
+  font-size: 24px;
+}
+
+.queue-closed-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+.queue-closed-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 90px;
+  height: 90px;
+
+  margin-bottom: 24px;
+
+  border: 2px solid #e5dfd4;
+  border-radius: 50%;
+
+  background: #fbf7ef;
+
+  color: #c49a55;
+}
+
+.queue-closed-icon svg {
+  width: 42px;
+  height: 42px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.queue-closed-content h3 {
+  margin: 0 0 12px;
+
+  color: #242424;
+
+  font-family:
+    'Fraunces',
+    'Playfair Display',
+    Georgia,
+    serif;
+
+  font-size: 28px;
+
+  font-weight: 500;
+}
+
+.queue-closed-description {
+  max-width: 650px;
+
+  margin: 0 0 30px;
+
+  color: #707070;
+
+  font-size: 15px;
+
+  line-height: 1.8;
+}
+
+.queue-open-button {
+  min-width: 260px;
+}
+
+.button-mark {
+  display: grid;
+  place-items: center;
+
+  width: 23px;
+  height: 23px;
+
+  flex: 0 0 23px;
+
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  min-height: 46px;
+
+  padding: 0 18px;
+
+  border: 1px solid #c49a55;
+  border-radius: 8px;
+
+  background: #c49a55;
+  color: #1b1612;
+
+  cursor: pointer;
+
+  font-weight: 700;
+}
+
+.primary-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+
+  .queue-closed-card {
+    padding: 24px;
+  }
+
+  .queue-closed-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .queue-closed-icon svg {
+    width: 34px;
+    height: 34px;
+  }
+
+  .queue-closed-content h3 {
+    font-size: 24px;
+  }
+
+  .queue-open-button {
+    width: 100%;
+  }
+
+}

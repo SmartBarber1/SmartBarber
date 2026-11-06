@@ -40,3 +40,16 @@ export interface Customer {
   name: string;
   cell: string;
 }
+
+export interface NotificationEvent {
+  type: string;
+  payload: NotificationPayload;
+
+}
+
+export interface NotificationPayload {
+  barberId: string;
+  barberName: string;
+  barberShopId: string;
+  barberShopName: string;
+}

@@ -1,0 +1,95 @@
+.queue-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #a87d35;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.queue-header h1 {
+  margin: 0;
+  color: #242424;
+  font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+  font-size: clamp(32px, 4vw, 42px);
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.queue-subtitle {
+  max-width: 650px;
+  margin: 12px 0 0;
+  color: #707070;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  min-height: 46px;
+  padding: 0 18px;
+
+  border: 1px solid #dedede;
+  border-radius: 8px;
+
+  background: #fff;
+  color: #363636;
+
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .7px;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    color .2s ease,
+    opacity .2s ease,
+    transform .2s ease;
+}
+
+.refresh-button:hover:not(:disabled) {
+  background: #fbf7ef;
+  color: #8d672c;
+}
+
+.refresh-button svg {
+  width: 20px;
+  height: 20px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.refresh-button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+@media (max-width: 700px) {
+
+  .queue-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+}
