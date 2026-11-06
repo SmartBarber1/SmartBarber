@@ -183,7 +183,7 @@ export class SubscriptionService {
       );
     }
 
-    return session.barberId;
+    return session.barbershopId;
   }
 }
 
