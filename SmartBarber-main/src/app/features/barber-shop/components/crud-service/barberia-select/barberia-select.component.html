@@ -1,0 +1,11 @@
+<div class="input-group mb-3">
+  <label for="barberiaSelect" class="form-label">Seleccionar Barbería</label>
+  <div class="select-wrapper">
+    <select id="barberiaSelect" class="styled-select" (change)="onChange($event)">
+      <option value="" disabled [selected]="!selectedId">Selecciona una barbería...</option>
+      <option *ngFor="let b of barberias" [value]="b.id" [selected]="b.id === selectedId">
+        {{ b.label }}
+      </option>
+    </select>
+  </div>
+</div>

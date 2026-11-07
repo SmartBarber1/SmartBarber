@@ -1,0 +1,66 @@
+/* ==========================================
+   ESTILO CLÁSICO EJECUTIVO - BEIGE, CAFÉ Y BLANCO
+   Solo el layout del contenedor; cada hijo trae su CSS.
+   ========================================== */
+
+.crud-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3efe6 0%, #e6dfd1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #2c241d;
+}
+
+.crud-card {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  width: 100%;
+  max-width: 1150px;
+  background: #fbf9f4; /* Fondo marfil/beige */
+  border: 1px solid #d4c9b3;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(61, 50, 40, 0.12);
+}
+
+@media (max-width: 900px) {
+  .crud-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Lado derecho: catálogo */
+.list-section {
+  background: linear-gradient(145deg, #f5f1e8 0%, #eae3d2 100%);
+  padding: 2.5rem 2rem;
+  border-left: 1px solid #d4c9b3;
+  display: flex;
+  flex-direction: column;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #d4c9b3;
+  padding-bottom: 0.75rem;
+}
+
+.list-header h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #3b2c20;
+}
+
+.counter-badge {
+  font-size: 0.75rem;
+  background: #594435;
+  color: #ffffff;
+  padding: 0.25rem 0.7rem;
+  border-radius: 12px;
+  font-weight: 700;
+}

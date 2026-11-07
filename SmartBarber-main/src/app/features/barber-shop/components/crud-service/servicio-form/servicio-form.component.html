@@ -1,0 +1,106 @@
+<section class="form-section">
+  <div class="form-header">
+    <span class="badge-tag">💈 GESTIÓN DE SERVICIOS</span>
+    <h1 class="title">{{ isEditMode ? 'Modificar Servicio' : 'Crear Nuevo Servicio' }}</h1>
+    <p class="subtitle">
+      {{ isEditMode ? 'Actualiza los detalles del servicio seleccionado.' : 'Ingresa los detalles del servicio ofertado para tu barbería.' }}
+    </p>
+  </div>
+
+  <form [formGroup]="serviceForm" (ngSubmit)="onSubmit()" class="styled-form">
+
+    <!-- Nombre del Servicio -->
+    <div class="input-group">
+      <label for="name">Nombre del servicio *</label>
+      <div class="input-wrapper">
+        <span class="prefix-icon">✂️</span>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          class="styled-input"
+          placeholder="Ej. Corte clasico"
+        />
+      </div>
+    </div>
+
+    <!-- Descripción -->
+    <div class="input-group">
+      <label for="description">Descripción *</label>
+      <div class="input-wrapper">
+        <span class="prefix-icon">📝</span>
+        <input
+          id="description"
+          type="text"
+          formControlName="description"
+          class="styled-input"
+          placeholder="Ej. Corte moderno con degradado"
+        />
+      </div>
+    </div>
+
+    <!-- Fila doble: Duración y Precio Regular -->
+    <div class="form-row">
+      <div class="input-group">
+        <label for="duration">Duración (minutos) *</label>
+        <div class="input-wrapper">
+          <span class="prefix-icon">⏱️</span>
+          <input
+            id="duration"
+            type="number"
+            formControlName="duration"
+            class="styled-input"
+            placeholder="15"
+          />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="price">Precio ($) *</label>
+        <div class="input-wrapper">
+          <span class="prefix-icon">💵</span>
+          <input
+            id="price"
+            type="number"
+            formControlName="price"
+            class="styled-input"
+            placeholder="1000"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkbox de Oferta -->
+    <div class="checkbox-card">
+      <input type="checkbox" formControlName="offert" id="offert" class="styled-checkbox" />
+      <label for="offert" class="checkbox-label">🔥 ¿Servicio en oferta especial?</label>
+    </div>
+
+    <!-- Precio Especial (Solo si offert es true) -->
+    <div class="input-group" *ngIf="serviceForm.get('offert')?.value">
+      <label for="special_price">Precio especial de oferta ($) *</label>
+      <div class="input-wrapper highlight-gold">
+        <span class="prefix-icon">🏷️</span>
+        <input
+          id="special_price"
+          type="number"
+          formControlName="special_price"
+          class="styled-input"
+          placeholder="800"
+        />
+      </div>
+    </div>
+
+    <!-- ID de Barbería (oculto) -->
+    <input type="hidden" formControlName="barberiaId" />
+
+    <div class="form-buttons-row">
+      <button type="submit" class="btn-submit">
+        {{ isEditMode ? 'ACTUALIZAR SERVICIO' : 'CREAR SERVICIO' }}
+      </button>
+      <button type="button" class="btn-secondary" *ngIf="isEditMode" (click)="cancelar.emit()">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</section>

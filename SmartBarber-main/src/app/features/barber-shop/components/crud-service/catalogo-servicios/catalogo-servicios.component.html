@@ -1,0 +1,9 @@
+<div class="services-scroll">
+  <app-servicio-card
+    *ngFor="let item of servicios"
+    [servicio]="item"
+    (editar)="editar.emit(item)"
+    (alternarEstado)="alternarEstado.emit(item)"
+    (eliminar)="eliminar.emit(item)">
+  </app-servicio-card>
+</div>

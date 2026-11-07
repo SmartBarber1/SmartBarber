@@ -1,0 +1,25 @@
+<div class="service-item-card" [class.inactive]="servicio.isActive === false">
+  <div class="card-top">
+    <h3 class="service-title">{{ servicio.name }}</h3>
+    <span class="offer-tag" *ngIf="servicio.offert">OFERTA</span>
+  </div>
+
+  <p class="service-desc">{{ servicio.description }}</p>
+
+  <div class="card-meta">
+    <span>⏱️ {{ servicio.duration }} min</span>
+    <div class="price-box">
+      <span class="old-price" *ngIf="servicio.offert">${{ servicio.price }}</span>
+      <span class="main-price">${{ servicio.offert ? servicio.special_price : servicio.price }}</span>
+    </div>
+  </div>
+
+  <!-- Botones de Modificar, Desactivar/Activar y Eliminar -->
+  <div class="card-actions">
+    <button class="btn-action-text edit" (click)="editar.emit()">✏️ Modificar</button>
+    <button class="btn-action-text toggle" (click)="alternarEstado.emit()">
+      {{ servicio.isActive !== false ? '🚫 Desactivar' : '✅ Activar' }}
+    </button>
+    <button class="btn-delete" (click)="eliminar.emit()">🗑️ Eliminar</button>
+  </div>
+</div>

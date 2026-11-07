@@ -145,7 +145,7 @@ export const BARBER_SHOP_ROUTES: Routes = [
 
         loadComponent: () =>
             import(
-                './components/crud-service/Create-service/crud-servicios.component'
+                './components/crud-service/crud-servicios.component'
             ).then(
                 m =>
                     m.BarberServiConfigComponent

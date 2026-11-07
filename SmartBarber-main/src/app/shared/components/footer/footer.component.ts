@@ -4,14 +4,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { formEndpoints } from '../../forms/form-config';
-import { LegalConsentComponent } from '../legal-consent/legal-consent.component';
 
 type SubmitState = 'idle' | 'sending' | 'success' | 'error';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, LegalConsentComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.css'
 })
