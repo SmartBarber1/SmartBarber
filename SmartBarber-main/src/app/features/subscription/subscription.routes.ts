@@ -22,16 +22,12 @@ export const SUBSCRIPTION_ROUTES: Routes = [
       import('./pages/renewal-catalog/renewal-catalog.component')
         .then(m => m.RenewalCatalogComponent)
   },
+ 
   {
     path: 'payment-history',
-    data: {
-      title: 'Historial de pagos',
-      description: 'Consulta los pagos relacionados con el plan de tu barbería.',
-      availability: 'El historial detallado de pagos estará disponible próximamente.'
-    },
     loadComponent: () =>
-      import('./pages/subscription-module/subscription-module.component')
-        .then(m => m.SubscriptionModuleComponent)
+      import('./pages/payment-history/payment-history.component')
+        .then(m => m.PaymentHistoryComponent)
   },
   {
     path: '**',
