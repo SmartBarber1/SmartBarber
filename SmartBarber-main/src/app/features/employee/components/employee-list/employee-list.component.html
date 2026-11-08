@@ -1,0 +1,108 @@
+<div class="card-heading">
+    <div>
+        <span class="card-eyebrow">EQUIPO</span>
+        <h2 id="employee-list-title">Barberos de la barbería</h2>
+    </div>
+
+    <div class="heading-actions">
+        <span class="record-count" aria-live="polite">
+            @if (query()) {
+                {{ filteredEmployees().length }} de {{ employees().length }} registros
+            } @else {
+                {{ employees().length }} {{ employees().length === 1 ? 'registro' : 'registros' }}
+            }
+        </span>
+        <button type="button" class="secondary-button" (click)="reload()" [disabled]="loading()">
+            {{ loading() ? 'Actualizando...' : 'Actualizar' }}
+        </button>
+    </div>
+</div>
+
+@if (employees().length > 0) {
+    <div class="list-search">
+        <label for="employee-search">Buscar en el equipo</label>
+        <input
+            id="employee-search"
+            type="search"
+            placeholder="Nombre, documento, correo o especialidad"
+            autocomplete="off"
+            [value]="query()"
+            (input)="onSearch($any($event.target).value)">
+    </div>
+}
+
+@if (loading() && employees().length === 0) {
+    <div class="list-state" role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        Cargando el equipo…
+    </div>
+} @else if (errorMessage()) {
+    <div class="message error-message list-error" role="alert">
+        <span>{{ errorMessage() }}</span>
+        <button type="button" class="secondary-button" (click)="reload()">Reintentar</button>
+    </div>
+} @else if (employees().length === 0) {
+    <div class="empty-state">
+        <span class="empty-icon" aria-hidden="true">✂</span>
+        <h3>Aún no hay barberos registrados</h3>
+        <p>Usa «Crear barbero» para agregar a tu equipo. Cada barbero entrará con su propia cuenta de Google.</p>
+    </div>
+} @else if (filteredEmployees().length === 0) {
+    <div class="empty-state">
+        <h3>Sin resultados</h3>
+        <p>Ningún barbero coincide con «{{ query() }}».</p>
+    </div>
+} @else {
+    <div class="table-wrapper">
+        <table class="employee-table" aria-labelledby="employee-list-title">
+            <thead>
+                <tr>
+                    <th scope="col">Barbero</th>
+                    <th scope="col">Documento</th>
+                    <th scope="col">Contacto</th>
+                    <th scope="col">Especialidades</th>
+                    <th scope="col">Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (employee of filteredEmployees(); track employee.id) {
+                    <tr>
+                        <td data-label="Barbero">
+                            <span>
+                                <strong>{{ employee.name }}</strong>
+                                @if (employee.id === currentEmployeeId) {
+                                    <span class="you-badge">Tú</span>
+                                }
+                            </span>
+                        </td>
+                        <td data-label="Documento">
+                            {{ documentLabel(employee) }} {{ employee.document || '—' }}
+                        </td>
+                        <td data-label="Contacto">
+                            <span class="contact">
+                                @if (employee.email) {
+                                    <a [href]="'mailto:' + employee.email">{{ employee.email }}</a>
+                                }
+                                @if (employee.cell) {
+                                    <a [href]="'tel:+57' + employee.cell">{{ formatCell(employee.cell) }}</a>
+                                }
+                            </span>
+                        </td>
+                        <td data-label="Especialidades">
+                            <span class="chips">
+                                @for (item of specialtiesOf(employee); track item) {
+                                    <span class="chip">{{ item }}</span>
+                                } @empty {
+                                    —
+                                }
+                            </span>
+                        </td>
+                        <td data-label="Registro">
+                            {{ employee.createAt ? (employee.createAt | date: 'dd/MM/yyyy') : '—' }}
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

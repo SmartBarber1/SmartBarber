@@ -4,6 +4,7 @@ import {
 
 import {
     Component,
+    DestroyRef,
     EventEmitter,
     Input,
     Output,
@@ -11,14 +12,25 @@ import {
 } from '@angular/core';
 
 import {
+    takeUntilDestroyed
+} from '@angular/core/rxjs-interop';
+
+import {
+    AbstractControl,
     FormBuilder,
     ReactiveFormsModule,
+    ValidationErrors,
+    ValidatorFn,
     Validators
 } from '@angular/forms';
 
 import {
     finalize
 } from 'rxjs';
+
+import {
+    User
+} from 'firebase/auth';
 
 import {
     CreateEmployeeUseCase
@@ -41,8 +53,54 @@ import {
 } from '../../../authentication/domain/models/user-role.model';
 
 import {
-    User
-} from 'firebase/auth';
+    ErrorMessageOverrides,
+    toApiError
+} from '../../../../core/errors';
+
+import {
+    documentNumberValidator,
+    mobilePhoneValidator,
+    normalizeDocument,
+    normalizePhone,
+    normalizeText,
+    notBlankValidator,
+    personNameValidator,
+    validationMessage
+} from '../../../../shared/forms/colombia-validators';
+
+import {
+    applyServerFieldErrors
+} from '../../../../shared/forms/server-field-errors';
+
+/** Mensajes propios del registro de barberos (sobrescriben el catálogo general). */
+const EMPLOYEE_ERROR_MESSAGES: ErrorMessageOverrides = {
+    US_002: 'La cuenta de Google seleccionada ya pertenece a otro usuario de SmartBarber. Vincula una cuenta diferente.',
+    EY_001: 'Solo se pueden registrar barberos desde este formulario.',
+    EY_002: 'Ya existe un barbero registrado con ese número de documento.',
+    EY_005: 'El correo no coincide con la cuenta de Google vinculada. Vuelve a vincular la cuenta.',
+    AT_003: 'Solo el administrador de esta barbería puede registrar barberos.',
+    US_004: 'Tu cuenta de administrador no está registrada. Vuelve a iniciar sesión.',
+    HTTP_401: 'Tu sesión de administrador expiró. Vuelve a iniciar sesión para registrar barberos.',
+    TECH_001: 'Revisa los campos marcados en el formulario.',
+    DEFAULT: 'No fue posible registrar al barbero. Inténtalo nuevamente.'
+};
+
+/** Errores que obligan a vincular otra cuenta de Google. */
+const ACCOUNT_ERROR_CODES = new Set(['US_002', 'EY_005']);
+
+/** Campo del backend → control del formulario. */
+const SERVER_FIELD_ALIASES: Readonly<Record<string, string>> = {
+    specialty: 'specialties'
+};
+
+const NAME_MAX_LENGTH = 120;
+
+function atLeastOneSelected(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null =>
+        Array.isArray(control.value) && control.value.length > 0
+            ? null
+            : { required: true };
+}
 
 @Component({
     selector: 'app-employee-register',
@@ -71,6 +129,9 @@ export class EmployeeRegisterComponent {
     private readonly firebaseAuth =
         inject(FirebaseAuthService);
 
+    private readonly destroyRef =
+        inject(DestroyRef);
+
     @Input()
     barberiaId = '';
 
@@ -86,25 +147,22 @@ export class EmployeeRegisterComponent {
 
     isConnectingGoogle = false;
 
+    submitted = false;
+
     successMessage = '';
 
     backendError = '';
 
     registrationUser: User | null = null;
 
+    readonly nameMaxLength = NAME_MAX_LENGTH;
+
     readonly specialties = [
-
         'Cortes',
-
         'Barba',
-
         'Colorimetría',
-
         'Tratamientos capilares'
-    ];
-
-    selectedSpecialties =
-        new Set<string>();
+    ] as const;
 
     readonly form =
         this.fb.nonNullable.group({
@@ -113,7 +171,10 @@ export class EmployeeRegisterComponent {
                 '',
                 [
                     Validators.required,
-                    Validators.maxLength(120)
+                    notBlankValidator(),
+                    Validators.minLength(3),
+                    Validators.maxLength(NAME_MAX_LENGTH),
+                    personNameValidator()
                 ]
             ],
 
@@ -126,7 +187,7 @@ export class EmployeeRegisterComponent {
                 '',
                 [
                     Validators.required,
-                    Validators.maxLength(30)
+                    documentNumberValidator()
                 ]
             ],
 
@@ -142,30 +203,48 @@ export class EmployeeRegisterComponent {
                 '',
                 [
                     Validators.required,
-                    Validators.pattern(
-                        /^[0-9]{10}$/
-                    )
+                    mobilePhoneValidator()
                 ]
+            ],
+
+            specialties: [
+                [] as string[],
+                atLeastOneSelected()
             ]
         });
+
+    constructor() {
+        // El documento se valida según el tipo elegido (CC o CE).
+        this.form.controls.documentType.valueChanges
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() =>
+                this.form.controls.document.updateValueAndValidity()
+            );
+    }
+
+    /** Mensaje de error de un campo, solo cuando el usuario ya lo tocó. */
+    errorFor(controlName: keyof typeof this.form.controls): string | null {
+        return validationMessage(this.form.controls[controlName], {
+            required: controlName === 'specialties'
+                ? 'Selecciona al menos una especialidad.'
+                : 'Este campo es obligatorio.',
+            email: 'Vincula una cuenta de Google con un correo válido.'
+        });
+    }
+
+    isSelected(specialty: string): boolean {
+        return this.form.controls.specialties.value.includes(specialty);
+    }
 
     toggleSpecialty(
         specialty: string,
         checked: boolean
     ): void {
+        const control = this.form.controls.specialties;
+        const current = control.value.filter(item => item !== specialty);
 
-        if (checked) {
-
-            this.selectedSpecialties.add(
-                specialty
-            );
-
-        } else {
-
-            this.selectedSpecialties.delete(
-                specialty
-            );
-        }
+        control.setValue(checked ? [...current, specialty] : current);
+        control.markAsTouched();
     }
 
     async connectGoogleAccount(): Promise<void> {
@@ -174,24 +253,22 @@ export class EmployeeRegisterComponent {
         }
 
         this.backendError = '';
-        this.registrationUser = null;
-        this.form.controls.email.setValue('');
+        this.successMessage = '';
         this.isConnectingGoogle = true;
 
         try {
-            await this.firebaseAuth
-                .signOutEmployeeRegistration();
+            await this.releaseLinkedAccount();
 
             const user =
                 await this.firebaseAuth
                     .signInWithGoogleForEmployeeRegistration();
 
-            if (!user.email) {
+            if (!user.email || !user.emailVerified) {
                 await this.firebaseAuth
                     .signOutEmployeeRegistration();
 
                 this.backendError =
-                    'La cuenta de Google debe tener un correo electrónico para iniciar sesión.';
+                    'La cuenta de Google debe tener un correo verificado para poder iniciar sesión.';
 
                 return;
             }
@@ -200,9 +277,10 @@ export class EmployeeRegisterComponent {
             this.form.controls.email.setValue(
                 user.email.trim().toLowerCase()
             );
+            this.form.controls.email.markAsTouched();
         } catch (error: unknown) {
             this.backendError =
-                this.getErrorMessage(error);
+                toApiError(error, EMPLOYEE_ERROR_MESSAGES).message;
         } finally {
             this.isConnectingGoogle = false;
         }
@@ -213,36 +291,29 @@ export class EmployeeRegisterComponent {
             return;
         }
 
-        if (this.registrationUser) {
-            try {
-                await this.firebaseAuth
-                    .signOutEmployeeRegistration();
-            } catch (error: unknown) {
-                this.backendError =
-                    this.getErrorMessage(error);
+        try {
+            await this.releaseLinkedAccount();
+        } catch (error: unknown) {
+            this.backendError =
+                toApiError(error, EMPLOYEE_ERROR_MESSAGES).message;
 
-                return;
-            }
+            return;
         }
 
         this.cancelled.emit();
     }
 
     async submit(): Promise<void> {
-
-        this.successMessage = '';
-
-        this.backendError = '';
-
-        if (
-            this.form.invalid ||
-            this.selectedSpecialties.size === 0
-        ) {
-
-            this.form.markAllAsTouched();
-
+        if (this.isSubmitting) {
             return;
         }
+
+        this.submitted = true;
+        this.successMessage = '';
+        this.backendError = '';
+
+        // Se marcan todos los campos para mostrar de una vez todo lo que falta.
+        this.form.markAllAsTouched();
 
         if (!this.registrationUser) {
             this.backendError =
@@ -251,160 +322,118 @@ export class EmployeeRegisterComponent {
             return;
         }
 
-        if (!this.barberiaId) {
-
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
             this.backendError =
-                'No fue posible identificar la barbería de esta sesión.';
+                'Revisa los campos marcados antes de continuar.';
 
             return;
         }
 
-        const value =
-            this.form.getRawValue();
+        if (!this.barberiaId) {
+            this.backendError =
+                'No fue posible identificar la barbería de esta sesión. Vuelve a iniciar sesión.';
 
-        const request:
-            EmployeeRegistration = {
+            return;
+        }
 
-            user: {
-                roleId: USER_ROLE_IDS.BARBER
-            },
-
-            barberiaId:
-                this.barberiaId,
-
-            name:
-                value.name.trim(),
-
-            document:
-                value.document.trim(),
-
-            documentType:
-                value.documentType,
-
-            cell:
-                value.cell.trim(),
-
-            email:
-                value.email
-                    .trim()
-                    .toLowerCase(),
-
-            specialty:
-                Array.from(
-                    this.selectedSpecialties
-                ).join(', ')
-        };
+        const request = this.buildRequest();
 
         this.isSubmitting = true;
 
-        let idToken: string;
+        let employeeIdToken: string;
 
         try {
-            idToken =
+            // Token vigente de la cuenta vinculada. La sesión secundaria se
+            // conserva hasta que el registro termine, para poder corregir
+            // datos y reintentar sin volver a vincular la cuenta.
+            employeeIdToken =
                 await this.registrationUser.getIdToken();
-
-            await this.firebaseAuth
-                .signOutEmployeeRegistration();
-
-            this.registrationUser = null;
-            this.form.controls.email.setValue('');
         } catch (error: unknown) {
-            this.backendError =
-                this.getErrorMessage(error);
-
             this.isSubmitting = false;
+            this.backendError =
+                toApiError(error, EMPLOYEE_ERROR_MESSAGES).message;
 
             return;
         }
 
         this.createEmployee
-            .execute(request, idToken)
-
+            .execute(request, employeeIdToken)
             .pipe(
-                finalize(
-                    () =>
-                        this.isSubmitting = false
-                )
+                finalize(() => this.isSubmitting = false)
             )
-
             .subscribe({
-
                 next: employee => {
+                    void this.releaseLinkedAccount();
 
                     this.successMessage =
                         'Barbero registrado correctamente. Podrá iniciar sesión con la cuenta de Google vinculada.';
 
-                    this.registered.emit(
-                        employee
-                    );
-
+                    this.submitted = false;
                     this.form.reset({
-
                         name: '',
-
                         documentType: 'CC',
-
                         document: '',
-
                         email: '',
-
-                        cell: ''
+                        cell: '',
+                        specialties: []
                     });
 
-                    this.selectedSpecialties.clear();
+                    this.registered.emit(employee);
                 },
 
-                error: error => {
-
-                    this.backendError =
-                        this.getErrorMessage(error);
-                }
+                error: error => this.handleBackendError(error)
             });
     }
 
-    private getErrorMessage(error: unknown): string {
-        if (typeof error === 'object' && error !== null) {
-            if ('error' in error) {
-                const responseBody = error.error;
+    private buildRequest(): EmployeeRegistration {
+        const value = this.form.getRawValue();
 
-                if (
-                    typeof responseBody === 'object' &&
-                    responseBody !== null
-                ) {
-                    if (
-                        'data' in responseBody &&
-                        typeof responseBody.data === 'object' &&
-                        responseBody.data !== null &&
-                        'message' in responseBody.data &&
-                        typeof responseBody.data.message === 'string'
-                    ) {
-                        return responseBody.data.message;
-                    }
+        return {
+            user: {
+                roleId: USER_ROLE_IDS.BARBER
+            },
+            barberiaId: this.barberiaId,
+            name: normalizeText(value.name),
+            document: normalizeDocument(value.documentType, value.document),
+            documentType: value.documentType,
+            cell: normalizePhone(value.cell),
+            email: value.email.trim().toLowerCase(),
+            specialty: value.specialties.join(', ')
+        };
+    }
 
-                    if (
-                        'message' in responseBody &&
-                        typeof responseBody.message === 'string'
-                    ) {
-                        return responseBody.message;
-                    }
-                }
-            }
+    private handleBackendError(error: unknown): void {
+        const apiError = toApiError(error, EMPLOYEE_ERROR_MESSAGES);
 
-            if ('code' in error && typeof error.code === 'string') {
-                if (error.code === 'auth/popup-closed-by-user') {
-                    return 'Se cerró la ventana de Google antes de vincular la cuenta.';
-                }
+        const unmatched = applyServerFieldErrors(
+            this.form,
+            apiError.fields,
+            SERVER_FIELD_ALIASES
+        );
 
-                if (error.code === 'auth/popup-blocked') {
-                    return 'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes e inténtalo de nuevo.';
-                }
-            }
-
-            if ('message' in error && typeof error.message === 'string') {
-                return error.message;
-            }
+        if (apiError.code === 'EY_002') {
+            this.form.controls.document.setErrors({ server: apiError.message });
+            this.form.controls.document.markAsTouched();
         }
 
-        return 'No fue posible completar el registro del barbero. Inténtalo nuevamente.';
+        if (apiError.code && ACCOUNT_ERROR_CODES.has(apiError.code)) {
+            void this.releaseLinkedAccount();
+        }
+
+        this.backendError = unmatched.length > 0
+            ? `${apiError.message} ${unmatched.join(' ')}`
+            : apiError.message;
+    }
+
+    /** Cierra la sesión temporal de la cuenta de Google del barbero. */
+    private async releaseLinkedAccount(): Promise<void> {
+        if (!this.registrationUser) {
+            return;
+        }
+
+        this.registrationUser = null;
+        this.form.controls.email.setValue('');
+        await this.firebaseAuth.signOutEmployeeRegistration();
     }
 }

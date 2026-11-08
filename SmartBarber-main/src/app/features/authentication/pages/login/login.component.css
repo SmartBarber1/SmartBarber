@@ -768,3 +768,14 @@
   }
 
 }
+
+/* Invitación a registrarse cuando la cuenta de Google no existe en SmartBarber */
+.register-button.is-highlighted {
+  background: rgba(182, 138, 78, 0.16);
+  box-shadow: 0 0 0 3px rgba(182, 138, 78, 0.22);
+  color: var(--color-ivory);
+}
+
+.login-error {
+  font-size: 13px;
+}

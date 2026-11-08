@@ -44,6 +44,10 @@ import {
 } from '../mapper/auth-session.mapper';
 
 
+import {
+    UserFacingError
+} from '../../../../core/errors';
+
 @Injectable()
 export class RegisterAdminUseCase {
 
@@ -79,7 +83,7 @@ export class RegisterAdminUseCase {
 
             return throwError(
                 () =>
-                    new Error(
+                    new UserFacingError(
                         'No existe una sesión autenticada con Google.'
                     )
             );
@@ -90,7 +94,7 @@ export class RegisterAdminUseCase {
 
             return throwError(
                 () =>
-                    new Error(
+                    new UserFacingError(
                         'La cuenta de Google no tiene correo.'
                     )
             );
@@ -204,8 +208,8 @@ export class RegisterAdminUseCase {
                                             session.barberId !== onboardingResponse.employee.id ||
                                             session.barbershopId !== onboardingResponse.id
                                         ) {
-                                            throw new Error(
-                                                'La sesión autenticada no coincide con el administrador o la barbería recién registrados.'
+                                            throw new UserFacingError(
+                        'La sesión autenticada no coincide con el administrador o la barbería recién registrados.'
                                             );
                                         }
 
@@ -213,8 +217,8 @@ export class RegisterAdminUseCase {
                                             !session.barberId ||
                                             !session.barbershopId
                                         ) {
-                                            throw new Error(
-                                                'La sesión autenticada no contiene la barbería del administrador.'
+                                            throw new UserFacingError(
+                        'La sesión autenticada no contiene la barbería del administrador.'
                                             );
                                         }
 

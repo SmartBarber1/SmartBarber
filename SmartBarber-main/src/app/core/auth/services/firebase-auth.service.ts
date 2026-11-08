@@ -4,7 +4,10 @@ import {
     Auth,
     GoogleAuthProvider,
     User,
+    browserPopupRedirectResolver,
     getAuth,
+    inMemoryPersistence,
+    initializeAuth,
     onAuthStateChanged,
     signInWithPopup,
     signOut
@@ -151,12 +154,19 @@ export class FirebaseAuthService {
                 'smartbarber-employee-registration';
             const existingApp =
                 getApps().find(app => app.name === appName);
-            const registrationApp =
-                existingApp ??
-                initializeApp(firebaseConfig, appName);
 
-            this.employeeRegistrationAuth =
-                getAuth(registrationApp);
+            // La cuenta del barbero solo se usa para obtener su token durante
+            // el registro: se guarda en memoria y no queda persistida en el
+            // navegador del administrador.
+            this.employeeRegistrationAuth = existingApp
+                ? getAuth(existingApp)
+                : initializeAuth(
+                    initializeApp(firebaseConfig, appName),
+                    {
+                        persistence: inMemoryPersistence,
+                        popupRedirectResolver: browserPopupRedirectResolver
+                    }
+                );
         }
 
         return this.employeeRegistrationAuth;

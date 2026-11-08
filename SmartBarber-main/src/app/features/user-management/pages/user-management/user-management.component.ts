@@ -1,5 +1,6 @@
 import {
     Component,
+    ViewChild,
     inject,
     signal
 } from '@angular/core';
@@ -35,6 +36,10 @@ import {
 } from '../../../employee/components/employee-register/employee-register.component';
 
 import {
+    EmployeeListComponent
+} from '../../../employee/components/employee-list/employee-list.component';
+
+import {
     Employee
 } from '../../../employee/domain/models/employee.model';
 
@@ -51,7 +56,8 @@ import {
     imports: [
         CommonModule,
         ReactiveFormsModule,
-        EmployeeRegisterComponent
+        EmployeeRegisterComponent,
+        EmployeeListComponent
     ],
 
     templateUrl:
@@ -77,6 +83,9 @@ export class UserManagementComponent {
     private readonly sessionService =
         inject(SessionService);
 
+
+    @ViewChild(EmployeeListComponent)
+    private employeeList?: EmployeeListComponent;
 
     readonly users =
         signal<ManagedUser[]>([]);
@@ -108,6 +117,10 @@ export class UserManagementComponent {
 
 
     readonly successMessage =
+        signal('');
+
+    /** Confirmación del registro de un barbero (se muestra junto al equipo). */
+    readonly teamMessage =
         signal('');
 
 
@@ -151,9 +164,14 @@ export class UserManagementComponent {
         return this.sessionService.getBarbershopId() ?? '';
     }
 
+    get currentEmployeeId(): string | null {
+        return this.sessionService.getBarberId();
+    }
+
     openEmployeeRegistration(): void {
         this.errorMessage.set('');
         this.successMessage.set('');
+        this.teamMessage.set('');
 
         if (!this.barberiaId) {
             this.errorMessage.set(
@@ -172,7 +190,8 @@ export class UserManagementComponent {
 
     onEmployeeRegistered(employee: Employee): void {
         this.showEmployeeRegistration.set(false);
-        this.successMessage.set(
+        this.employeeList?.reload();
+        this.teamMessage.set(
             `${employee.name} fue registrado y podrá iniciar sesión con la cuenta de Google vinculada.`
         );
     }

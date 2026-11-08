@@ -204,6 +204,10 @@ export function validationMessage(control: AbstractControl | null, extra: Record
     return null;
   }
   for (const key of Object.keys(control.errors)) {
+    // Mensaje enviado por el backend para este campo (ver server-field-errors.ts).
+    if (key === 'server' && typeof control.errors[key] === 'string') {
+      return control.errors[key];
+    }
     if (key === 'minlength') {
       return `Debe tener al menos ${control.errors[key].requiredLength} caracteres.`;
     }

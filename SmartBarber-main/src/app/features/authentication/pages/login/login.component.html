@@ -16,11 +16,11 @@
             </p>
         </div>
 
-        <div class="login-error" *ngIf="errorMessage">
+        <div class="login-error" *ngIf="errorMessage" role="alert">
             {{ errorMessage }}
         </div>
 
-        <button type="button" class="google-button" [disabled]="loading" (click)="loginWithGoogle()">
+        <button type="button" class="google-button" [disabled]="loading" [attr.aria-busy]="loading" (click)="loginWithGoogle()">
 
             <span class="google-icon" aria-hidden="true">G</span>
 
@@ -35,7 +35,7 @@
             <span>¿Aún no tienes una cuenta?</span>
         </div>
 
-        <button type="button" class="register-button" (click)="goToRegister()">
+        <button type="button" class="register-button" [class.is-highlighted]="suggestRegister" (click)="goToRegister()">
             Registrarme como cliente
         </button>
 

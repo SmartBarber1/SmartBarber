@@ -38,6 +38,10 @@ import {
     DocumentType
 } from '../../../barber-shop/domain/models/barber-shop.model';
 
+import {
+    toUserMessage
+} from '../../../../core/errors';
+
 @Component({
     selector: 'app-register',
     standalone: true,
@@ -331,60 +335,14 @@ export class RegisterComponent {
     }
 
     getBackendErrorMessage(
-        error: any
+        error: unknown
     ): string {
-
-        const status =
-            error?.status;
-
-        const message =
-            error?.error?.data?.message ??
-            error?.error?.message ??
-            error?.message;
-
-        if (status === 400) {
-
-            return (
-                message ??
-                'La información del cliente proporcionada no es válida.'
-            );
-        }
-
-        if (status === 409) {
-
-            return (
-                message ??
-                'Ya existe un cliente con esta información.'
-            );
-        }
-
-        if (status === 401) {
-
-            return (
-                'La sesión de autenticación no es válida.'
-            );
-        }
-
-        if (status === 403) {
-
-            return (
-                'No tienes autorización para realizar esta operación.'
-            );
-        }
-
-        if (
-            status &&
-            status >= 500
-        ) {
-
-            return (
-                'El servidor no pudo completar el registro. Inténtalo nuevamente más tarde.'
-            );
-        }
-
-        return (
-            message ??
-            'Ocurrió un error inesperado durante el registro.'
-        );
+        return toUserMessage(error, {
+            US_002: 'Esta cuenta de Google ya está registrada. Inicia sesión en lugar de registrarte.',
+            CT_002: 'Ya existe un cliente registrado con estos datos. Si es tu cuenta, inicia sesión.',
+            TECH_001: 'Revisa los datos del formulario.',
+            HTTP_401: 'La sesión de Google no es válida. Vuelve a vincular tu cuenta.',
+            DEFAULT: 'Ocurrió un error inesperado durante el registro. Inténtalo nuevamente.'
+        });
     }
 }

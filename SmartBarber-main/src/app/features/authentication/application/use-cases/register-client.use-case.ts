@@ -31,6 +31,10 @@ import {
 } from '../../domain/models/user-role.model';
 
 
+import {
+    UserFacingError
+} from '../../../../core/errors';
+
 @Injectable()
 export class RegisterClientUseCase {
 
@@ -67,7 +71,7 @@ export class RegisterClientUseCase {
 
             return throwError(
                 () =>
-                    new Error(
+                    new UserFacingError(
                         'No existe una sesión autenticada con Google.'
                     )
             );
@@ -78,7 +82,7 @@ export class RegisterClientUseCase {
 
             return throwError(
                 () =>
-                    new Error(
+                    new UserFacingError(
                         'La cuenta de Google no tiene correo electrónico.'
                     )
             );

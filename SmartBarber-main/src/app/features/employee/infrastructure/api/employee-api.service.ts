@@ -33,6 +33,12 @@ import {
     EmployeeRegistrationResponse
 } from '../../domain/models/employee-registration.model';
 
+import {
+    EmployeeResponse,
+    mapEmployeeResponse,
+    mapOnboardingResponse
+} from '../mappers/employee.mapper';
+
 @Injectable({
     providedIn: 'root'
 })
@@ -42,37 +48,46 @@ export class EmployeeApiService
     private readonly http =
         inject(HttpClient);
 
+    private readonly baseUrl =
+        `${environment.apiUrl}`;
+
+    /**
+     * Authorization lo agrega el interceptor con el token del administrador.
+     * idToken lleva el token de la cuenta de Google del nuevo barbero.
+     */
     override createEmployee(
         request: EmployeeRegistration,
-        idToken: string
-    ):
-        Observable<Employee> {
+        employeeIdToken: string
+    ): Observable<Employee> {
 
         return this.http
             .post<EmployeeRegistrationResponse>(
-                `${environment.apiUrl}/public/employee-service/onboarding`,
+                `${this.baseUrl}/public/employee-service/onboarding`,
                 request,
                 {
                     headers: new HttpHeaders({
-                        Authorization: `Bearer ${idToken}`,
-                        idToken: `Bearer ${idToken}`
+                        idToken: `Bearer ${employeeIdToken}`
                     })
                 }
             )
             .pipe(
-                map(response => ({
-                    id: response.id,
-                    userId: response.user.id,
-                    barberiaId: response.barberiaId,
-                    document: response.document,
-                    documentType: response.documentType,
-                    name: response.name,
-                    cell: response.cell,
-                    email: response.email,
-                    specialty: response.specialty,
-                    createAt: response.createAt,
-                    updateAt: response.updateAt ?? null
-                }))
+                map(mapOnboardingResponse)
+            );
+    }
+
+    override getEmployeesByBarbershop(
+        barberiaId: string
+    ): Observable<Employee[]> {
+
+        return this.http
+            .get<EmployeeResponse[] | null>(
+                `${this.baseUrl}/employee-service/barbershop/${encodeURIComponent(barberiaId)}`
+            )
+            .pipe(
+                map(response =>
+                    (Array.isArray(response) ? response : [])
+                        .map(mapEmployeeResponse)
+                )
             );
     }
 }

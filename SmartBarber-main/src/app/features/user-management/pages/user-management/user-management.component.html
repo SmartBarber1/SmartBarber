@@ -48,6 +48,22 @@
 
 
     <!-- ========================================================= -->
+    <!-- EQUIPO DE LA BARBERÍA -->
+    <!-- ========================================================= -->
+
+    <div *ngIf="teamMessage()" class="message success-message" role="status">
+        {{ teamMessage() }}
+    </div>
+
+    <section *ngIf="barberiaId" class="management-card" aria-labelledby="employee-list-title">
+        <app-employee-list
+            [barberiaId]="barberiaId"
+            [currentEmployeeId]="currentEmployeeId">
+        </app-employee-list>
+    </section>
+
+
+    <!-- ========================================================= -->
     <!-- SEARCH -->
     <!-- ========================================================= -->
 
@@ -112,14 +128,14 @@
     <!-- MESSAGES -->
     <!-- ========================================================= -->
 
-    <div *ngIf="errorMessage()" class="message error-message">
+    <div *ngIf="errorMessage()" class="message error-message" role="alert">
 
         {{ errorMessage() }}
 
     </div>
 
 
-    <div *ngIf="successMessage()" class="message success-message">
+    <div *ngIf="successMessage()" class="message success-message" role="status">
 
         {{ successMessage() }}
 

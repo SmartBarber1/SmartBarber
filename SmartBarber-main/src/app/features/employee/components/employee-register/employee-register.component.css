@@ -380,3 +380,60 @@ fieldset legend {
     background: #f3f8f2;
     color: #3d7248;
 }
+
+/* ============================================================
+   VALIDACIÓN Y RESPONSIVE
+   ============================================================ */
+
+.required-note {
+    margin: 0 0 16px;
+    color: #81776b;
+    font-family: 'Fraunces', serif;
+    font-size: 12px;
+}
+
+.form-field small {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.form-field input[aria-invalid='true'],
+.form-field select[aria-invalid='true'] {
+    border-color: #c0675c;
+}
+
+.form-field input::placeholder {
+    color: #a39a8e;
+}
+
+.account-link.is-linked {
+    border-color: #c9ddcc;
+    background: #f3f8f2;
+}
+
+.specialty-options label {
+    min-height: 44px;
+    cursor: pointer;
+}
+
+@media (max-width: 640px) {
+    .account-link .secondary-button,
+    .form-actions button {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .specialty-options {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+    }
+
+    .form-field input,
+    .form-field select {
+        font-size: 16px; /* evita el zoom automático de iOS al enfocar */
+    }
+}

@@ -1,8 +1,8 @@
-<section class="registration-card">
+<section class="registration-card" aria-labelledby="employee-register-title">
     <header class="registration-heading">
         <div>
             <span class="section-eyebrow">NUEVO EQUIPO</span>
-            <h2>Registrar barbero</h2>
+            <h2 id="employee-register-title">Registrar barbero</h2>
             <p>
                 Vincula la cuenta de Google que utilizará para entrar a SmartBarber
                 y completa sus datos profesionales.
@@ -18,7 +18,7 @@
         </button>
     </header>
 
-    <div class="account-link">
+    <div class="account-link" [class.is-linked]="registrationUser">
         <div>
             <span class="field-eyebrow">ACCESO A SMARTBARBER</span>
             <strong *ngIf="registrationUser">
@@ -44,32 +44,42 @@
         </button>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <p class="required-note">Los campos marcados con * son obligatorios.</p>
+
         <div class="form-grid">
             <div class="form-field">
                 <label for="employee-name">Nombre completo *</label>
                 <input
                     id="employee-name"
                     formControlName="name"
-                    autocomplete="name">
-                <small *ngIf="form.controls.name.touched && form.controls.name.invalid">
-                    Ingresa el nombre del barbero (máximo 120 caracteres).
+                    autocomplete="name"
+                    [attr.maxlength]="nameMaxLength"
+                    [attr.aria-invalid]="!!errorFor('name')"
+                    [attr.aria-describedby]="errorFor('name') ? 'employee-name-error' : 'employee-name-help'">
+                <small *ngIf="!errorFor('name')" id="employee-name-help" class="field-hint">
+                    Nombre y apellido, como aparece en el documento.
+                </small>
+                <small *ngIf="errorFor('name') as message" id="employee-name-error" role="alert">
+                    {{ message }}
                 </small>
             </div>
 
             <div class="form-field">
-                <label for="employee-email">Correo de acceso</label>
+                <label for="employee-email">Correo de acceso *</label>
                 <input
                     id="employee-email"
                     type="email"
                     formControlName="email"
                     readonly
-                    aria-describedby="employee-email-help">
-                <small id="employee-email-help" class="field-hint">
+                    placeholder="Se completa al vincular la cuenta"
+                    [attr.aria-invalid]="!!errorFor('email')"
+                    [attr.aria-describedby]="errorFor('email') ? 'employee-email-error' : 'employee-email-help'">
+                <small *ngIf="!errorFor('email')" id="employee-email-help" class="field-hint">
                     Se toma de la cuenta de Google vinculada.
                 </small>
-                <small *ngIf="form.controls.email.touched && form.controls.email.invalid">
-                    Vincula una cuenta de Google válida para habilitar el acceso del barbero.
+                <small *ngIf="errorFor('email') as message" id="employee-email-error" role="alert">
+                    {{ message }}
                 </small>
             </div>
 
@@ -86,9 +96,16 @@
                 <input
                     id="employee-document"
                     formControlName="document"
-                    autocomplete="off">
-                <small *ngIf="form.controls.document.touched && form.controls.document.invalid">
-                    El documento es obligatorio (máximo 30 caracteres).
+                    inputmode="numeric"
+                    autocomplete="off"
+                    maxlength="13"
+                    [attr.aria-invalid]="!!errorFor('document')"
+                    [attr.aria-describedby]="errorFor('document') ? 'employee-document-error' : 'employee-document-help'">
+                <small *ngIf="!errorFor('document')" id="employee-document-help" class="field-hint">
+                    Solo números, sin puntos ni espacios.
+                </small>
+                <small *ngIf="errorFor('document') as message" id="employee-document-error" role="alert">
+                    {{ message }}
                 </small>
             </div>
 
@@ -97,31 +114,35 @@
                 <input
                     id="employee-cell"
                     type="tel"
-                    maxlength="10"
+                    inputmode="numeric"
+                    maxlength="14"
                     formControlName="cell"
-                    autocomplete="tel">
-                <small *ngIf="form.controls.cell.touched && form.controls.cell.invalid">
-                    Ingresa un número de celular de 10 dígitos.
+                    autocomplete="off"
+                    placeholder="3001234567"
+                    [attr.aria-invalid]="!!errorFor('cell')"
+                    [attr.aria-describedby]="errorFor('cell') ? 'employee-cell-error' : 'employee-cell-help'">
+                <small *ngIf="!errorFor('cell')" id="employee-cell-help" class="field-hint">
+                    Celular colombiano de 10 dígitos que empieza por 3.
+                </small>
+                <small *ngIf="errorFor('cell') as message" id="employee-cell-error" role="alert">
+                    {{ message }}
                 </small>
             </div>
         </div>
 
-        <fieldset>
+        <fieldset [attr.aria-invalid]="!!errorFor('specialties')" [attr.aria-describedby]="errorFor('specialties') ? 'employee-specialties-error' : null">
             <legend>Especialidades *</legend>
             <div class="specialty-options">
                 <label *ngFor="let specialty of specialties">
                     <input
                         type="checkbox"
-                        [checked]="selectedSpecialties.has(specialty)"
-                        (change)="toggleSpecialty(
-                            specialty,
-                            $any($event.target).checked
-                        )">
+                        [checked]="isSelected(specialty)"
+                        (change)="toggleSpecialty(specialty, $any($event.target).checked)">
                     <span>{{ specialty }}</span>
                 </label>
             </div>
-            <small *ngIf="selectedSpecialties.size === 0">
-                Selecciona al menos una especialidad.
+            <small *ngIf="errorFor('specialties') as message" id="employee-specialties-error" role="alert">
+                {{ message }}
             </small>
         </fieldset>
 
@@ -144,7 +165,8 @@
             <button
                 type="submit"
                 class="primary-button"
-                [disabled]="isSubmitting || isConnectingGoogle">
+                [disabled]="isSubmitting || isConnectingGoogle"
+                [attr.aria-busy]="isSubmitting">
                 {{
                     isSubmitting
                         ? 'Registrando...'

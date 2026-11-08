@@ -44,48 +44,46 @@ export class LoginUseCase {
         inject(AuthRepository);
 
 
+    /**
+     * 1. Inicia sesión con Google (Firebase).
+     * 2. Valida el token en el backend y obtiene el perfil.
+     * Si el paso 2 falla, se cierra la sesión de Google para no dejar al
+     * usuario autenticado en Firebase pero sin perfil en SmartBarber.
+     */
     async execute():
         Promise<AuthSession> {
-
-
-        /*
-         * =====================================================
-         * 1. GOOGLE FIREBASE
-         * =====================================================
-         */
 
         const firebaseUser =
             await this.firebaseAuth
                 .signInWithGoogle();
 
+        try {
+            const backendAuthentication =
+                await firstValueFrom(
+                    this.authRepository
+                        .verifyAuthentication()
+                );
 
-        /*
-         * =====================================================
-         * 2. VALIDAR FIREBASE TOKEN EN BACKEND
-         * =====================================================
-         */
+            if (!backendAuthentication) {
+                throw new Error('ACCOUNT_NOT_REGISTERED');
+            }
 
-        const backendAuthentication =
-            await firstValueFrom(
-                this.authRepository
-                    .verifyAuthentication()
+            const session = mapBackendAuthentication(
+                backendAuthentication,
+                firebaseUser
             );
 
-        const session = mapBackendAuthentication(
-            backendAuthentication,
-            firebaseUser
-        );
+            this.sessionService
+                .setSession(
+                    session
+                );
 
+            return session;
+        } catch (error: unknown) {
+            this.sessionService.clearSession();
+            await this.firebaseAuth.logout().catch(() => undefined);
 
-        this.sessionService
-            .setSession(
-                session
-            );
-
-            
-
-        return session;
-
+            throw error;
+        }
     }
-
 }

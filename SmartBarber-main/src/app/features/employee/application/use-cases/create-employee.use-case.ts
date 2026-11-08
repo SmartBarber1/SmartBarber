@@ -1,25 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { EmployeeRepository } from '../../domain/repositories/employee.repository';
 import { Employee } from '../../domain/models/employee.model';
 import { EmployeeRegistration } from '../../domain/models/employee-registration.model';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable()
 export class CreateEmployeeUseCase {
-    constructor(
-        private readonly employeeRepository: EmployeeRepository
-    ) { }
+
+    private readonly employeeRepository =
+        inject(EmployeeRepository);
 
     execute(
         request: EmployeeRegistration,
-        idToken: string
+        employeeIdToken: string
     ): Observable<Employee> {
         return this.employeeRepository.createEmployee(
             request,
-            idToken
+            employeeIdToken
         );
     }
 }

@@ -1,0 +1,150 @@
+import {
+    ChangeDetectionStrategy,
+    Component,
+    DestroyRef,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    computed,
+    inject,
+    signal
+} from '@angular/core';
+
+import {
+    DatePipe
+} from '@angular/common';
+
+import {
+    takeUntilDestroyed
+} from '@angular/core/rxjs-interop';
+
+import {
+    finalize
+} from 'rxjs';
+
+import {
+    GetEmployeesByBarbershopUseCase
+} from '../../application/use-cases/get-employees-by-barbershop.use-case';
+
+import {
+    Employee
+} from '../../domain/models/employee.model';
+
+import {
+    toApiError
+} from '../../../../core/errors';
+
+const LIST_ERROR_MESSAGES = {
+    AT_003: 'Solo el administrador de esta barbería puede consultar su equipo.',
+    HTTP_404: 'No se encontró el equipo de esta barbería.',
+    DEFAULT: 'No fue posible cargar el equipo de la barbería.'
+} as const;
+
+/**
+ * Muestra el equipo de la barbería tal como lo devuelve el backend.
+ * Solo presenta datos: la consulta la hace el caso de uso.
+ */
+@Component({
+    selector: 'app-employee-list',
+    standalone: true,
+    imports: [DatePipe],
+    templateUrl: './employee-list.component.html',
+    styleUrl: './employee-list.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class EmployeeListComponent implements OnChanges {
+
+    private readonly getEmployees =
+        inject(GetEmployeesByBarbershopUseCase);
+
+    private readonly destroyRef =
+        inject(DestroyRef);
+
+    @Input({ required: true })
+    barberiaId = '';
+
+    /** Empleado de la sesión actual, para marcarlo como "Tú". */
+    @Input()
+    currentEmployeeId: string | null = null;
+
+    readonly employees = signal<Employee[]>([]);
+    readonly loading = signal(false);
+    readonly errorMessage = signal('');
+    readonly query = signal('');
+
+    readonly filteredEmployees = computed(() => {
+        const term = normalize(this.query());
+
+        if (!term) {
+            return this.employees();
+        }
+
+        return this.employees().filter(employee =>
+            [employee.name, employee.document, employee.email, employee.specialty, employee.cell]
+                .some(value => normalize(value).includes(term))
+        );
+    });
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['barberiaId']) {
+            this.reload();
+        }
+    }
+
+    reload(): void {
+        if (!this.barberiaId) {
+            this.employees.set([]);
+            return;
+        }
+
+        this.loading.set(true);
+        this.errorMessage.set('');
+
+        this.getEmployees
+            .execute(this.barberiaId)
+            .pipe(
+                finalize(() => this.loading.set(false)),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe({
+                next: employees => this.employees.set(employees),
+                error: error => {
+                    this.employees.set([]);
+                    this.errorMessage.set(
+                        toApiError(error, LIST_ERROR_MESSAGES).message
+                    );
+                }
+            });
+    }
+
+    onSearch(value: string): void {
+        this.query.set(value);
+    }
+
+    documentLabel(employee: Employee): string {
+        return employee.documentType === 'CE' ? 'C.E.' : 'C.C.';
+    }
+
+    specialtiesOf(employee: Employee): string[] {
+        return employee.specialty
+            .split(',')
+            .map(item => item.trim())
+            .filter(Boolean);
+    }
+
+    formatCell(cell: string): string {
+        const digits = cell.replace(/\D/g, '');
+
+        return digits.length === 10
+            ? `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`
+            : cell;
+    }
+}
+
+function normalize(value: string | null | undefined): string {
+    return (value ?? '')
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .trim();
+}

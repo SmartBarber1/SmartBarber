@@ -59,6 +59,10 @@ import {
 } from '../../../barber-shop/domain/models/barber-shop.model';
 
 
+import {
+  toUserMessage
+} from '../../../../core/errors';
+
 @Component({
   selector: 'app-register-admin',
 
@@ -665,99 +669,15 @@ export class RegisterAdminComponent {
   private getErrorMessage(
     error: unknown
   ): string {
-
-    const httpError =
-      error as {
-
-        status?: number;
-
-        error?: {
-
-          data?: {
-
-            message?: string;
-
-          };
-
-          message?: string;
-
-        };
-
-        message?: string;
-
-      };
-
-
-    const message =
-      httpError?.error?.data?.message ??
-      httpError?.error?.message ??
-      httpError?.message;
-
-
-    if (
-      httpError?.status === 400
-    ) {
-
-      return (
-        message ??
-        'Los datos enviados no son válidos.'
-      );
-
-    }
-
-
-    if (
-      httpError?.status === 401
-    ) {
-
-      return (
-        'La sesión de Google no es válida. Inicia sesión nuevamente.'
-      );
-
-    }
-
-
-    if (
-      httpError?.status === 403
-    ) {
-
-      return (
-        'No tienes autorización para realizar este registro.'
-      );
-
-    }
-
-
-    if (
-      httpError?.status === 409
-    ) {
-
-      return (
-        message ??
-        'Ya existe información registrada con estos datos.'
-      );
-
-    }
-
-
-    if (
-      httpError?.status &&
-      httpError.status >= 500
-    ) {
-
-      return (
-        'El servidor no pudo completar el registro. Inténtalo nuevamente más tarde.'
-      );
-
-    }
-
-
-    return (
-      message ??
-      'No fue posible completar el registro. Inténtalo nuevamente.'
-    );
-
-
+    return toUserMessage(error, {
+      US_002: 'Esta cuenta de Google ya está registrada. Inicia sesión en lugar de registrarte.',
+      BP_002: 'Ya existe una barbería registrada con estos datos.',
+      EY_002: 'Ya existe un empleado registrado con ese número de documento.',
+      CT_002: 'Ya existe un registro con ese número de documento.',
+      TECH_001: 'Revisa los datos del formulario.',
+      HTTP_401: 'La sesión de Google no es válida. Vuelve a vincular tu cuenta.',
+      DEFAULT: 'No fue posible completar el registro. Inténtalo nuevamente.'
+    });
   }
 
 }
