@@ -17,8 +17,8 @@
             </h1>
 
             <p>
-                Registra barberos con acceso propio y administra
-                el estado de acceso de los usuarios.
+                Registra barberos con acceso propio y consulta
+                el equipo de tu barbería.
             </p>
 
         </div>
@@ -78,7 +78,7 @@
                 </span>
 
                 <h2>
-                    Buscar barbero o usuario
+                    Buscar barbero
                 </h2>
 
             </div>
@@ -97,7 +97,6 @@
                 <select id="search-criterion" formControlName="criterion">
                     <option value="DOCUMENT">Documento del barbero</option>
                     <option value="NAME">Nombre del barbero</option>
-                    <option value="USER_ID">ID de usuario</option>
                 </select>
 
             </div>
@@ -153,18 +152,15 @@
     </div>
 
 
-    <div *ngIf="successMessage()" class="message success-message" role="status">
 
-        {{ successMessage() }}
-
-    </div>
 
 
     <!-- ========================================================= -->
-    <!-- BARBERO CONSULTADO -->
+    <!-- BARBEROS CONSULTADOS -->
     <!-- ========================================================= -->
 
-    <section *ngIf="foundEmployee() as employee" class="management-card user-detail-card" aria-labelledby="found-employee-title">
+    <section *ngFor="let employee of foundEmployees()" class="management-card user-detail-card"
+        [attr.aria-labelledby]="'found-employee-' + employee.id">
 
         <div class="card-heading">
 
@@ -174,7 +170,7 @@
                     BARBERO CONSULTADO
                 </span>
 
-                <h2 id="found-employee-title">
+                <h2 [id]="'found-employee-' + employee.id">
                     {{ employee.name }}
                 </h2>
 
@@ -191,7 +187,7 @@
 
             <div class="data-item">
                 <span>Documento</span>
-                <strong>{{ employee.documentType === 'CE' ? 'C.E.' : 'C.C.' }} {{ employee.document || 'No disponible' }}</strong>
+                <strong>{{ documentLabel(employee) }} {{ employee.document || 'No disponible' }}</strong>
             </div>
 
             <div class="data-item">
@@ -219,380 +215,5 @@
         </div>
 
     </section>
-
-
-    <!-- ========================================================= -->
-    <!-- CURRENT USER -->
-    <!-- ========================================================= -->
-
-    <section *ngIf="selectedUser()" class="management-card user-detail-card">
-
-        <div class="card-heading">
-
-            <div>
-
-                <span class="card-eyebrow">
-                    USUARIO CONSULTADO
-                </span>
-
-                <h2>
-                    Estado de acceso
-                </h2>
-
-            </div>
-
-
-            <span class="status-badge" [class.blocked]="isBlocked(selectedUser()!)">
-
-                {{ getStatusLabel(selectedUser()!.status) }}
-
-            </span>
-
-        </div>
-
-
-        <div class="user-data-grid">
-
-            <div class="data-item">
-
-                <span>
-                    ID
-                </span>
-
-                <strong>
-                    {{ selectedUser()!.id }}
-                </strong>
-
-            </div>
-
-
-            <div class="data-item">
-
-                <span>
-                    Firebase ID
-                </span>
-
-                <strong>
-                    {{ selectedUser()!.firebaseId }}
-                </strong>
-
-            </div>
-
-
-            <div class="data-item">
-
-                <span>
-                    Estado
-                </span>
-
-                <strong>
-                    {{ getStatusLabel(selectedUser()!.status) }}
-                </strong>
-
-            </div>
-
-
-            <div class="data-item">
-
-                <span>
-                    Registro
-                </span>
-
-                <strong>
-                    {{
-                    selectedUser()!.createAt
-                    ? (selectedUser()!.createAt | date:'dd/MM/yyyy HH:mm')
-                    : 'No disponible'
-                    }}
-                </strong>
-
-            </div>
-
-
-            <div class="data-item" *ngIf="selectedUser()!.updateAt">
-
-                <span>
-                    Última actualización
-                </span>
-
-                <strong>
-                    {{
-                    selectedUser()!.updateAt
-                    | date:'dd/MM/yyyy HH:mm'
-                    }}
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <!-- ACTION -->
-
-        <div class="user-action">
-
-            <button *ngIf="!isBlocked(selectedUser()!)" type="button" class="danger-button"
-                (click)="openBlockDialog(selectedUser()!)">
-
-                Bloquear usuario
-
-            </button>
-
-
-            <div *ngIf="isBlocked(selectedUser()!)" class="blocked-message">
-
-                <span>
-                    ●
-                </span>
-
-                Usuario bloqueado
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ========================================================= -->
-    <!-- LOADED USERS -->
-    <!-- ========================================================= -->
-
-    <section class="management-card">
-
-        <div class="card-heading">
-
-            <div>
-
-                <span class="card-eyebrow">
-                    REGISTRO DE CONSULTAS
-                </span>
-
-                <h2>
-                    Usuarios consultados
-                </h2>
-
-            </div>
-
-            <span class="record-count">
-                {{ users().length }} registros
-            </span>
-
-        </div>
-
-
-        <div *ngIf="users().length === 0" class="empty-state">
-
-            <span class="empty-icon">
-                ◎
-            </span>
-
-            <h3>
-                No hay usuarios consultados
-            </h3>
-
-            <p>
-                Consulta un usuario mediante su identificador
-                para visualizarlo en este listado.
-            </p>
-
-        </div>
-
-
-        <div *ngIf="users().length > 0" class="user-table-wrapper">
-
-            <table class="user-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Usuario
-                        </th>
-
-                        <th>
-                            Firebase
-                        </th>
-
-                        <th>
-                            Estado
-                        </th>
-
-                        <th>
-                            Última actualización
-                        </th>
-
-                        <th>
-                            Acción
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    <tr *ngFor="let user of users()" [class.row-blocked]="isBlocked(user)">
-
-                        <td>
-
-                            <strong>
-                                {{ user.id }}
-                            </strong>
-
-                        </td>
-
-
-                        <td>
-                            {{ user.firebaseId }}
-                        </td>
-
-
-                        <td>
-
-                            <span class="status-badge" [class.blocked]="isBlocked(user)">
-
-                                {{ getStatusLabel(user.status) }}
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            {{
-                            user.updateAt
-                            ? (user.updateAt | date:'dd/MM/yyyy HH:mm')
-                            : 'Sin actualización'
-                            }}
-
-                        </td>
-
-
-                        <td>
-
-                            <button *ngIf="!isBlocked(user)" type="button" class="table-action"
-                                (click)="openBlockDialog(user)">
-
-                                Bloquear
-
-                            </button>
-
-
-                            <span *ngIf="isBlocked(user)" class="table-blocked">
-
-                                Bloqueado
-
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
-
-
-    <!-- ========================================================= -->
-    <!-- BLOCK MODAL -->
-    <!-- ========================================================= -->
-
-    <div *ngIf="showBlockDialog()" class="modal-backdrop">
-
-        <section class="block-modal" role="dialog" aria-modal="true" aria-labelledby="block-title">
-
-            <div class="modal-icon">
-                !
-            </div>
-
-
-            <span class="section-eyebrow">
-                SEGURIDAD
-            </span>
-
-
-            <h2 id="block-title">
-                Bloquear usuario
-            </h2>
-
-
-            <p>
-                Esta acción cambiará el estado de acceso
-                del usuario seleccionado.
-            </p>
-
-
-            <div class="selected-user-summary">
-
-                <span>
-                    Usuario
-                </span>
-
-                <strong>
-                    {{ selectedUser()?.id }}
-                </strong>
-
-            </div>
-
-
-            <form [formGroup]="blockForm" (ngSubmit)="confirmBlock()">
-
-                <div class="form-field">
-
-                    <label for="blockReason">
-                        Motivo del bloqueo
-                    </label>
-
-                    <textarea id="blockReason" formControlName="reason" rows="4" maxlength="500"
-                        placeholder="Indica el motivo del bloqueo...">
-                    </textarea>
-
-                    <small *ngIf="
-                            reasonControl.invalid &&
-                            reasonControl.touched
-                        ">
-
-                        Debes indicar un motivo de al menos
-                        5 caracteres.
-
-                    </small>
-
-                </div>
-
-
-                <div class="modal-actions">
-
-                    <button type="button" class="secondary-button" [disabled]="blocking()" (click)="closeBlockDialog()">
-
-                        Cancelar
-
-                    </button>
-
-
-                    <button type="submit" class="danger-button" [disabled]="blocking()">
-
-                        {{
-                        blocking()
-                        ? 'Procesando...'
-                        : 'Confirmar bloqueo'
-                        }}
-
-                    </button>
-
-                </div>
-
-            </form>
-
-        </section>
-
-    </div>
 
 </section>

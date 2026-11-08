@@ -12,90 +12,22 @@ import {
 import {
     FormBuilder,
     ReactiveFormsModule,
+    ValidatorFn,
     Validators
 } from '@angular/forms';
-
-import {
-    finalize
-} from 'rxjs';
 
 import {
     takeUntilDestroyed
 } from '@angular/core/rxjs-interop';
 
 import {
-    ValidatorFn
-} from '@angular/forms';
+    finalize
+} from 'rxjs';
 
 import {
     EmployeeSearchCriterion,
     SearchEmployeeUseCase
 } from '../../../employee/application/use-cases/search-employee.use-case';
-
-import {
-    normalizeDocument,
-    normalizeText,
-    personNameValidator,
-    validationMessage
-} from '../../../../shared/forms/colombia-validators';
-
-import {
-    toApiError
-} from '../../../../core/errors';
-
-type SearchCriterion = EmployeeSearchCriterion | 'USER_ID';
-
-interface SearchCopy {
-    label: string;
-    placeholder: string;
-    hint: string;
-    required: string;
-}
-
-const SEARCH_COPY: Record<SearchCriterion, SearchCopy> = {
-    DOCUMENT: {
-        label: 'Número de documento',
-        placeholder: 'Ej. 1012345678',
-        hint: 'Cédula del barbero, solo números.',
-        required: 'Ingresa el número de documento.'
-    },
-    NAME: {
-        label: 'Nombre completo',
-        placeholder: 'Ej. Carlos Pérez',
-        hint: 'Escribe el nombre exactamente como fue registrado.',
-        required: 'Ingresa el nombre del barbero.'
-    },
-    USER_ID: {
-        label: 'ID del usuario',
-        placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-        hint: 'Identificador único del usuario en SmartBarber.',
-        required: 'Ingresa el ID del usuario.'
-    }
-};
-
-/** Documento: 3 a 10 dígitos; se aceptan puntos y espacios al escribir. */
-const documentSearchValidator: ValidatorFn = control =>
-    /^\d{3,10}$/.test(String(control.value ?? '').replace(/[.\s-]/g, ''))
-        ? null
-        : { searchDocument: true };
-
-const SEARCH_VALIDATORS: Record<SearchCriterion, ValidatorFn[]> = {
-    DOCUMENT: [Validators.required, documentSearchValidator],
-    NAME: [Validators.required, Validators.maxLength(120), personNameValidator()],
-    USER_ID: [Validators.required, Validators.pattern(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)]
-};
-
-import {
-    GetUserUseCase
-} from '../../application/use-cases/get-user.use-case';
-
-import {
-    BlockUserUseCase
-} from '../../application/use-cases/block-user.use-case';
-
-import {
-    ManagedUser
-} from '../../domain/models/user-management.model';
 
 import {
     EmployeeRegisterComponent
@@ -112,6 +44,58 @@ import {
 import {
     SessionService
 } from '../../../../core/auth/services/session.service';
+
+import {
+    normalizeDocument,
+    normalizeText,
+    validationMessage
+} from '../../../../shared/forms/colombia-validators';
+
+import {
+    toApiError
+} from '../../../../core/errors';
+
+interface SearchCopy {
+    label: string;
+    placeholder: string;
+    hint: string;
+    required: string;
+}
+
+const SEARCH_COPY: Record<EmployeeSearchCriterion, SearchCopy> = {
+    DOCUMENT: {
+        label: 'Número de documento',
+        placeholder: 'Ej. 1012345678',
+        hint: 'Cédula del barbero, solo números.',
+        required: 'Ingresa el número de documento.'
+    },
+    NAME: {
+        label: 'Nombre',
+        placeholder: 'Ej. carlos o Carlos Pérez',
+        hint: 'No importan mayúsculas, minúsculas ni tildes; puedes escribir solo una parte del nombre.',
+        required: 'Ingresa el nombre del barbero.'
+    }
+};
+
+/** Documento: 3 a 10 dígitos; se aceptan puntos y espacios al escribir. */
+const documentSearchValidator: ValidatorFn = control =>
+    /^\d{3,10}$/.test(String(control.value ?? '').replace(/[.\s-]/g, ''))
+        ? null
+        : { searchDocument: true };
+
+/** Nombre: al menos 2 letras; solo letras, espacios, apóstrofes, puntos y guiones. */
+const nameSearchValidator: ValidatorFn = control => {
+    const value = String(control.value ?? '').trim();
+
+    return /^[\p{L}][\p{L} .'-]*$/u.test(value) && value.replace(/[^\p{L}]/gu, '').length >= 2
+        ? null
+        : { searchName: true };
+};
+
+const SEARCH_VALIDATORS: Record<EmployeeSearchCriterion, ValidatorFn[]> = {
+    DOCUMENT: [Validators.required, documentSearchValidator],
+    NAME: [Validators.required, Validators.maxLength(120), nameSearchValidator]
+};
 
 
 @Component({
@@ -134,17 +118,8 @@ import {
 })
 export class UserManagementComponent {
 
-
     private readonly formBuilder =
         inject(FormBuilder);
-
-
-    private readonly getUserUseCase =
-        inject(GetUserUseCase);
-
-
-    private readonly blockUserUseCase =
-        inject(BlockUserUseCase);
 
     private readonly sessionService =
         inject(SessionService);
@@ -152,54 +127,25 @@ export class UserManagementComponent {
     private readonly searchEmployeeUseCase =
         inject(SearchEmployeeUseCase);
 
-
     @ViewChild(EmployeeListComponent)
     private employeeList?: EmployeeListComponent;
-
-    readonly users =
-        signal<ManagedUser[]>([]);
 
     readonly showEmployeeRegistration =
         signal(false);
 
-
-    readonly selectedUser =
-        signal<ManagedUser | null>(
-            null
-        );
-
-
-    readonly loading =
-        signal(false);
-
-
     readonly searching =
         signal(false);
 
-
-    readonly blocking =
-        signal(false);
-
-
     readonly errorMessage =
-        signal('');
-
-
-    readonly successMessage =
         signal('');
 
     /** Confirmación del registro de un barbero (se muestra junto al equipo). */
     readonly teamMessage =
         signal('');
 
-
-    readonly showBlockDialog =
-        signal(false);
-
-
-    /** Barbero encontrado con la búsqueda por documento o nombre. */
-    readonly foundEmployee =
-        signal<Employee | null>(null);
+    /** Barberos encontrados con la búsqueda por documento o nombre. */
+    readonly foundEmployees =
+        signal<Employee[]>([]);
 
     readonly searchForm =
         this.formBuilder
@@ -207,28 +153,12 @@ export class UserManagementComponent {
             .group({
 
                 criterion: [
-                    'DOCUMENT' as SearchCriterion
+                    'DOCUMENT' as EmployeeSearchCriterion
                 ],
 
                 term: [
                     '',
                     SEARCH_VALIDATORS.DOCUMENT
-                ]
-            });
-
-
-    readonly blockForm =
-        this.formBuilder
-            .nonNullable
-            .group({
-
-                reason: [
-                    '',
-                    [
-                        Validators.required,
-                        Validators.minLength(5),
-                        Validators.maxLength(500)
-                    ]
                 ]
             });
 
@@ -240,7 +170,7 @@ export class UserManagementComponent {
                 term.setValidators(SEARCH_VALIDATORS[criterion]);
                 term.setValue('');
                 term.markAsUntouched();
-                this.foundEmployee.set(null);
+                this.foundEmployees.set([]);
                 this.errorMessage.set('');
             });
     }
@@ -253,9 +183,24 @@ export class UserManagementComponent {
         return this.sessionService.getBarberId();
     }
 
+    get searchCriterion(): EmployeeSearchCriterion {
+        return this.searchForm.controls.criterion.value;
+    }
+
+    get searchCopy(): SearchCopy {
+        return SEARCH_COPY[this.searchCriterion];
+    }
+
+    get searchTermError(): string | null {
+        return validationMessage(this.searchForm.controls.term, {
+            required: this.searchCopy.required,
+            searchDocument: 'El documento debe tener entre 3 y 10 dígitos, sin letras.',
+            searchName: 'Escribe al menos 2 letras, sin números ni símbolos.'
+        });
+    }
+
     openEmployeeRegistration(): void {
         this.errorMessage.set('');
-        this.successMessage.set('');
         this.teamMessage.set('');
 
         if (!this.barberiaId) {
@@ -281,28 +226,9 @@ export class UserManagementComponent {
         );
     }
 
-
-    get searchCriterion(): SearchCriterion {
-        return this.searchForm.controls.criterion.value;
-    }
-
-    get searchCopy(): SearchCopy {
-        return SEARCH_COPY[this.searchCriterion];
-    }
-
-    get searchTermError(): string | null {
-        return validationMessage(this.searchForm.controls.term, {
-            required: this.searchCopy.required,
-            pattern: 'Ingresa un ID de usuario válido (formato UUID).',
-            searchDocument: 'El documento debe tener entre 3 y 10 dígitos, sin letras.'
-        });
-    }
-
-    /** Botón "Consultar": decide la búsqueda según el criterio elegido. */
+    /** Botón "Consultar": busca por documento o por nombre. */
     search(): void {
-
         this.errorMessage.set('');
-        this.successMessage.set('');
 
         if (this.searchForm.invalid) {
             this.searchForm.markAllAsTouched();
@@ -310,27 +236,12 @@ export class UserManagementComponent {
         }
 
         const criterion = this.searchCriterion;
-        const term = this.searchForm.controls.term.value;
-
-        if (criterion === 'USER_ID') {
-            this.foundEmployee.set(null);
-            this.searchUser(term.trim());
-            return;
-        }
-
-        this.searchEmployee(criterion, term);
-    }
-
-    private searchEmployee(
-        criterion: EmployeeSearchCriterion,
-        rawTerm: string
-    ): void {
+        const rawTerm = this.searchForm.controls.term.value;
         const term = criterion === 'DOCUMENT'
             ? normalizeDocument('CC', rawTerm)
             : normalizeText(rawTerm);
 
-        this.selectedUser.set(null);
-        this.foundEmployee.set(null);
+        this.foundEmployees.set([]);
         this.searching.set(true);
 
         this.searchEmployeeUseCase
@@ -339,23 +250,22 @@ export class UserManagementComponent {
                 finalize(() => this.searching.set(false))
             )
             .subscribe({
-                next: employee => {
-                    if (!employee) {
+                next: employees => {
+                    if (employees.length === 0) {
                         this.errorMessage.set(
                             criterion === 'DOCUMENT'
                                 ? `No hay un barbero de tu barbería con el documento ${term}.`
-                                : `No hay un barbero de tu barbería llamado "${term}". Escribe el nombre completo tal como fue registrado.`
+                                : `No hay barberos de tu barbería cuyo nombre contenga "${term}".`
                         );
                         return;
                     }
 
-                    this.foundEmployee.set(employee);
+                    this.foundEmployees.set(employees);
                 },
                 error: error => {
                     this.errorMessage.set(
                         toApiError(error, {
                             HTTP_401: 'Tu sesión expiró. Vuelve a iniciar sesión para consultar barberos.',
-                            TECH_005: 'El servidor no pudo completar la búsqueda. Si buscas por nombre, puede haber más de un barbero con ese nombre: intenta con el documento.',
                             DEFAULT: 'No fue posible consultar el barbero. Inténtalo nuevamente.'
                         }).message
                     );
@@ -363,398 +273,7 @@ export class UserManagementComponent {
             });
     }
 
-    private searchUser(userId: string): void {
-
-
-        this.searching.set(
-            true
-        );
-
-
-        this.getUserUseCase
-            .execute(userId)
-
-            .pipe(
-                finalize(() =>
-                    this.searching.set(
-                        false
-                    )
-                )
-            )
-
-            .subscribe({
-
-                next: user => {
-
-                    this.selectedUser.set(
-                        user
-                    );
-
-
-                    this.addOrReplaceUser(
-                        user
-                    );
-                },
-
-
-                error: error => {
-
-                    this.selectedUser.set(
-                        null
-                    );
-
-
-                    this.errorMessage.set(
-                        this.getErrorMessage(
-                            error
-                        )
-                    );
-                }
-            });
-    }
-
-
-    openBlockDialog(
-        user: ManagedUser
-    ): void {
-
-        this.errorMessage.set('');
-        this.successMessage.set('');
-
-
-        if (
-            user.status ===
-            'BLOCKED'
-        ) {
-
-            this.errorMessage.set(
-                'El usuario ya se encuentra bloqueado.'
-            );
-
-            return;
-        }
-
-
-        this.selectedUser.set(
-            user
-        );
-
-
-        this.blockForm.reset();
-
-
-        this.showBlockDialog.set(
-            true
-        );
-    }
-
-
-    closeBlockDialog(): void {
-
-        if (
-            this.blocking()
-        ) {
-
-            return;
-        }
-
-
-        this.showBlockDialog.set(
-            false
-        );
-
-
-        this.blockForm.reset();
-    }
-
-
-    confirmBlock(): void {
-
-        this.errorMessage.set('');
-        this.successMessage.set('');
-
-
-        const user =
-            this.selectedUser();
-
-
-        if (!user) {
-
-            return;
-        }
-
-
-        if (
-            this.blockForm.invalid
-        ) {
-
-            this.blockForm.markAllAsTouched();
-
-            return;
-        }
-
-
-        const reason =
-            this.blockForm
-                .controls
-                .reason
-                .value
-                .trim();
-
-
-        this.blocking.set(
-            true
-        );
-
-
-        this.blockUserUseCase
-            .execute(
-                user,
-                reason
-            )
-
-            .pipe(
-                finalize(() =>
-                    this.blocking.set(
-                        false
-                    )
-                )
-            )
-
-            .subscribe({
-
-                next: updatedUser => {
-
-                    const normalizedUser:
-                        ManagedUser = {
-
-                        ...updatedUser,
-
-                        status:
-                            'BLOCKED'
-                    };
-
-
-                    this.selectedUser.set(
-                        normalizedUser
-                    );
-
-
-                    this.replaceUser(
-                        normalizedUser
-                    );
-
-
-                    this.showBlockDialog.set(
-                        false
-                    );
-
-
-                    this.blockForm.reset();
-
-
-                    this.successMessage.set(
-                        'El usuario fue marcado como bloqueado.'
-                    );
-                },
-
-
-                error: error => {
-
-                    this.errorMessage.set(
-                        this.getBlockErrorMessage(
-                            error
-                        )
-                    );
-                }
-            });
-    }
-
-
-    getStatusLabel(
-        status: string
-    ): string {
-
-        switch (
-        status.toUpperCase()
-        ) {
-
-            case 'ACTIVE':
-            case 'ACTIVO':
-                return 'Activo';
-
-            case 'BLOCKED':
-            case 'BLOQUEADO':
-                return 'Bloqueado';
-
-            case 'INACTIVE':
-            case 'INACTIVO':
-                return 'Inactivo';
-
-            default:
-                return status;
-        }
-    }
-
-
-    isBlocked(
-        user: ManagedUser
-    ): boolean {
-
-        const status =
-            user.status
-                .toUpperCase();
-
-
-        return (
-            status ===
-            'BLOCKED' ||
-            status ===
-            'BLOQUEADO'
-        );
-    }
-
-
-    private addOrReplaceUser(
-        user: ManagedUser
-    ): void {
-
-        const existingIndex =
-            this.users()
-                .findIndex(
-                    current =>
-                        current.id ===
-                        user.id
-                );
-
-
-        if (
-            existingIndex === -1
-        ) {
-
-            this.users.update(
-                current => [
-                    user,
-                    ...current
-                ]
-            );
-
-            return;
-        }
-
-
-        this.replaceUser(
-            user
-        );
-    }
-
-
-    private replaceUser(
-        user: ManagedUser
-    ): void {
-
-        this.users.update(
-            current =>
-                current.map(
-                    item =>
-                        item.id === user.id
-                            ? user
-                            : item
-                )
-        );
-    }
-
-
-    private getErrorMessage(
-        error: unknown
-    ): string {
-
-        const httpError =
-            error as {
-                status?: number
-            };
-
-
-        if (
-            httpError?.status === 403
-        ) {
-
-            return (
-                'El servidor solo permite consultar usuarios a cuentas con rol de barbero; con una cuenta de administrador esta consulta no está disponible.'
-            );
-        }
-
-
-        if (
-            httpError?.status === 404
-        ) {
-
-            return (
-                'No se encontró el usuario solicitado.'
-            );
-        }
-
-
-        if (
-            httpError?.status === 400
-        ) {
-
-            return (
-                'Los datos enviados para consultar el usuario no son válidos.'
-            );
-        }
-
-
-        return (
-            'No fue posible consultar el usuario. Inténtalo nuevamente.'
-        );
-    }
-
-
-    private getBlockErrorMessage(
-        error: unknown
-    ): string {
-
-        const message =
-            error instanceof Error
-                ? error.message
-                : '';
-
-
-        switch (message) {
-
-            case 'SESSION_NOT_FOUND':
-                return (
-                    'La sesión actual no está disponible.'
-                );
-
-            case 'UNAUTHORIZED_ROLE':
-                return (
-                    'Solo un administrador puede bloquear usuarios.'
-                );
-
-            case 'USER_ALREADY_BLOCKED':
-                return (
-                    'El usuario ya se encuentra bloqueado.'
-                );
-
-            case 'BLOCK_REASON_REQUIRED':
-                return (
-                    'Debes indicar el motivo del bloqueo.'
-                );
-
-            default:
-                return (
-                    'No fue posible bloquear el usuario. Verifica la información e inténtalo nuevamente.'
-                );
-        }
-    }
-
-
-
-
-
-    get reasonControl() {
-        return this.blockForm.controls.reason;
+    documentLabel(employee: Employee): string {
+        return employee.documentType === 'CE' ? 'C.E.' : 'C.C.';
     }
 }

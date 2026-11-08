@@ -7,11 +7,14 @@ import { Employee } from '../../domain/models/employee.model';
 export type EmployeeSearchCriterion = 'DOCUMENT' | 'NAME';
 
 /**
- * Busca un barbero por documento o por nombre exacto.
+ * Busca barberos de la barbería del administrador.
  *
- * El backend busca en todas las barberías, así que aquí se descarta cualquier
- * resultado que no pertenezca a la barbería del administrador: para él es
- * equivalente a "no encontrado".
+ * - DOCUMENT: usa GET /employee-service/documento/{documento}. El backend busca
+ *   en todas las barberías, así que se descarta lo que no sea de esta barbería.
+ * - NAME: el endpoint /employee-service/nombre/{nombre} del backend exige el
+ *   nombre exacto (distingue mayúsculas), por eso se consulta el equipo de la
+ *   barbería y se filtra aquí sin distinguir mayúsculas, minúsculas ni tildes,
+ *   aceptando coincidencias parciales ("carlos" encuentra "Carlos Pérez").
  */
 @Injectable()
 export class SearchEmployeeUseCase {
@@ -23,17 +26,39 @@ export class SearchEmployeeUseCase {
         criterion: EmployeeSearchCriterion,
         value: string,
         barberiaId: string
-    ): Observable<Employee | null> {
-        const search$ = criterion === 'DOCUMENT'
-            ? this.employeeRepository.findByDocument(value)
-            : this.employeeRepository.findByName(value);
+    ): Observable<Employee[]> {
+        if (criterion === 'DOCUMENT') {
+            return this.employeeRepository
+                .findByDocument(value)
+                .pipe(
+                    map(employee =>
+                        employee && employee.barberiaId === barberiaId
+                            ? [employee]
+                            : []
+                    )
+                );
+        }
 
-        return search$.pipe(
-            map(employee =>
-                employee && employee.barberiaId === barberiaId
-                    ? employee
-                    : null
-            )
-        );
+        const term = normalizeForSearch(value);
+
+        return this.employeeRepository
+            .getEmployeesByBarbershop(barberiaId)
+            .pipe(
+                map(employees =>
+                    employees
+                        .filter(employee => normalizeForSearch(employee.name).includes(term))
+                        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+                )
+            );
     }
+}
+
+/** Minúsculas, sin tildes y con espacios simples: "  JOSÉ  Pérez" → "jose perez". */
+export function normalizeForSearch(value: string | null | undefined): string {
+    return (value ?? '')
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
 }
