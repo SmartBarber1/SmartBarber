@@ -30,7 +30,6 @@ const LOGIN_ERROR_MESSAGES: ErrorMessageOverrides = {
     // Respuestas del backend
     US_004: 'Tu cuenta de Google no está registrada en SmartBarber. Regístrate como cliente o registra tu barbería.',
     ACCOUNT_NOT_REGISTERED: 'Tu cuenta de Google no está registrada en SmartBarber. Regístrate como cliente o registra tu barbería.',
-    EY_004: 'Tu cuenta existe, pero no está vinculada a ninguna barbería. Pide al administrador que te registre como barbero.',
     CT_004: 'Tu cuenta existe, pero no tiene un perfil de cliente. Completa tu registro como cliente.',
     BP_004: 'La barbería asociada a tu cuenta ya no existe. Comunícate con soporte.',
     AT_001: 'Google entregó una sesión vencida. Vuelve a intentarlo.',

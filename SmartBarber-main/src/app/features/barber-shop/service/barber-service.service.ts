@@ -34,7 +34,6 @@ export class BarberServiceService {
     return from(currentUser.getIdToken(true)).pipe(
       switchMap(token => {
         const cleanToken = token.replace(/['"]+/g, '').trim();
-        console.log('🔑 [TOKEN FRESCO OBTENIDO DE FIREBASE]:', cleanToken.substring(0, 15) + '...');
         
         const headers = new HttpHeaders({
           'Content-Type': 'application/json',

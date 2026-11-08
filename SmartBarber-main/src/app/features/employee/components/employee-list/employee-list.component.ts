@@ -5,7 +5,6 @@ import {
     Input,
     OnChanges,
     SimpleChanges,
-    computed,
     inject,
     signal
 } from '@angular/core';
@@ -35,8 +34,6 @@ import {
 } from '../../../../core/errors';
 
 const LIST_ERROR_MESSAGES = {
-    AT_003: 'Solo el administrador de esta barbería puede consultar su equipo.',
-    HTTP_404: 'No se encontró el equipo de esta barbería.',
     DEFAULT: 'No fue posible cargar el equipo de la barbería.'
 } as const;
 
@@ -70,20 +67,6 @@ export class EmployeeListComponent implements OnChanges {
     readonly employees = signal<Employee[]>([]);
     readonly loading = signal(false);
     readonly errorMessage = signal('');
-    readonly query = signal('');
-
-    readonly filteredEmployees = computed(() => {
-        const term = normalize(this.query());
-
-        if (!term) {
-            return this.employees();
-        }
-
-        return this.employees().filter(employee =>
-            [employee.name, employee.document, employee.email, employee.specialty, employee.cell]
-                .some(value => normalize(value).includes(term))
-        );
-    });
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['barberiaId']) {
@@ -117,10 +100,6 @@ export class EmployeeListComponent implements OnChanges {
             });
     }
 
-    onSearch(value: string): void {
-        this.query.set(value);
-    }
-
     documentLabel(employee: Employee): string {
         return employee.documentType === 'CE' ? 'C.E.' : 'C.C.';
     }
@@ -139,12 +118,4 @@ export class EmployeeListComponent implements OnChanges {
             ? `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`
             : cell;
     }
-}
-
-function normalize(value: string | null | undefined): string {
-    return (value ?? '')
-        .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
-        .toLowerCase()
-        .trim();
 }

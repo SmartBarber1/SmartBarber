@@ -5,16 +5,17 @@ import {
 
 import {
     HttpClient,
+    HttpErrorResponse,
     HttpHeaders
 } from '@angular/common/http';
 
 import {
-    Observable
+    Observable,
+    catchError,
+    map,
+    of,
+    throwError
 } from 'rxjs';
-
-import {
-    map
-} from 'rxjs/operators';
 
 import {
     environment
@@ -39,6 +40,9 @@ import {
     mapOnboardingResponse
 } from '../mappers/employee.mapper';
 
+/** Código con el que el backend responde "empleado no encontrado" (HTTP 409). */
+const EMPLOYEE_NOT_FOUND_CODE = 'CT_004';
+
 @Injectable({
     providedIn: 'root'
 })
@@ -49,11 +53,12 @@ export class EmployeeApiService
         inject(HttpClient);
 
     private readonly baseUrl =
-        `${environment.apiUrl}`;
+        environment.apiUrl;
 
     /**
-     * Authorization lo agrega el interceptor con el token del administrador.
-     * idToken lleva el token de la cuenta de Google del nuevo barbero.
+     * El backend identifica la cuenta nueva con el token que llega en
+     * Authorization, por eso aquí va el token del barbero y no el del
+     * administrador (el interceptor no lo reemplaza si ya existe).
      */
     override createEmployee(
         request: EmployeeRegistration,
@@ -66,12 +71,16 @@ export class EmployeeApiService
                 request,
                 {
                     headers: new HttpHeaders({
+                        Authorization: `Bearer ${employeeIdToken}`,
                         idToken: `Bearer ${employeeIdToken}`
                     })
                 }
             )
             .pipe(
-                map(mapOnboardingResponse)
+                map(response => mapOnboardingResponse(
+                    response,
+                    request.barberiaId
+                ))
             );
     }
 
@@ -81,13 +90,50 @@ export class EmployeeApiService
 
         return this.http
             .get<EmployeeResponse[] | null>(
-                `${this.baseUrl}/employee-service/barbershop/${encodeURIComponent(barberiaId)}`
+                `${this.baseUrl}/public/employee-service/barbershop/${encodeURIComponent(barberiaId)}`
             )
             .pipe(
                 map(response =>
                     (Array.isArray(response) ? response : [])
                         .map(mapEmployeeResponse)
-                )
+                ),
+                // Sin barberos, el backend responde "no encontrado".
+                catchError(error => isNotFound(error) ? of([]) : throwError(() => error))
             );
     }
+
+    override findByDocument(
+        document: string
+    ): Observable<Employee | null> {
+        return this.findOne(
+            `${this.baseUrl}/employee-service/documento/${encodeURIComponent(document)}`
+        );
+    }
+
+    override findByName(
+        name: string
+    ): Observable<Employee | null> {
+        return this.findOne(
+            `${this.baseUrl}/employee-service/nombre/${encodeURIComponent(name)}`
+        );
+    }
+
+    private findOne(url: string): Observable<Employee | null> {
+        return this.http
+            .get<EmployeeResponse | null>(url)
+            .pipe(
+                map(response => response ? mapEmployeeResponse(response) : null),
+                catchError(error => isNotFound(error) ? of(null) : throwError(() => error))
+            );
+    }
+}
+
+function isNotFound(error: unknown): boolean {
+    if (!(error instanceof HttpErrorResponse)) {
+        return false;
+    }
+
+    const code = (error.error as { data?: { code?: unknown } } | null)?.data?.code;
+
+    return error.status === 404 || code === EMPLOYEE_NOT_FOUND_CODE;
 }

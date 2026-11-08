@@ -40,6 +40,9 @@ import {
 import {
     GetEmployeesByBarbershopUseCase
 } from '../employee/application/use-cases/get-employees-by-barbershop.use-case';
+import {
+    SearchEmployeeUseCase
+} from '../employee/application/use-cases/search-employee.use-case';
 
 
 export const USER_MANAGEMENT_ROUTES:
@@ -80,7 +83,8 @@ export const USER_MANAGEMENT_ROUTES:
                 BlockUserUseCase,
 
                 CreateEmployeeUseCase,
-                GetEmployeesByBarbershopUseCase
+                GetEmployeesByBarbershopUseCase,
+                SearchEmployeeUseCase
             ],
 
             loadComponent: () =>

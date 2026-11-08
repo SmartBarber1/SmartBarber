@@ -938,3 +938,61 @@
     border-color: #e1d7c8;
     background: #fcfaf6;
 }
+
+/* ============================================================
+   BÚSQUEDA POR CRITERIO
+   ============================================================ */
+
+.criterion-field {
+    flex: 0 0 220px;
+}
+
+.form-field select {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #ded6ca;
+    border-radius: 6px;
+    outline: none;
+    background: #fff;
+    color: #29231e;
+    font-family: inherit;
+    font-size: 15px;
+}
+
+.form-field select:focus {
+    border-color: #a77b43;
+    box-shadow: 0 0 0 3px rgba(167, 123, 67, .12);
+}
+
+.form-field .field-hint {
+    color: #81776b;
+}
+
+.form-field input[aria-invalid='true'] {
+    border-color: #c0675c;
+}
+
+.search-form {
+    align-items: flex-start;
+}
+
+.search-form > .primary-button {
+    margin-top: 27px;
+}
+
+@media (max-width: 750px) {
+    .criterion-field {
+        flex-basis: auto;
+    }
+
+    .search-form > .primary-button {
+        margin-top: 4px;
+        width: 100%;
+    }
+
+    .form-field input,
+    .form-field select {
+        font-size: 16px;
+    }
+}

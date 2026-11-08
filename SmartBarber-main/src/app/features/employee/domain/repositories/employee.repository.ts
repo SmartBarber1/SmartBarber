@@ -17,7 +17,7 @@ import {
 export abstract class EmployeeRepository {
 
     /**
-     * Registra un barbero en la barbería del administrador con sesión activa.
+     * Registra un barbero.
      * @param employeeIdToken token de la cuenta de Google que usará el barbero.
      */
     abstract createEmployee(
@@ -25,8 +25,18 @@ export abstract class EmployeeRepository {
         employeeIdToken: string
     ): Observable<Employee>;
 
-    /** Equipo completo de la barbería (solo disponible para su administrador). */
+    /** Equipo de una barbería. Lista vacía si no tiene barberos. */
     abstract getEmployeesByBarbershop(
         barberiaId: string
     ): Observable<Employee[]>;
+
+    /** Barbero por número de documento, o null si no existe. */
+    abstract findByDocument(
+        document: string
+    ): Observable<Employee | null>;
+
+    /** Barbero por nombre exacto, o null si no existe. */
+    abstract findByName(
+        name: string
+    ): Observable<Employee | null>;
 }

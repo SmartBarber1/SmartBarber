@@ -20,6 +20,72 @@ import {
 } from 'rxjs';
 
 import {
+    takeUntilDestroyed
+} from '@angular/core/rxjs-interop';
+
+import {
+    ValidatorFn
+} from '@angular/forms';
+
+import {
+    EmployeeSearchCriterion,
+    SearchEmployeeUseCase
+} from '../../../employee/application/use-cases/search-employee.use-case';
+
+import {
+    normalizeDocument,
+    normalizeText,
+    personNameValidator,
+    validationMessage
+} from '../../../../shared/forms/colombia-validators';
+
+import {
+    toApiError
+} from '../../../../core/errors';
+
+type SearchCriterion = EmployeeSearchCriterion | 'USER_ID';
+
+interface SearchCopy {
+    label: string;
+    placeholder: string;
+    hint: string;
+    required: string;
+}
+
+const SEARCH_COPY: Record<SearchCriterion, SearchCopy> = {
+    DOCUMENT: {
+        label: 'Número de documento',
+        placeholder: 'Ej. 1012345678',
+        hint: 'Cédula del barbero, solo números.',
+        required: 'Ingresa el número de documento.'
+    },
+    NAME: {
+        label: 'Nombre completo',
+        placeholder: 'Ej. Carlos Pérez',
+        hint: 'Escribe el nombre exactamente como fue registrado.',
+        required: 'Ingresa el nombre del barbero.'
+    },
+    USER_ID: {
+        label: 'ID del usuario',
+        placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        hint: 'Identificador único del usuario en SmartBarber.',
+        required: 'Ingresa el ID del usuario.'
+    }
+};
+
+/** Documento: 3 a 10 dígitos; se aceptan puntos y espacios al escribir. */
+const documentSearchValidator: ValidatorFn = control =>
+    /^\d{3,10}$/.test(String(control.value ?? '').replace(/[.\s-]/g, ''))
+        ? null
+        : { searchDocument: true };
+
+const SEARCH_VALIDATORS: Record<SearchCriterion, ValidatorFn[]> = {
+    DOCUMENT: [Validators.required, documentSearchValidator],
+    NAME: [Validators.required, Validators.maxLength(120), personNameValidator()],
+    USER_ID: [Validators.required, Validators.pattern(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)]
+};
+
+import {
     GetUserUseCase
 } from '../../application/use-cases/get-user.use-case';
 
@@ -83,6 +149,9 @@ export class UserManagementComponent {
     private readonly sessionService =
         inject(SessionService);
 
+    private readonly searchEmployeeUseCase =
+        inject(SearchEmployeeUseCase);
+
 
     @ViewChild(EmployeeListComponent)
     private employeeList?: EmployeeListComponent;
@@ -128,19 +197,22 @@ export class UserManagementComponent {
         signal(false);
 
 
+    /** Barbero encontrado con la búsqueda por documento o nombre. */
+    readonly foundEmployee =
+        signal<Employee | null>(null);
+
     readonly searchForm =
         this.formBuilder
             .nonNullable
             .group({
 
-                userId: [
+                criterion: [
+                    'DOCUMENT' as SearchCriterion
+                ],
+
+                term: [
                     '',
-                    [
-                        Validators.required,
-                        Validators.pattern(
-                            /^[0-9a-fA-F-]{36}$/
-                        )
-                    ]
+                    SEARCH_VALIDATORS.DOCUMENT
                 ]
             });
 
@@ -159,6 +231,19 @@ export class UserManagementComponent {
                     ]
                 ]
             });
+
+    constructor() {
+        this.searchForm.controls.criterion.valueChanges
+            .pipe(takeUntilDestroyed())
+            .subscribe(criterion => {
+                const term = this.searchForm.controls.term;
+                term.setValidators(SEARCH_VALIDATORS[criterion]);
+                term.setValue('');
+                term.markAsUntouched();
+                this.foundEmployee.set(null);
+                this.errorMessage.set('');
+            });
+    }
 
     get barberiaId(): string {
         return this.sessionService.getBarbershopId() ?? '';
@@ -197,28 +282,88 @@ export class UserManagementComponent {
     }
 
 
-    searchUser(): void {
+    get searchCriterion(): SearchCriterion {
+        return this.searchForm.controls.criterion.value;
+    }
+
+    get searchCopy(): SearchCopy {
+        return SEARCH_COPY[this.searchCriterion];
+    }
+
+    get searchTermError(): string | null {
+        return validationMessage(this.searchForm.controls.term, {
+            required: this.searchCopy.required,
+            pattern: 'Ingresa un ID de usuario válido (formato UUID).',
+            searchDocument: 'El documento debe tener entre 3 y 10 dígitos, sin letras.'
+        });
+    }
+
+    /** Botón "Consultar": decide la búsqueda según el criterio elegido. */
+    search(): void {
 
         this.errorMessage.set('');
         this.successMessage.set('');
 
-
-        if (
-            this.searchForm.invalid
-        ) {
-
+        if (this.searchForm.invalid) {
             this.searchForm.markAllAsTouched();
-
             return;
         }
 
+        const criterion = this.searchCriterion;
+        const term = this.searchForm.controls.term.value;
 
-        const userId =
-            this.searchForm
-                .controls
-                .userId
-                .value
-                .trim();
+        if (criterion === 'USER_ID') {
+            this.foundEmployee.set(null);
+            this.searchUser(term.trim());
+            return;
+        }
+
+        this.searchEmployee(criterion, term);
+    }
+
+    private searchEmployee(
+        criterion: EmployeeSearchCriterion,
+        rawTerm: string
+    ): void {
+        const term = criterion === 'DOCUMENT'
+            ? normalizeDocument('CC', rawTerm)
+            : normalizeText(rawTerm);
+
+        this.selectedUser.set(null);
+        this.foundEmployee.set(null);
+        this.searching.set(true);
+
+        this.searchEmployeeUseCase
+            .execute(criterion, term, this.barberiaId)
+            .pipe(
+                finalize(() => this.searching.set(false))
+            )
+            .subscribe({
+                next: employee => {
+                    if (!employee) {
+                        this.errorMessage.set(
+                            criterion === 'DOCUMENT'
+                                ? `No hay un barbero de tu barbería con el documento ${term}.`
+                                : `No hay un barbero de tu barbería llamado "${term}". Escribe el nombre completo tal como fue registrado.`
+                        );
+                        return;
+                    }
+
+                    this.foundEmployee.set(employee);
+                },
+                error: error => {
+                    this.errorMessage.set(
+                        toApiError(error, {
+                            HTTP_401: 'Tu sesión expiró. Vuelve a iniciar sesión para consultar barberos.',
+                            TECH_005: 'El servidor no pudo completar la búsqueda. Si buscas por nombre, puede haber más de un barbero con ese nombre: intenta con el documento.',
+                            DEFAULT: 'No fue posible consultar el barbero. Inténtalo nuevamente.'
+                        }).message
+                    );
+                }
+            });
+    }
+
+    private searchUser(userId: string): void {
 
 
         this.searching.set(
@@ -531,6 +676,16 @@ export class UserManagementComponent {
 
 
         if (
+            httpError?.status === 403
+        ) {
+
+            return (
+                'El servidor solo permite consultar usuarios a cuentas con rol de barbero; con una cuenta de administrador esta consulta no está disponible.'
+            );
+        }
+
+
+        if (
             httpError?.status === 404
         ) {
 
@@ -596,9 +751,7 @@ export class UserManagementComponent {
     }
 
 
-    get userIdControl() {
-        return this.searchForm.controls.userId;
-    }
+
 
 
     get reasonControl() {

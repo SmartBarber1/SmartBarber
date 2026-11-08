@@ -69,38 +69,6 @@
     opacity: 0.6;
 }
 
-/* Búsqueda */
-.list-search {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    max-width: 420px;
-    margin-bottom: 18px;
-}
-
-.list-search label {
-    color: #4f463c;
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-}
-
-.list-search input {
-    height: 44px;
-    padding: 0 13px;
-    border: 1px solid #ded6ca;
-    border-radius: 6px;
-    background: #fff;
-    color: #29231e;
-    font-family: inherit;
-    font-size: 15px;
-}
-
-.list-search input:focus {
-    border-color: #a77b43;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(167, 123, 67, .12);
-}
-
 /* Estados */
 .list-state {
     display: flex;
@@ -276,10 +244,6 @@
 
     .heading-actions {
         justify-content: space-between;
-    }
-
-    .list-search {
-        max-width: none;
     }
 
     .employee-table thead {

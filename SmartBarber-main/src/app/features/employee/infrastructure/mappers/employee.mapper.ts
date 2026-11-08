@@ -37,11 +37,15 @@ export function mapEmployeeResponse(response: EmployeeResponse): Employee {
     };
 }
 
-export function mapOnboardingResponse(response: EmployeeRegistrationResponse): Employee {
+/** El backend no devuelve barberiaId en el onboarding: se toma de la solicitud. */
+export function mapOnboardingResponse(
+    response: EmployeeRegistrationResponse,
+    requestedBarberiaId: string
+): Employee {
     return {
         id: response.id,
-        userId: response.user.id,
-        barberiaId: response.barberiaId,
+        userId: response.user?.id ?? '',
+        barberiaId: response.barberiaId ?? requestedBarberiaId,
         document: response.document,
         documentType: response.documentType,
         name: response.name,

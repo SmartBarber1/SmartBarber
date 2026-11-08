@@ -6,30 +6,13 @@
 
     <div class="heading-actions">
         <span class="record-count" aria-live="polite">
-            @if (query()) {
-                {{ filteredEmployees().length }} de {{ employees().length }} registros
-            } @else {
-                {{ employees().length }} {{ employees().length === 1 ? 'registro' : 'registros' }}
-            }
+            {{ employees().length }} {{ employees().length === 1 ? 'registro' : 'registros' }}
         </span>
         <button type="button" class="secondary-button" (click)="reload()" [disabled]="loading()">
             {{ loading() ? 'Actualizando...' : 'Actualizar' }}
         </button>
     </div>
 </div>
-
-@if (employees().length > 0) {
-    <div class="list-search">
-        <label for="employee-search">Buscar en el equipo</label>
-        <input
-            id="employee-search"
-            type="search"
-            placeholder="Nombre, documento, correo o especialidad"
-            autocomplete="off"
-            [value]="query()"
-            (input)="onSearch($any($event.target).value)">
-    </div>
-}
 
 @if (loading() && employees().length === 0) {
     <div class="list-state" role="status">
@@ -47,11 +30,6 @@
         <h3>Aún no hay barberos registrados</h3>
         <p>Usa «Crear barbero» para agregar a tu equipo. Cada barbero entrará con su propia cuenta de Google.</p>
     </div>
-} @else if (filteredEmployees().length === 0) {
-    <div class="empty-state">
-        <h3>Sin resultados</h3>
-        <p>Ningún barbero coincide con «{{ query() }}».</p>
-    </div>
 } @else {
     <div class="table-wrapper">
         <table class="employee-table" aria-labelledby="employee-list-title">
@@ -65,7 +43,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (employee of filteredEmployees(); track employee.id) {
+                @for (employee of employees(); track employee.id) {
                     <tr>
                         <td data-label="Barbero">
                             <span>

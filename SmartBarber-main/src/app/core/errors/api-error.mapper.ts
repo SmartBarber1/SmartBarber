@@ -72,7 +72,18 @@ function fromHttpError(
         return build(0, 'NETWORK', overrides['NETWORK'] ?? NETWORK_ERROR_MESSAGE);
     }
 
-    const { code, fields } = readPayload(error.error);
+    const payload = readPayload(error.error);
+    let { code, fields } = payload;
+
+    // El backend responde las validaciones de Bean Validation con 400 y el
+    // detalle en el texto: "cell: El celular ..., name: El nombre ...".
+    if (error.status === 400 && Object.keys(fields).length === 0 && payload.message) {
+        const parsed = parseViolations(payload.message);
+        if (Object.keys(parsed).length > 0) {
+            fields = parsed;
+            code = VALIDATION_CODE;
+        }
+    }
 
     const message =
         (code ? overrides[code] ?? BACKEND_ERROR_MESSAGES[code] : undefined)
@@ -86,7 +97,27 @@ function fromHttpError(
 
 interface BackendErrorPayload {
     code: string | null;
+    message: string | null;
     fields: Record<string, string>;
+}
+
+/** Código interno para errores de validación de campos. */
+export const VALIDATION_CODE = 'VALIDATION';
+
+/** "a.b: mensaje uno, c: mensaje dos" → { b: 'mensaje uno', c: 'mensaje dos' } */
+function parseViolations(message: string): Record<string, string> {
+    const fields: Record<string, string> = {};
+    const pattern = /([A-Za-z_][\w.\[\]]*):\s*(.+?)(?=,\s*[A-Za-z_][\w.\[\]]*:\s|$)/g;
+
+    for (const match of message.matchAll(pattern)) {
+        const path = match[1].split('.').pop() ?? match[1];
+        const text = match[2].trim();
+        if (text && !fields[path]) {
+            fields[path] = text;
+        }
+    }
+
+    return fields;
 }
 
 /** Acepta { data: { code, fields } } (formato del backend) o { code, fields }. */
@@ -95,6 +126,7 @@ function readPayload(body: unknown): BackendErrorPayload {
     const data = asRecord(container?.['data']) ?? container;
 
     const code = typeof data?.['code'] === 'string' ? data['code'] : null;
+    const message = typeof data?.['message'] === 'string' ? data['message'] : null;
     const rawFields = asRecord(data?.['fields']);
     const fields: Record<string, string> = {};
 
@@ -106,7 +138,7 @@ function readPayload(body: unknown): BackendErrorPayload {
         }
     }
 
-    return { code, fields };
+    return { code, message, fields };
 }
 
 function readFirebaseCode(error: unknown): string | null {

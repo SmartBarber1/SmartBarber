@@ -75,18 +75,15 @@ import {
 /** Mensajes propios del registro de barberos (sobrescriben el catálogo general). */
 const EMPLOYEE_ERROR_MESSAGES: ErrorMessageOverrides = {
     US_002: 'La cuenta de Google seleccionada ya pertenece a otro usuario de SmartBarber. Vincula una cuenta diferente.',
-    EY_001: 'Solo se pueden registrar barberos desde este formulario.',
-    EY_002: 'Ya existe un barbero registrado con ese número de documento.',
-    EY_005: 'El correo no coincide con la cuenta de Google vinculada. Vuelve a vincular la cuenta.',
-    AT_003: 'Solo el administrador de esta barbería puede registrar barberos.',
-    US_004: 'Tu cuenta de administrador no está registrada. Vuelve a iniciar sesión.',
-    HTTP_401: 'Tu sesión de administrador expiró. Vuelve a iniciar sesión para registrar barberos.',
-    TECH_001: 'Revisa los campos marcados en el formulario.',
+    CT_002: 'Ya existe un barbero registrado con ese número de documento.',
+    VALIDATION: 'Revisa los campos marcados en el formulario.',
+    TECH_001: 'La sesión de la cuenta de Google vinculada no es válida. Vuelve a vincularla.',
+    TECH_008: 'La sesión de la cuenta de Google vinculada expiró. Vuelve a vincularla.',
     DEFAULT: 'No fue posible registrar al barbero. Inténtalo nuevamente.'
 };
 
 /** Errores que obligan a vincular otra cuenta de Google. */
-const ACCOUNT_ERROR_CODES = new Set(['US_002', 'EY_005']);
+const ACCOUNT_ERROR_CODES = new Set(['US_002', 'TECH_001', 'TECH_008']);
 
 /** Campo del backend → control del formulario. */
 const SERVER_FIELD_ALIASES: Readonly<Record<string, string>> = {
@@ -412,7 +409,7 @@ export class EmployeeRegisterComponent {
             SERVER_FIELD_ALIASES
         );
 
-        if (apiError.code === 'EY_002') {
+        if (apiError.code === 'CT_002') {
             this.form.controls.document.setErrors({ server: apiError.message });
             this.form.controls.document.markAsTouched();
         }

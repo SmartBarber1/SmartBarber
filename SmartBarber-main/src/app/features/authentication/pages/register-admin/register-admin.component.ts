@@ -672,7 +672,6 @@ export class RegisterAdminComponent {
     return toUserMessage(error, {
       US_002: 'Esta cuenta de Google ya está registrada. Inicia sesión en lugar de registrarte.',
       BP_002: 'Ya existe una barbería registrada con estos datos.',
-      EY_002: 'Ya existe un empleado registrado con ese número de documento.',
       CT_002: 'Ya existe un registro con ese número de documento.',
       TECH_001: 'Revisa los datos del formulario.',
       HTTP_401: 'La sesión de Google no es válida. Vuelve a vincular tu cuenta.',

@@ -78,7 +78,7 @@
                 </span>
 
                 <h2>
-                    Buscar usuario
+                    Buscar barbero o usuario
                 </h2>
 
             </div>
@@ -86,24 +86,42 @@
         </div>
 
 
-        <form [formGroup]="searchForm" (ngSubmit)="searchUser()" class="search-form">
+        <form [formGroup]="searchForm" (ngSubmit)="search()" class="search-form" novalidate>
+
+            <div class="form-field criterion-field">
+
+                <label for="search-criterion">
+                    Buscar por
+                </label>
+
+                <select id="search-criterion" formControlName="criterion">
+                    <option value="DOCUMENT">Documento del barbero</option>
+                    <option value="NAME">Nombre del barbero</option>
+                    <option value="USER_ID">ID de usuario</option>
+                </select>
+
+            </div>
+
 
             <div class="form-field">
 
-                <label for="userId">
-                    ID del usuario
+                <label for="search-term">
+                    {{ searchCopy.label }}
                 </label>
 
-                <input id="userId" type="text" formControlName="userId"
-                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off">
+                <input id="search-term" type="text" formControlName="term"
+                    [placeholder]="searchCopy.placeholder"
+                    [attr.inputmode]="searchCriterion === 'DOCUMENT' ? 'numeric' : null"
+                    [attr.aria-invalid]="!!searchTermError"
+                    [attr.aria-describedby]="searchTermError ? 'search-term-error' : 'search-term-help'"
+                    autocomplete="off">
 
-                <small *ngIf="
-                        userIdControl.invalid &&
-                        userIdControl.touched
-                    ">
+                <small *ngIf="searchTermError as message" id="search-term-error" role="alert">
+                    {{ message }}
+                </small>
 
-                    Ingresa un UUID válido.
-
+                <small *ngIf="!searchTermError" id="search-term-help" class="field-hint">
+                    {{ searchCopy.hint }}
                 </small>
 
             </div>
@@ -114,7 +132,7 @@
                 {{
                 searching()
                 ? 'Consultando...'
-                : 'Consultar usuario'
+                : 'Consultar'
                 }}
 
             </button>
@@ -140,6 +158,67 @@
         {{ successMessage() }}
 
     </div>
+
+
+    <!-- ========================================================= -->
+    <!-- BARBERO CONSULTADO -->
+    <!-- ========================================================= -->
+
+    <section *ngIf="foundEmployee() as employee" class="management-card user-detail-card" aria-labelledby="found-employee-title">
+
+        <div class="card-heading">
+
+            <div>
+
+                <span class="card-eyebrow">
+                    BARBERO CONSULTADO
+                </span>
+
+                <h2 id="found-employee-title">
+                    {{ employee.name }}
+                </h2>
+
+            </div>
+
+            <span class="status-badge">
+                {{ employee.id === currentEmployeeId ? 'Tú' : 'Tu barbería' }}
+            </span>
+
+        </div>
+
+
+        <div class="user-data-grid">
+
+            <div class="data-item">
+                <span>Documento</span>
+                <strong>{{ employee.documentType === 'CE' ? 'C.E.' : 'C.C.' }} {{ employee.document || 'No disponible' }}</strong>
+            </div>
+
+            <div class="data-item">
+                <span>Correo</span>
+                <strong>{{ employee.email || 'No disponible' }}</strong>
+            </div>
+
+            <div class="data-item">
+                <span>Celular</span>
+                <strong>{{ employee.cell || 'No disponible' }}</strong>
+            </div>
+
+            <div class="data-item">
+                <span>Especialidades</span>
+                <strong>{{ employee.specialty || 'No disponible' }}</strong>
+            </div>
+
+            <div class="data-item">
+                <span>Registro</span>
+                <strong>
+                    {{ employee.createAt ? (employee.createAt | date:'dd/MM/yyyy HH:mm') : 'No disponible' }}
+                </strong>
+            </div>
+
+        </div>
+
+    </section>
 
 
     <!-- ========================================================= -->

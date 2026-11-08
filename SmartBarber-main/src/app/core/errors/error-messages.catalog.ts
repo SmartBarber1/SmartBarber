@@ -11,10 +11,12 @@ export const DEFAULT_ERROR_MESSAGE =
 
 /** Códigos que envía el backend en { data: { code } }. */
 export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
+    // Validación de campos (400 con el detalle por campo)
+    VALIDATION: 'Hay datos con formato inválido. Revisa los campos marcados.',
+
     // Autenticación y autorización
     AT_001: 'Tu sesión expiró. Vuelve a iniciar sesión.',
     AT_002: 'Tu cuenta no está activa. Comunícate con el administrador de tu barbería o con soporte.',
-    AT_003: 'No tienes permiso para realizar esta acción en esta barbería.',
 
     // Usuarios
     US_001: 'Los datos del usuario no son válidos.',
@@ -24,15 +26,12 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
 
     // Barberos (empleados)
     EY_001: 'Los datos del barbero no son válidos.',
-    EY_002: 'Ya existe un barbero registrado con ese número de documento.',
-    EY_003: 'Los datos del barbero no son válidos.',
-    EY_004: 'No se encontró el barbero solicitado.',
-    EY_005: 'El correo no coincide con la cuenta de Google vinculada.',
 
-    // Clientes
-    CT_001: 'Los datos del cliente no son válidos.',
-    CT_002: 'Ya existe un registro con esos datos.',
-    CT_004: 'No se encontró el perfil asociado a esta cuenta.',
+    // Clientes y empleados (el backend usa los mismos códigos para ambos)
+    CT_001: 'Los datos enviados no son válidos.',
+    CT_002: 'Ya existe un registro con ese número de documento.',
+    CT_003: 'Los datos enviados no son válidos.',
+    CT_004: 'No se encontró la información solicitada.',
 
     // Barberías
     BA_001: 'Los datos de la barbería no son válidos.',
