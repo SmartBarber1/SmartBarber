@@ -198,6 +198,9 @@ nav ul li.has-dropdown:focus-within .dropdown-menu {
   border-radius: 4px;
   color: var(--ivory);
   cursor: pointer;
+  /* Sin espera de doble toque en celular: el menú responde al instante. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .menu-toggle:hover {
@@ -235,13 +238,13 @@ nav ul li.has-dropdown:focus-within .dropdown-menu {
   background: rgba(0, 0, 0, 0.55);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+  transition: opacity 0.18s ease-out, visibility 0s linear 0.18s;
 }
 
 .mobile-backdrop.is-visible {
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.25s ease, visibility 0s;
+  transition: opacity 0.18s ease-out, visibility 0s;
 }
 
 .mobile-drawer {
@@ -263,14 +266,15 @@ nav ul li.has-dropdown:focus-within .dropdown-menu {
   transform: translateX(100%);
   visibility: hidden;
   /* Al cerrar, se oculta cuando termina el deslizamiento. */
-  transition: transform 0.28s ease, visibility 0s linear 0.28s;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.18s;
+  will-change: transform;
 }
 
 .mobile-drawer.is-open {
   transform: translateX(0);
   visibility: visible;
-  /* Al abrir, es visible de inmediato para poder recibir el foco. */
-  transition: transform 0.28s ease, visibility 0s;
+  /* Al abrir, es visible de inmediato y desliza con arranque rápido. */
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
 }
 
 .drawer-header {

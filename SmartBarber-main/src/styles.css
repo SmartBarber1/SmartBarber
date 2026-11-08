@@ -129,8 +129,11 @@ img{max-width:100%; display:block;}
 .showcase-divider .dash{width:36px; height:1px; background:repeating-linear-gradient(to right, var(--brass) 0 4px, transparent 4px 8px);}
 .showcase-divider svg{width:26px; height:26px;}
 
+/* Solo las secciones de las páginas públicas (inicio, autenticación, legales).
+   Antes aplicaba a todos los <section>, incluido el menú lateral del panel,
+   y en celular dejaba huecos de 64 px entre sus grupos. */
 @media (max-width: 540px){
-  section{padding:64px 0;}
+  app-public-layout section{padding:64px 0;}
 }
 
 .panel-shell--admin {

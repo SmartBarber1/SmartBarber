@@ -89,8 +89,8 @@ button {
         1px solid rgba(182, 138, 78, .25);
 
     transition:
-        width .22s ease,
-        transform .22s ease;
+        width .18s cubic-bezier(.22, 1, .36, 1),
+        transform .18s cubic-bezier(.22, 1, .36, 1);
 }
 
 
@@ -2459,5 +2459,17 @@ button {
 
         animation-duration:
             .01ms !important;
+    }
+}
+
+/* Respuesta inmediata al tocar los botones del menú en celular. */
+.mobile-menu-button,
+.sidebar-toggle {
+    touch-action: manipulation;
+}
+
+@media (max-width: 860px) {
+    .panel-sidebar {
+        will-change: transform;
     }
 }
