@@ -5,6 +5,7 @@ import { Observable, Subject, throwError } from 'rxjs';
 import { SessionService } from '../../../core/auth/services/session.service';
 import { environment } from '../../../../environments/environment';
 
+import { UserFacingError } from '../../../core/errors';
 export type SubscriptionType = 'CREATE' | 'RENEW';
 export const SUBSCRIPTION_DURATION = 60;
 export type SubscriptionBarberStatus =
@@ -32,13 +33,14 @@ export interface SubscriptionBarbershopRequest
 
 export interface SubscriptionCreationResponse {
   id: string;
+  /** Solo lo devuelve POST /create. PUT /renew no incluye la referencia del pago. */
   barberId: string;
   subscriptionId: number;
   status: SubscriptionBarberStatus;
   duration: number;
   subscriptionPrice: number;
   subscriptionDiscount: number;
-  orderId: string;
+  orderId?: string | null;
   createdAt: string;
   updatedAt: string | null;
   startDate: string | null;
@@ -93,11 +95,13 @@ export class SubscriptionService {
     );
   }
 
-  connectWebSocket(orderId: string): void {
+  connectWebSocket(orderId: string | null | undefined): void {
     this.disconnectWebSocket();
 
-    if (!orderId.trim()) {
-      throw new Error('El backend no devolvió un orderId válido para el pago.');
+    if (!orderId?.trim()) {
+      throw new UserFacingError(
+        'No recibimos la referencia del pago, así que no podemos mostrar su estado en tiempo real. Consulta el estado del plan en unos minutos.'
+      );
     }
 
     const apiUrl = new URL(environment.apiUrl);
@@ -178,8 +182,8 @@ export class SubscriptionService {
       !session.barberId ||
       !session.barbershopId
     ) {
-      throw new Error(
-        'No se encontró un perfil de administrador asociado a una barbería.'
+      throw new UserFacingError(
+        'No se encontró un perfil de administrador asociado a una barbería. Cierra sesión y vuelve a ingresar.'
       );
     }
 

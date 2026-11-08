@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { SessionService } from '../../../../core/auth/services/session.service';
 import { AuthSessionBootstrapService } from '../../../authentication/application/services/auth-session-bootstrap.service';
 
+import { toUserMessage } from '../../../../core/errors';
 export type SubscriptionAccessStatus =
   | 'loading'
   | 'active'
@@ -58,9 +59,10 @@ export class BarbershopSubscriptionAccessService {
       .then(() => this.applySessionStatus())
       .catch((error: unknown) => {
         this.setError(
-          error instanceof Error
-            ? error.message
-            : 'Ocurrió un error inesperado al verificar la suscripción.'
+          toUserMessage(error, {
+            AT_004: 'No encontramos el perfil de tu barbería. Cierra sesión y vuelve a ingresar.',
+            DEFAULT: 'Ocurrió un error inesperado al verificar la suscripción.'
+          })
         );
       });
   }

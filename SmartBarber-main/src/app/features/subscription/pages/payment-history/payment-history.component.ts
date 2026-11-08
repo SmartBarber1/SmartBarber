@@ -364,7 +364,6 @@ export class PaymentHistoryComponent implements OnInit {
 
             default:
                 return (
-                    response.error?.message ??
                     'No fue posible cargar el historial de pagos.'
                 );
         }

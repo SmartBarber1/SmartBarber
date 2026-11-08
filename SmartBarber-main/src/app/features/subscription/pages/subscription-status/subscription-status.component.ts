@@ -21,6 +21,7 @@ import {
   SubscriptionWsService
 } from '../../infrastructure/subscription-ws.service';
 
+import { toUserMessage } from '../../../../core/errors';
 @Component({
   selector: 'app-subscription-status',
   standalone: true,
@@ -119,9 +120,9 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
     } catch (error: unknown) {
       this.submitting.set(false);
       this.errorMessage.set(
-        error instanceof Error
-          ? error.message
-          : 'No fue posible validar el perfil para adquirir el plan.'
+        toUserMessage(error, {
+          DEFAULT: 'No fue posible validar el perfil para adquirir el plan.'
+        })
       );
       return;
     }
@@ -216,9 +217,9 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
     } catch (error: unknown) {
       console.error('No fue posible conectar con el estado del pago:', error);
       this.errorMessage.set(
-        error instanceof Error
-          ? error.message
-          : 'No fue posible conectar con el estado del pago.'
+        toUserMessage(error, {
+          DEFAULT: 'La solicitud se creó, pero no fue posible conectar con el estado del pago. Consulta el estado del plan en unos minutos.'
+        })
       );
     }
   }

@@ -250,8 +250,7 @@ export class ChangePlanComponent implements OnInit {
         return 'Debes tener un método de pago válido para cambiar de plan.';
 
       default:
-        return response.error?.message
-          ?? 'No fue posible realizar el cambio de plan.';
+        return 'El cambio de plan todavía no está disponible. Puedes renovar con otro plan cuando termine el periodo actual.';
     }
   }
 

@@ -41,6 +41,27 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
     BP_004: 'No se encontró la barbería.',
     BP_005: 'La barbería no tiene una suscripción activa.',
 
+    // Suscripciones de la barbería
+    SB_001: 'Los datos de la suscripción no son válidos.',
+    SB_002: 'No se encontró la suscripción de la barbería.',
+    SB_003: 'La barbería ya tiene esta suscripción registrada.',
+    SB_004: 'El estado de la suscripción no es válido.',
+    SB_005: 'Ya tienes una suscripción activa, pendiente de pago o aprobada. Espera a que termine ese proceso antes de solicitar otra.',
+    SB_006: 'El tipo de operación de la suscripción no es válido.',
+    SB_007: 'La barbería ya tiene una suscripción activa.',
+
+    // Planes
+    ST_001: 'Ese plan ya existe.',
+    ST_002: 'No se encontró el plan seleccionado.',
+    ST_003: 'El plan seleccionado no es válido.',
+
+    // Transacciones de pago
+    TS_001: 'El estado del pago no es válido.',
+    TS_002: 'Este pago ya fue registrado.',
+    TS_003: 'No se encontró el pago.',
+    TS_004: 'Los datos del pago no son válidos.',
+    TS_005: 'Este tipo de pago no está soportado.',
+
     // Errores técnicos
     TECH_001: 'Hay datos con formato inválido. Revisa la información e inténtalo de nuevo.',
     TECH_002: 'El servidor tardó demasiado en responder. Inténtalo de nuevo.',

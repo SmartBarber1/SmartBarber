@@ -299,8 +299,7 @@ export class CancelSubscriptionComponent implements OnInit {
                 return 'No fue posible procesar la cancelación debido a un problema con el servicio de pagos.';
 
             default:
-                return response.error?.message
-                    ?? 'No fue posible cancelar la suscripción.';
+                return 'La cancelación de la suscripción todavía no está disponible. Comunícate con soporte para cancelarla.';
         }
     }
 }

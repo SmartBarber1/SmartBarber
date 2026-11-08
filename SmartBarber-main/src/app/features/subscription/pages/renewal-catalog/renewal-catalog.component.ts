@@ -15,6 +15,7 @@ import {
   SubscriptionWsService
 } from '../../infrastructure/subscription-ws.service';
 
+import { toUserMessage } from '../../../../core/errors';
 @Component({
   selector: 'app-renewal-catalog',
   standalone: true,
@@ -86,9 +87,9 @@ export class RenewalCatalogComponent implements OnInit, OnDestroy {
     } catch (error: unknown) {
       this.submittingPlanId.set(null);
       this.errorMessage.set(
-        error instanceof Error
-          ? error.message
-          : 'No fue posible validar la barbería para iniciar la renovación.'
+        toUserMessage(error, {
+          DEFAULT: 'No fue posible validar la barbería para iniciar la renovación.'
+        })
       );
       return;
     }
@@ -103,7 +104,11 @@ export class RenewalCatalogComponent implements OnInit, OnDestroy {
         this.submittingPlanId.set(null);
         console.error('No fue posible iniciar la renovación:', error);
         this.errorMessage.set(
-          'No fue posible iniciar la renovación. Verifica el estado del plan e inténtalo nuevamente.'
+          toUserMessage(error, {
+            SB_005: 'Ya tienes una renovación pendiente de pago o aprobada. Espera a que se confirme antes de solicitar otra.',
+            VALIDATION: 'Los datos de la renovación no son válidos. Recarga la página e inténtalo de nuevo.',
+            DEFAULT: 'No fue posible iniciar la renovación. Verifica el estado del plan e inténtalo nuevamente.'
+          })
         );
       }
     });
@@ -153,7 +158,9 @@ export class RenewalCatalogComponent implements OnInit, OnDestroy {
         error: (error: unknown) => {
           console.error('No fue posible cargar datos de renovación:', error);
           this.errorMessage.set(
-            'No fue posible consultar la barbería y los planes disponibles. Inténtalo nuevamente.'
+            toUserMessage(error, {
+              DEFAULT: 'No fue posible consultar la barbería y los planes disponibles. Inténtalo nuevamente.'
+            })
           );
         }
       });
@@ -161,6 +168,17 @@ export class RenewalCatalogComponent implements OnInit, OnDestroy {
 
   private listenForPayment(response: SubscriptionCreationResponse): void {
     this.paymentSubscription?.unsubscribe();
+
+    // PUT /renew del backend no devuelve la referencia del pago (orderId):
+    // sin ella no hay seguimiento en tiempo real, se consulta el estado del plan.
+    if (!response.orderId?.trim()) {
+      this.paymentMessage.set(
+        'Renovación solicitada. Cuando la pasarela confirme el pago, el nuevo periodo aparecerá en "Suscripción y pagos".'
+      );
+      this.subscriptionAccess.refresh();
+      return;
+    }
+
     this.paymentSubscription = this.subscriptionWs.getPaymentStatus().subscribe({
       next: event => {
         this.paymentMessage.set(this.getPaymentUpdateMessage(event));
@@ -182,9 +200,9 @@ export class RenewalCatalogComponent implements OnInit, OnDestroy {
     } catch (error: unknown) {
       console.error('No fue posible conectar con el estado del pago:', error);
       this.errorMessage.set(
-        error instanceof Error
-          ? error.message
-          : 'No fue posible conectar con el estado del pago.'
+        toUserMessage(error, {
+          DEFAULT: 'La renovación se solicitó, pero no fue posible conectar con el estado del pago. Consulta el estado del plan en unos minutos.'
+        })
       );
     }
   }

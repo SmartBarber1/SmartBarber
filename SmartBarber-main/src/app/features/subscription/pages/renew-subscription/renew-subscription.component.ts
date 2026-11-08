@@ -21,6 +21,7 @@ import {
 import { GetCurrentSubscriptionUseCase } from '../../application/use-cases/get-current-subscription.use-case';
 import { RenewSubscriptionUseCase } from '../../application/use-cases/renew-subscription.use-case';
 
+import { toUserMessage } from '../../../../core/errors';
 @Component({
   selector: 'app-renew-subscription',
   standalone: true,
@@ -254,11 +255,14 @@ export class RenewSubscriptionComponent {
         };
       };
 
-      if (httpError.error?.message) {
-        return httpError.error.message;
+      if (httpError.error) {
+        return toUserMessage(error, {
+          SB_005: 'Ya tienes una renovación pendiente de pago o aprobada. Espera a que se confirme antes de solicitar otra.',
+          DEFAULT: 'No fue posible procesar la renovación. Inténtalo nuevamente.'
+        });
       }
     }
 
-    return 'Unable to process the subscription renewal. Please try again.';
+    return 'No fue posible procesar la renovación. Inténtalo nuevamente.';
   }
 }

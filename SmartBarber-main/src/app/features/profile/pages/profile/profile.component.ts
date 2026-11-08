@@ -40,6 +40,7 @@ import {
 } from '../../../../core/auth/services/session.service';
 
 
+import { toUserMessage } from '../../../../core/errors';
 @Component({
     selector: 'app-profile',
     standalone: true,
@@ -576,10 +577,10 @@ export class ProfileComponent
 
         if (status === 400) {
 
-            return (
-                error?.error?.message ??
-                'La información proporcionada no es válida.'
-            );
+            return toUserMessage(error, {
+                VALIDATION: 'Revisa los datos del perfil: hay campos con formato inválido.',
+                DEFAULT: 'La información proporcionada no es válida.'
+            });
         }
 
 
@@ -611,9 +612,14 @@ export class ProfileComponent
 
         if (status === 409) {
 
-            return (
-                'La información proporcionada ya está registrada.'
-            );
+            // El backend responde 409 también cuando no encuentra el registro (CT_004).
+            return toUserMessage(error, {
+                CT_004: 'No fue posible encontrar la información del perfil.',
+                AT_003: isUpdate
+                    ? 'No tienes autorización para modificar este perfil.'
+                    : 'No tienes autorización para consultar este perfil.',
+                DEFAULT: 'La información proporcionada ya está registrada.'
+            });
         }
 
 
