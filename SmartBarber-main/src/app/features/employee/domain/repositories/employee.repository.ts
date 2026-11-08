@@ -34,9 +34,4 @@ export abstract class EmployeeRepository {
     abstract findByDocument(
         document: string
     ): Observable<Employee | null>;
-
-    /** Barbero por nombre exacto, o null si no existe. */
-    abstract findByName(
-        name: string
-    ): Observable<Employee | null>;
 }

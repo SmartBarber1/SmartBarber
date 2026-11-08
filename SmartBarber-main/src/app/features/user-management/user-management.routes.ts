@@ -10,21 +10,9 @@ import {
     roleGuard
 } from '../../core/auth/guards/role.guard';
 
-import {
-    UserManagementRepository
-} from './domain/repositories/user-management.repository';
 
-import {
-    UserManagementApiService
-} from './infrastructure/api/user-management-api.service';
 
-import {
-    GetUserUseCase
-} from './application/use-cases/get-user.use-case';
 
-import {
-    BlockUserUseCase
-} from './application/use-cases/block-user.use-case';
 
 import {
     EmployeeRepository
@@ -64,23 +52,11 @@ export const USER_MANAGEMENT_ROUTES:
 
                 {
                     provide:
-                        UserManagementRepository,
-
-                    useClass:
-                        UserManagementApiService
-                },
-
-                {
-                    provide:
                         EmployeeRepository,
 
                     useClass:
                         EmployeeApiService
                 },
-
-                GetUserUseCase,
-
-                BlockUserUseCase,
 
                 CreateEmployeeUseCase,
                 GetEmployeesByBarbershopUseCase,

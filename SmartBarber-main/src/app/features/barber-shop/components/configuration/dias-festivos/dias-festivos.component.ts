@@ -39,6 +39,12 @@ export class DiasFestivosComponent implements OnChanges {
     errorField: 'date' | 'reason' | null = null;
     successMessage = '';
 
+    get activeShopName(): string {
+        return this.barberList.length > 0 && this.barberList[0].name
+            ? this.barberList[0].name
+            : 'No disponible';
+    }
+
     private get barbershopId(): string {
         return this.barberList[0]?.id ?? this.sessionService.getBarbershopId() ?? '';
     }

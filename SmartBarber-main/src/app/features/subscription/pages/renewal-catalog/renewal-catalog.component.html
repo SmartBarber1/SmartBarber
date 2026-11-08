@@ -46,7 +46,7 @@
       {{ errorMessage() }}
     </div>
     <div *ngIf="createdSubscription()" class="renewal-alert renewal-alert--success" role="status">
-      Solicitud creada · Referencia {{ createdSubscription()?.orderId }} · Estado {{ createdSubscription()?.status }}.
+      Solicitud creada · Estado: {{ statusLabel(createdSubscription()?.status) }}@if (createdSubscription()?.orderId) { · Referencia de pago: {{ createdSubscription()?.orderId }}}.
     </div>
     <div *ngIf="paymentMessage()" class="renewal-alert" role="status" aria-live="polite">
       {{ paymentMessage() }}

@@ -110,14 +110,6 @@ export class EmployeeApiService
         );
     }
 
-    override findByName(
-        name: string
-    ): Observable<Employee | null> {
-        return this.findOne(
-            `${this.baseUrl}/employee-service/nombre/${encodeURIComponent(name)}`
-        );
-    }
-
     private findOne(url: string): Observable<Employee | null> {
         return this.http
             .get<EmployeeResponse | null>(url)

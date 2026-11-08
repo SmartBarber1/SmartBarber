@@ -22,6 +22,7 @@ import {
 } from '../../infrastructure/subscription-ws.service';
 
 import { toUserMessage } from '../../../../core/errors';
+import { paymentUpdateMessage, subscriptionStatusLabel } from '../../domain/models/status-labels';
 @Component({
   selector: 'app-subscription-status',
   standalone: true,
@@ -225,15 +226,10 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
   }
 
   private getPaymentUpdateMessage(event: unknown): string {
-    if (
-      typeof event === 'object' &&
-      event !== null &&
-      'status' in event &&
-      typeof event.status === 'string'
-    ) {
-      return `Estado de la transacción: ${event.status}.`;
-    }
+    return paymentUpdateMessage(event);
+  }
 
-    return 'Se recibió una actualización de la transacción.';
+  statusLabel(status: string | null | undefined): string {
+    return subscriptionStatusLabel(status);
   }
 }

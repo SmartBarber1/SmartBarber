@@ -90,8 +90,10 @@
       </div>
 
       <div *ngIf="createdSubscription()" class="form-alert form-alert-success" role="status">
-        Solicitud creada con estado {{ createdSubscription()?.status }}.
-        Referencia: {{ createdSubscription()?.orderId }}
+        Solicitud creada con estado: {{ statusLabel(createdSubscription()?.status) }}.
+        @if (createdSubscription()?.orderId) {
+          Referencia de pago: {{ createdSubscription()?.orderId }}
+        }
       </div>
 
       <div *ngIf="paymentMessage()" class="form-alert form-alert-info" role="status" aria-live="polite">

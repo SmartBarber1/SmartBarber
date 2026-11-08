@@ -8,7 +8,7 @@
   <!-- La sede se deriva de la sesión autenticada. -->
   <div class="card-subheader-selector">
     <label>Sede Activa:</label>
-    <strong>{{ barberList[0]?.name || 'No disponible' }}</strong>
+    <strong>{{ activeShopName }}</strong>
   </div>
 
   <form class="holiday-add-box" (ngSubmit)="addHoliday(dateInput)" novalidate>
