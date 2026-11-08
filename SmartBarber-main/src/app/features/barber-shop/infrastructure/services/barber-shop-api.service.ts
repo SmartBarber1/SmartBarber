@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, of, throwError } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import {
@@ -65,9 +65,22 @@ export class BarberShopApiService {
     );
   }
 
+  /**
+   * Equipo de la barbería. El backend solo expone esta consulta como ruta
+   * pública (/public/employee-service/barbershop/{id}) y, si la barbería no
+   * tiene empleados, responde 409 con el código CT_004: se trata como lista vacía.
+   */
   getEmployeesByBarbershop(barbershopId: string): Observable<unknown[]> {
     return this.http.get<unknown[]>(
-      `${this.employeeUrl}/barbershop/${encodeURIComponent(barbershopId)}`
+      `${environment.apiUrl}/public/employee-service/barbershop/${encodeURIComponent(barbershopId)}`
+    ).pipe(
+      catchError((error: unknown) => {
+        const code = error instanceof HttpErrorResponse
+          ? (error.error as { data?: { code?: unknown } } | null)?.data?.code
+          : null;
+
+        return code === 'CT_004' ? of([]) : throwError(() => error);
+      })
     );
   }
 

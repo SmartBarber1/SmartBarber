@@ -11,20 +11,41 @@
     <strong>{{ barberList[0]?.name || 'No disponible' }}</strong>
   </div>
 
-  <div class="holiday-add-box">
-    <input type="date" [(ngModel)]="newHolidayDate" class="vintage-input" aria-label="Fecha del día no laborable" />
-    <input type="text" [(ngModel)]="newHolidayDesc" placeholder="Motivo (ej. Mantenimiento)" class="vintage-input" aria-label="Motivo del día no laborable" />
-    <button type="button" class="vintage-btn gold-sm" (click)="addHoliday()">Agregar</button>
-  </div>
+  <form class="holiday-add-box" (ngSubmit)="addHoliday(dateInput)" novalidate>
+    <input #dateInput type="date" name="holidayDate" [(ngModel)]="newHolidayDate"
+      (ngModelChange)="onFieldChange('date')" (input)="onFieldChange('date')"
+      class="vintage-input" [min]="minDate"
+      aria-label="Fecha del día no laborable"
+      [attr.aria-invalid]="errorField === 'date'"
+      [attr.aria-describedby]="errorField === 'date' ? 'holiday-error' : null" />
+    <input type="text" name="holidayReason" [(ngModel)]="newHolidayDesc"
+      (ngModelChange)="onFieldChange('reason')"
+      placeholder="Motivo (ej. Mantenimiento)" class="vintage-input"
+      [maxlength]="reasonMax"
+      aria-label="Motivo del día no laborable"
+      [attr.aria-invalid]="errorField === 'reason'"
+      [attr.aria-describedby]="errorField === 'reason' ? 'holiday-error' : null" />
+    <button type="submit" class="vintage-btn gold-sm">Agregar</button>
+  </form>
+
+  <p *ngIf="errorMessage" id="holiday-error" class="holiday-message holiday-error" role="alert">
+    {{ errorMessage }}
+  </p>
+  <p class="holiday-message holiday-success" role="status" aria-live="polite">{{ successMessage }}</p>
 
   <div class="holidays-list">
     <div class="holiday-item" *ngFor="let h of holidays">
       <div class="holiday-info">
-        <strong>📅 {{ h.date }}</strong>
-        <span>{{ h.description }}</span>
+        <strong>📅 {{ formatDate(h.date) }}</strong>
+        <span>{{ h.reason }}</span>
       </div>
-      <button type="button" class="btn-delete" (click)="removeHoliday(h.id)">❌</button>
+      <button type="button" class="btn-delete" (click)="removeHoliday(h.id)"
+        [attr.aria-label]="'Eliminar ' + formatDate(h.date)">❌</button>
     </div>
     <p class="empty-msg" *ngIf="holidays.length === 0">No hay días no laborables registrados para esta sede.</p>
   </div>
+
+  <p class="holiday-note">
+    Los días se guardan en este navegador mientras el sistema habilita su registro en el servidor.
+  </p>
 </div>
