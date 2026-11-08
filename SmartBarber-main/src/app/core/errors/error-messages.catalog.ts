@@ -17,6 +17,8 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
     // Autenticación y autorización
     AT_001: 'Tu sesión expiró. Vuelve a iniciar sesión.',
     AT_002: 'Tu cuenta no está activa. Comunícate con el administrador de tu barbería o con soporte.',
+    AT_003: 'No tienes permiso para realizar esta acción.',
+    AT_004: 'No encontramos una cuenta de SmartBarber asociada a este correo de Google.',
 
     // Usuarios
     US_001: 'Los datos del usuario no son válidos.',

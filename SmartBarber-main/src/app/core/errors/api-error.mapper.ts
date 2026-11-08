@@ -92,7 +92,7 @@ function fromHttpError(
         ?? overrides['DEFAULT']
         ?? DEFAULT_ERROR_MESSAGE;
 
-    return build(error.status, code, message, fields);
+    return build(error.status, code, message, fields, payload.message);
 }
 
 interface BackendErrorPayload {
@@ -157,7 +157,8 @@ function build(
     status: number,
     code: string | null,
     message: string,
-    fields: Record<string, string> = {}
+    fields: Record<string, string> = {},
+    detail: string | null = null
 ): ApiError {
-    return { status, code, message, fields };
+    return { status, code, message, fields, detail };
 }

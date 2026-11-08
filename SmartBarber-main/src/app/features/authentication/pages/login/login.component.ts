@@ -1,6 +1,7 @@
 import {
     Component,
-    inject
+    inject,
+    isDevMode
 } from '@angular/core';
 
 import {
@@ -27,7 +28,11 @@ import {
 
 /** Mensajes del inicio de sesión (sobrescriben el catálogo general). */
 const LOGIN_ERROR_MESSAGES: ErrorMessageOverrides = {
-    // Respuestas del backend
+    // Respuestas de POST /auth/verify
+    AT_004: 'Tu cuenta de Google no está registrada en SmartBarber o su perfil está incompleto. Regístrate como cliente o registra tu barbería.',
+    AT_003: 'Tu cuenta no tiene permiso para ingresar. Comunícate con soporte.',
+    TECH_005: 'El servidor no pudo validar tu cuenta por un error interno. Inténtalo en unos minutos y, si continúa, avisa al equipo técnico (código TECH_005).',
+    HTTP_500: 'El servidor no pudo validar tu cuenta por un error interno. Inténtalo en unos minutos y, si continúa, avisa al equipo técnico.',
     US_004: 'Tu cuenta de Google no está registrada en SmartBarber. Regístrate como cliente o registra tu barbería.',
     ACCOUNT_NOT_REGISTERED: 'Tu cuenta de Google no está registrada en SmartBarber. Regístrate como cliente o registra tu barbería.',
     CT_004: 'Tu cuenta existe, pero no tiene un perfil de cliente. Completa tu registro como cliente.',
@@ -53,7 +58,7 @@ const LOGIN_ERROR_MESSAGES: ErrorMessageOverrides = {
 };
 
 /** Errores en los que conviene invitar al usuario a registrarse. */
-const NOT_REGISTERED_CODES = new Set(['US_004', 'ACCOUNT_NOT_REGISTERED', 'CT_004']);
+const NOT_REGISTERED_CODES = new Set(['AT_004', 'US_004', 'ACCOUNT_NOT_REGISTERED', 'CT_004']);
 
 /** El usuario cerró la ventana de Google: no es un error que deba alarmarlo. */
 const CANCELLED_CODES = new Set(['auth/popup-closed-by-user', 'auth/cancelled-popup-request']);
@@ -108,6 +113,16 @@ export class LoginComponent {
             });
         } catch (error: unknown) {
             const apiError = toApiError(error, LOGIN_ERROR_MESSAGES);
+
+            // Diagnóstico solo en desarrollo: el detalle técnico del servidor
+            // (por ejemplo, la excepción de un 500) nunca se muestra al usuario.
+            if (isDevMode() && apiError.status >= 500) {
+                console.error('[login] POST /auth/verify falló', {
+                    status: apiError.status,
+                    code: apiError.code,
+                    detail: apiError.detail
+                });
+            }
 
             if (apiError.code && CANCELLED_CODES.has(apiError.code)) {
                 return;

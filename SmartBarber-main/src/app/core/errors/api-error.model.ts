@@ -14,6 +14,12 @@ export interface ApiError {
 
     /** Errores por campo que envía el backend: { nombreDelCampo: mensaje }. */
     readonly fields: Readonly<Record<string, string>>;
+
+    /**
+     * Mensaje técnico original del servidor. Solo para diagnóstico en
+     * desarrollo: nunca se muestra al usuario.
+     */
+    readonly detail: string | null;
 }
 
 /**
