@@ -423,7 +423,7 @@ export class PanelNavigationService {
             visible:
               true
           },
-
+          
           {
             id: 'subscription',
 
@@ -471,7 +471,29 @@ export class PanelNavigationService {
             visible:
               true
           },
+          {
+            id: 'subscription-history',
 
+            label: 'Historial de suscripción',
+
+            description:
+              'Consulta los registros y cambios de suscripción de tu barbería.',
+
+            icon: 'history',
+
+            route:
+              '/panel/subscription/subscription-history',
+
+            roles: [
+              'ADMIN'
+            ],
+
+            status:
+              'AVAILABLE',
+
+            visible:
+              true
+          },
           {
             id: 'reports',
 
