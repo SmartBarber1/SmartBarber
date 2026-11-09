@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.smartbarber.com'
+  apiUrl: 'https://smartbarber-lwn3.onrender.com'
 };

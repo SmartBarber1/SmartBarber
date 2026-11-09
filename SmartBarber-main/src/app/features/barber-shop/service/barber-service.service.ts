@@ -4,11 +4,13 @@ import { Observable, from, switchMap } from 'rxjs';
 import { BarberServicePayload } from '../components/crud-service/crud-servicios.component';
 import { getAuth } from 'firebase/auth'; 
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class BarberServiceService {
-  private apiUrl = 'http://localhost:8080/services-service';
+  private apiUrl = `${environment.apiUrl}/services-service`;
 
   constructor(private http: HttpClient) {}
 

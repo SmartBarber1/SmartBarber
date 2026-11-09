@@ -3,11 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BarberShopRegisterRequest, BarberShopResponse } from '../../features/barber-shop/domain/models/barber-shop.model';
 
+import { environment } from '../../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class BarberiaService {
-  private apiUrl = 'http://localhost:8080/barber-service';
+  private apiUrl = `${environment.apiUrl}/barber-service`;
 
   constructor(private http: HttpClient) {}
 

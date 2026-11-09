@@ -5,13 +5,15 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { getAuth } from 'firebase/auth';
 import {CreateReservationPayload} from '../models/reservation.model'
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class ReservationService {
-  private apiUrl = 'http://localhost:8080';
+  private apiUrl = environment.apiUrl;
 
-  // Endpoint de creación de reservas: POST http://localhost:8080/reservation-service/create
+  // Endpoint de creación de reservas: POST {apiUrl}/reservation-service/create
   private readonly createReservationUrl = `${this.apiUrl}/reservation-service/create`;
 
   constructor(private http: HttpClient) {}
