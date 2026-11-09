@@ -6,5 +6,11 @@ export const RESERVATION_ROUTES: Routes = [
         loadComponent: () =>
             import('./components/appointment/appointment.component')
                 .then(m => m.AppointmentComponent)
+    },
+    {
+        path: 'history',
+        loadComponent: () =>
+            import('./pages/reservation-history/reservation-history.component')
+                .then(m => m.ReservationHistoryComponent)
     }
 ];

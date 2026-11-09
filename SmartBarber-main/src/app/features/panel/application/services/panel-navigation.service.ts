@@ -400,6 +400,17 @@ export class PanelNavigationService {
               true
           },
 
+          
+          {
+            id: 'client-barber-history',
+            label: 'Historial Clientes y Barberos',
+            description:'Administra el equipo y los usuarios.',
+            route: '/panel/clients-barbers/history',
+            icon: 'users', 
+            status: 'AVAILABLE',
+            roles: [ 'ADMIN' ],
+            visible: false
+          },
           {
             id: 'services',
 

@@ -158,6 +158,11 @@ export const PANEL_ROUTES: Routes = [
           )
       },
 
+      {
+        path: 'clients-barbers-history',
+        redirectTo: 'home'
+      },
+
 
       // ========================================================
       // SERVICIOS
