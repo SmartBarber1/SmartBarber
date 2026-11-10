@@ -1,54 +1,66 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { SessionService } from '../../../../core/auth/services/session.service';
-import { FirebaseAuthService } from '../../../../core/auth/services/firebase-auth.service';
-import { environment } from '../../../../../environments/environment';
-
-export interface ReservationHistoryItem {
-  id: string;
-  barbershopId: string;
-  customerId: string;
-  employeeId: string;
-  status: string;
-  reservationType: string;
-  notes?: string;
-  duration: number;
-  startTime: string;
-  endTime: string;
-  queueEntryTime?: string | null;
-  creationDate: string;
-  updatedDate: string;
-}
+import { ReservationService } from '../../services/reservation.service';
+import { HistoryScope, ReservationHistoryItem } from '../../models/reservation.model';
 
 @Component({
   selector: 'app-reservation-history',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule],
   templateUrl: './reservation-history.component.html',
   styleUrls: ['./reservation-history.component.css']
 })
 export class ReservationHistoryComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
+  private readonly reservationService = inject(ReservationService);
   private readonly sessionService = inject(SessionService);
-  private readonly firebaseAuthService = inject(FirebaseAuthService);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  scope: HistoryScope = 'customer';
   historyList: ReservationHistoryItem[] = [];
   isLoading = true;
   errorMessage = '';
 
   ngOnInit(): void {
+    this.scope = this.route.snapshot.data['scope'] ?? 'customer';
     this.loadReservationHistory();
   }
 
-  async loadReservationHistory(): Promise<void> {
-    const customerId = this.sessionService.currentSession?.clientId;
+  get headerTag(): string {
+    return {
+      customer: '✦ PANEL DE CLIENTE',
+      employee: '✦ PANEL DE BARBERO',
+      barbershop: '✦ PANEL DE BARBERÍA'
+    }[this.scope];
+  }
 
-    if (!customerId) {
+  get subtitle(): string {
+    return {
+      customer: 'Consulta y seguimiento detallado de tus servicios y citas agendadas.',
+      employee: 'Citas que has atendido y que tienes programadas.',
+      barbershop: 'Todas las reservas registradas en tu barbería.'
+    }[this.scope];
+  }
+
+  // TODO: confirmar los nombres reales en SessionService.currentSession
+  private resolveId(): string | undefined {
+    const s: any = this.sessionService.currentSession;
+    return {
+      customer: s?.clientId,
+      employee: s?.employeeId,
+      barbershop: s?.barbershopId
+    }[this.scope];
+  }
+
+  async loadReservationHistory(): Promise<void> {
+    const id = this.resolveId();
+
+    if (!id) {
       this.isLoading = false;
-      this.errorMessage = 'No se encontró el identificador del cliente en la sesión actual.';
+      this.errorMessage = 'No se encontró el identificador en la sesión actual.';
       this.cdr.markForCheck();
       return;
     }
@@ -58,18 +70,8 @@ export class ReservationHistoryComponent implements OnInit {
     this.cdr.markForCheck();
 
     try {
-      const token = await this.firebaseAuthService.getIdToken();
-
-      const headers = new HttpHeaders({
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      });
-
-      const baseUrl = environment.apiUrl || 'http://localhost:8080';
-      const endpoint = `${baseUrl}/reservation-service/customer/${customerId}`;
-
       const data = await firstValueFrom(
-        this.http.get<ReservationHistoryItem[]>(endpoint, { headers })
+        this.reservationService.getReservationHistory(this.scope, id)
       );
 
       this.historyList = (data ?? []).sort(
@@ -81,7 +83,7 @@ export class ReservationHistoryComponent implements OnInit {
       if (err.status === 401) {
         this.errorMessage = 'Sesión no autorizada o token expirado. Inicia sesión nuevamente.';
       } else if (err.status === 404) {
-        this.errorMessage = 'No se encontró historial para este cliente.';
+        this.errorMessage = 'No se encontró historial de reservas.';
       } else if (err.status === 503) {
         this.errorMessage = 'El servicio de reservas no está disponible (503). Intenta de nuevo en unos momentos.';
       } else {

@@ -2,13 +2,11 @@
   <!-- Header Clásico Tradicional -->
   <header class="classic-header">
     <div class="header-content">
-      <span class="classic-tag font-serif">✦ PANEL DE CLIENTE</span>
+      <span class="classic-tag font-serif">{{ headerTag }}</span>
       <h1 class="title-classic">
         Historial de <span class="text-brown-highlight">Reservas</span>
       </h1>
-      <p class="subtitle">
-        Consulta y seguimiento detallado de tus servicios y citas agendadas.
-      </p>
+      <p class="subtitle">{{ subtitle }}</p>
     </div>
 
     <button type="button" class="btn-classic-refresh" (click)="loadReservationHistory()">
@@ -67,7 +65,7 @@
     <div *ngIf="historyList.length === 0" class="empty-classic-state">
       <div class="empty-badge">📜</div>
       <h3>Sin reservas registradas</h3>
-      <p>No se encontraron movimientos previos de reservas para este cliente.</p>
+      <p>No se encontraron reservas para mostrar.</p>
     </div>
 
     <div class="table-scroll" *ngIf="historyList.length > 0">
@@ -76,6 +74,8 @@
           <tr>
             <th>ID Referencia</th>
             <th>Servicio</th>
+            <th *ngIf="scope !== 'customer'">Cliente</th>
+            <th *ngIf="scope === 'barbershop'">Barbero</th>
             <th>Estado</th>
             <th>Fecha de Cita</th>
             <th>Duración</th>
@@ -88,6 +88,8 @@
               <span class="tx-hash">#{{ item.id | slice:0:10 }}...</span>
             </td>
             <td class="service-name">{{ item.notes || 'Corte / Servicio General' }}</td>
+            <td *ngIf="scope !== 'customer'" class="tx-cell"><span class="tx-hash">{{ item.customerId | slice:0:8 }}…</span></td>
+            <td *ngIf="scope === 'barbershop'" class="tx-cell"><span class="tx-hash">{{ item.employeeId | slice:0:8 }}…</span></td>
             <td>
               <span class="status-chip" [ngClass]="{
                 'chip-active': item.status === 'CONFIRMED' || item.status === 'COMPLETED' || item.status === 'APPROVED',

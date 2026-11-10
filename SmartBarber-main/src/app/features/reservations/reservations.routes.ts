@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 
+const loadHistory = () =>
+    import('./pages/reservation-history/reservation-history.component')
+        .then(m => m.ReservationHistoryComponent);
+
 export const RESERVATION_ROUTES: Routes = [
     {
         path: '',
@@ -7,10 +11,7 @@ export const RESERVATION_ROUTES: Routes = [
             import('./components/appointment/appointment.component')
                 .then(m => m.AppointmentComponent)
     },
-    {
-        path: 'history',
-        loadComponent: () =>
-            import('./pages/reservation-history/reservation-history.component')
-                .then(m => m.ReservationHistoryComponent)
-    }
+    { path: 'history', data: { scope: 'customer' }, loadComponent: loadHistory },
+    { path: 'history/employee', data: { scope: 'employee' }, loadComponent: loadHistory },
+    { path: 'history/barbershop', data: { scope: 'barbershop' }, loadComponent: loadHistory }
 ];

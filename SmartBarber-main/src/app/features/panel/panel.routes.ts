@@ -159,6 +159,16 @@ export const PANEL_ROUTES: Routes = [
       },
 
       {
+  path: 'reservations-history',
+  canActivate: [authGuard, roleGuard],
+  data: {
+    roles: ['ADMIN']
+  },
+  loadComponent: () =>
+    import('../reservations/pages/reservation-history-barber/reservation-history-barber.component')
+      .then(m => m.ReservationHistoryBarberComponent)
+},
+      {
         path: 'clients-barbers-history',
         redirectTo: 'home'
       },

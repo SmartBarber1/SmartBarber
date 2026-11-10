@@ -332,7 +332,6 @@ export class PanelNavigationService {
             visible:
               true
           }
-
         ]
       },
 
@@ -504,6 +503,16 @@ export class PanelNavigationService {
 
             visible:
               true
+          },
+                    {
+            id: 'reservations-history',
+            label: 'Historial General de Reservas',
+            description: 'Consulta el historial de reservas de los barberos y de toda la barbería en un solo lugar.',
+            icon: 'history',
+            route: '/panel/reservations-history',
+            roles: ['ADMIN'],
+            status: 'AVAILABLE',
+            visible: true
           },
           {
             id: 'reports',
