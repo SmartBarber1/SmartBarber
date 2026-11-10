@@ -237,6 +237,19 @@ export const PANEL_ROUTES: Routes = [
             m => m.RESERVATION_ROUTES
           )
       },
+
+        // ========================================================
+      // HISTORIAL DE RESERVAS
+      // ========================================================
+
+      {
+        path: 'reservation-history',
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['CLIENT'] },
+        loadComponent: () =>
+          import('../reservations/pages/reservation-history/reservation-history.component')
+            .then(m => m.ReservationHistoryComponent)
+      },
       /*
        * COLA VIRTUAL
        */

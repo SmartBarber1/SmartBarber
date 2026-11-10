@@ -190,11 +190,10 @@ export class PanelNavigationService {
               true
           },
 
-
-          {
+           {
             id: 'reservation-history',
 
-            label: 'Historial',
+            label: 'Historial reserva',
 
             description:
               'Consulta tus reservas y servicios anteriores.',
@@ -202,19 +201,20 @@ export class PanelNavigationService {
             icon: 'history',
 
             route:
-              '/panel/history',
+              '/panel/reservation-history',
 
             roles: [
               'CLIENT'
             ],
 
             status:
-              'COMING_SOON',
+              'AVAILABLE',
 
             visible:
               true
           },
 
+         
 
           {
             id: 'notifications',

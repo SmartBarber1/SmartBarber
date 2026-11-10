@@ -1,22 +1,25 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { SessionService } from '../../../../core/auth/services/session.service';
 import { FirebaseAuthService } from '../../../../core/auth/services/firebase-auth.service';
 import { environment } from '../../../../../environments/environment';
 
 export interface ReservationHistoryItem {
   id: string;
-  barbershopId?: string;
-  clientId?: string;
-  employeeId?: string;
-  serviceName?: string;
+  barbershopId: string;
+  customerId: string;
+  employeeId: string;
   status: string;
-  reservationDate?: string;
-  date?: string;
-  price?: number;
-  servicePrice?: number;
-  createdAt: string;
+  reservationType: string;
+  notes?: string;
+  duration: number;
+  startTime: string;
+  endTime: string;
+  queueEntryTime?: string | null;
+  creationDate: string;
+  updatedDate: string;
 }
 
 @Component({
@@ -30,6 +33,7 @@ export class ReservationHistoryComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly sessionService = inject(SessionService);
   private readonly firebaseAuthService = inject(FirebaseAuthService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   historyList: ReservationHistoryItem[] = [];
   isLoading = true;
@@ -40,60 +44,64 @@ export class ReservationHistoryComponent implements OnInit {
   }
 
   async loadReservationHistory(): Promise<void> {
-    const session = this.sessionService.currentSession;
-    const clientId = session?.clientId || session?.userId;
+    const customerId = this.sessionService.currentSession?.clientId;
 
-    if (!clientId) {
+    if (!customerId) {
       this.isLoading = false;
       this.errorMessage = 'No se encontró el identificador del cliente en la sesión actual.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
+    this.cdr.markForCheck();
 
     try {
       const token = await this.firebaseAuthService.getIdToken();
 
       const headers = new HttpHeaders({
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
       });
 
       const baseUrl = environment.apiUrl || 'http://localhost:8080';
-      const endpoint = `${baseUrl}/reservations-service/client-history/${clientId}`;
+      const endpoint = `${baseUrl}/reservation-service/customer/${customerId}`;
 
-      const data = await this.http.get<ReservationHistoryItem[]>(endpoint, { headers }).toPromise();
-      
-      this.historyList = data || [];
-      this.errorMessage = '';
+      const data = await firstValueFrom(
+        this.http.get<ReservationHistoryItem[]>(endpoint, { headers })
+      );
 
+      this.historyList = (data ?? []).sort(
+        (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+      );
     } catch (err: any) {
-      console.error('Error en el servicio de historial de reservas:', err);
-      if (err.status === 503) {
-        this.errorMessage = 'El servicio de reservas se encuentra temporalmente fuera de línea en Render (503). Intenta nuevamente en unos momentos.';
-      } else if (err.status === 401) {
+      console.error('Error cargando historial de reservas:', err);
+
+      if (err.status === 401) {
         this.errorMessage = 'Sesión no autorizada o token expirado. Inicia sesión nuevamente.';
+      } else if (err.status === 404) {
+        this.errorMessage = 'No se encontró historial para este cliente.';
+      } else if (err.status === 503) {
+        this.errorMessage = 'El servicio de reservas no está disponible (503). Intenta de nuevo en unos momentos.';
       } else {
         this.errorMessage = 'No se pudo obtener el historial de reservas.';
       }
     } finally {
       this.isLoading = false;
+      this.cdr.markForCheck();
     }
   }
 
   get activeReservesCount(): number {
-    return this.historyList.filter(item => 
-      item.status === 'ACTIVE' || 
-      item.status === 'CONFIRMED' || 
-      item.status === 'APPROVED'
+    return this.historyList.filter(item =>
+      ['PENDING', 'CONFIRMED', 'ACTIVE', 'APPROVED'].includes(item.status)
     ).length;
   }
 
-  get totalSpent(): number {
-    return this.historyList.reduce((acc, item) => {
-      const priceVal = Number(item.servicePrice ?? item.price ?? 0);
-      return acc + priceVal;
-    }, 0);
+  get totalMinutes(): number {
+    return this.historyList
+      .filter(item => item.status === 'COMPLETED')
+      .reduce((acc, item) => acc + (item.duration ?? 0), 0);
   }
 }
