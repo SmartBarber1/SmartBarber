@@ -18,6 +18,7 @@ import { NextCustomerUseCase } from '../../application/usecase/next-customer.use
 import { GetStatusQueueUseCase } from '../../application/usecase/get-status-queue.use-case';
 import { CompleteCurrentTurnUseCase } from '../../application/usecase/complete-current-turn.use-case';
 import { VirtualQueueWebSocketUseCase } from '../../application/usecase/virtual-queue-socket.use-case';
+import { ActivatedRoute } from '@angular/router';
 
 import { SessionService } from '../../../../core/auth/services/session.service';
 
@@ -62,6 +63,9 @@ export class VirtualQueueComponent implements OnInit, OnDestroy {
 
   private readonly session =
     inject(SessionService);
+
+  private readonly route =
+    inject(ActivatedRoute);
 
   private readonly openQueueUseCase =
     inject(OpenQueueUseCase);
@@ -114,16 +118,23 @@ export class VirtualQueueComponent implements OnInit, OnDestroy {
 
   private get employeeId(): string {
 
+    const employeeIdFromUrl =
+      this.route.snapshot.queryParamMap.get('employeeId');
+
+    if (employeeIdFromUrl) {
+      return employeeIdFromUrl;
+    }
+
     const barberId =
       this.session.getBarberId();
 
-    if (!barberId) {
-      throw new Error(
-        'No existe un barbero autenticado.'
-      );
+    if (barberId) {
+      return barberId;
     }
 
-    return barberId;
+    throw new Error(
+      'No se encontró el identificador del empleado.'
+    );
   }
 
   ngOnInit(): void {

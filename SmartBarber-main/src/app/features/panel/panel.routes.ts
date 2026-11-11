@@ -277,6 +277,42 @@ export const PANEL_ROUTES: Routes = [
           ).then(
             m => m.VIRTUAL_QUEUE_ROUTES
           )
+      },
+
+      /*
+       * COLA VIRTUAL
+       */
+
+      {
+        path: 'virtual-queue-available',
+        canActivate: [
+          authGuard,
+          roleGuard
+        ],
+        data: {
+          roles: ['CLIENT']
+        },
+        loadComponent: () =>
+          import(
+            '../../services/components/services/available-queues-page/available-queues-page.component'
+          ).then(
+            m => m.AvailableQueuesPageComponent
+          )
+      },
+
+      {
+        path: 'virtual-queue-tracking',
+        canActivate: [
+          authGuard,
+          roleGuard
+        ],
+        data: {
+          roles: ['CLIENT']
+        },
+        loadComponent: () =>
+          import(
+            '../services/components/services/virtual-queue-page/virtual-queue-page.component'
+          ).then(m => m.VirtualQueuePageComponent)
       }
     ]
   }
