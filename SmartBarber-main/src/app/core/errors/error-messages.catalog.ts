@@ -25,6 +25,7 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
     US_002: 'Esta cuenta de Google ya está registrada en SmartBarber.',
     US_004: 'No encontramos una cuenta de SmartBarber asociada a este correo de Google.',
     US_005: 'El rol indicado no existe.',
+    US_006: 'No tienes permiso para realizar esta acción.',
 
     // Barberos (empleados)
     EY_001: 'Los datos del barbero no son válidos.',
@@ -61,6 +62,30 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
     TS_003: 'No se encontró el pago.',
     TS_004: 'Los datos del pago no son válidos.',
     TS_005: 'Este tipo de pago no está soportado.',
+
+    // Reservas
+    RES_001: 'Los datos de la reserva no son válidos.',
+    RES_002: 'No se encontró la reserva.',
+    RES_003: 'El estado de la reserva no es válido.',
+    RES_004: 'El tipo de reserva no es válido.',
+    RES_005: 'La fecha de la reserva no es válida.',
+    RES_006: 'Ya tienes una reserva en ese horario.',
+    RES_007: 'El barbero no está disponible en ese horario. Elige otro.',
+    RES_008: 'No se encontró tu perfil de cliente. Vuelve a iniciar sesión.',
+    RES_009: 'Esta reserva ya no se puede cancelar.',
+    RES_010: 'La fecha de la reserva no es válida.',
+    RES_011: 'El barbero no está disponible en ese horario. Elige otro.',
+    RES_012: 'Esta reserva ya no se puede confirmar.',
+    RES_013: 'La fila virtual no está recibiendo clientes en este momento.',
+
+    // Días no laborables y festivos
+    ND_001: 'Los datos del día no laborable no son válidos.',
+    ND_002: 'Esa fecha ya está registrada como día no laborable.',
+    ND_003: 'No puedes registrar una fecha que ya pasó.',
+    ND_004: 'No se encontró el día no laborable.',
+    ND_005: 'El rango de fechas consultado no es válido.',
+    ND_006: 'La barbería no atiende en esa fecha. Elige otro día.',
+    ND_007: 'Solo el administrador de la barbería puede gestionar los días no laborables.',
 
     // Errores técnicos
     TECH_001: 'Hay datos con formato inválido. Revisa la información e inténtalo de nuevo.',

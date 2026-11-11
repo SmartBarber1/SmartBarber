@@ -46,6 +46,7 @@
         <app-calendario
           [currentDate]="currentDate"
           [selectedDia]="selectedDia"
+          [diasCerrados]="diasCerradosMes"
           (cambioMes)="cambiarMes($event)"
           (diaSeleccionado)="seleccionarDia($event)">
         </app-calendario>

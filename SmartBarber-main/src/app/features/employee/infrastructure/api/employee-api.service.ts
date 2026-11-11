@@ -56,9 +56,9 @@ export class EmployeeApiService
         environment.apiUrl;
 
     /**
-     * El backend identifica la cuenta nueva con el token que llega en
-     * Authorization, por eso aquí va el token del barbero y no el del
-     * administrador (el interceptor no lo reemplaza si ya existe).
+     * Authorization: token del administrador (lo agrega el interceptor y el
+     * backend verifica que sea ADMIN de esta barbería).
+     * idToken: token de la cuenta de Google del barbero nuevo.
      */
     override createEmployee(
         request: EmployeeRegistration,
@@ -71,7 +71,6 @@ export class EmployeeApiService
                 request,
                 {
                     headers: new HttpHeaders({
-                        Authorization: `Bearer ${employeeIdToken}`,
                         idToken: `Bearer ${employeeIdToken}`
                     })
                 }

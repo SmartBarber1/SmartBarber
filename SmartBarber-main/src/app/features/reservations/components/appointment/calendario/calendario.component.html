@@ -13,6 +13,9 @@
       *ngFor="let d of mes.dias"
       class="cal-day-cell"
       [class.active-day]="selectedDia === d"
+      [class.closed-day]="diasCerrados.has(d)"
+      [attr.title]="diasCerrados.has(d) ? 'La barbería no atiende este día' : null"
+      [attr.aria-label]="diasCerrados.has(d) ? d + ', la barbería no atiende' : null"
       type="button"
       (click)="diaSeleccionado.emit(d)"
     >

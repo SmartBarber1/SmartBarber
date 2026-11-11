@@ -13,6 +13,8 @@ export class CalendarioComponent implements OnChanges {
   /** Mes visible (el padre lo reemplaza por un Date nuevo al navegar) */
   @Input() currentDate: Date = new Date();
   @Input() selectedDia: number | null = null;
+  /** Días del mes en que la barbería no atiende. */
+  @Input() diasCerrados: ReadonlySet<number> = new Set<number>();
 
   /** Emite -1 (mes anterior) o +1 (mes siguiente) */
   @Output() cambioMes = new EventEmitter<number>();

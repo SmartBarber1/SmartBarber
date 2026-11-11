@@ -62,7 +62,7 @@ export class ClientRegistrationApiService
 
 
     private readonly onboardingApiUrl =
-        `${environment.apiUrl}/public/customer-service/onboarding`;
+        `${environment.apiUrl}/customer-service/onboarding`;
 
 
     /*

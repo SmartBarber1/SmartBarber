@@ -14,18 +14,20 @@
   <form class="holiday-add-box" (ngSubmit)="addHoliday(dateInput)" novalidate>
     <input #dateInput type="date" name="holidayDate" [(ngModel)]="newHolidayDate"
       (ngModelChange)="onFieldChange('date')" (input)="onFieldChange('date')"
-      class="vintage-input" [min]="minDate"
+      class="vintage-input" [min]="minDate" [disabled]="saving"
       aria-label="Fecha del día no laborable"
       [attr.aria-invalid]="errorField === 'date'"
       [attr.aria-describedby]="errorField === 'date' ? 'holiday-error' : null" />
     <input type="text" name="holidayReason" [(ngModel)]="newHolidayDesc"
       (ngModelChange)="onFieldChange('reason')"
       placeholder="Motivo (ej. Mantenimiento)" class="vintage-input"
-      [maxlength]="reasonMax"
+      [maxlength]="reasonMax" [disabled]="saving"
       aria-label="Motivo del día no laborable"
       [attr.aria-invalid]="errorField === 'reason'"
       [attr.aria-describedby]="errorField === 'reason' ? 'holiday-error' : null" />
-    <button type="submit" class="vintage-btn gold-sm">Agregar</button>
+    <button type="submit" class="vintage-btn gold-sm" [disabled]="saving" [attr.aria-busy]="saving">
+      {{ saving ? 'Guardando…' : 'Agregar' }}
+    </button>
   </form>
 
   <p *ngIf="errorMessage" id="holiday-error" class="holiday-message holiday-error" role="alert">
@@ -33,19 +35,30 @@
   </p>
   <p class="holiday-message holiday-success" role="status" aria-live="polite">{{ successMessage }}</p>
 
-  <div class="holidays-list">
-    <div class="holiday-item" *ngFor="let h of holidays">
-      <div class="holiday-info">
-        <strong>📅 {{ formatDate(h.date) }}</strong>
-        <span>{{ h.reason }}</span>
-      </div>
-      <button type="button" class="btn-delete" (click)="removeHoliday(h.id)"
-        [attr.aria-label]="'Eliminar ' + formatDate(h.date)">❌</button>
+  <div class="holidays-list" [attr.aria-busy]="loading">
+    <p class="empty-msg" *ngIf="loading">Cargando días no laborables…</p>
+
+    <div class="holiday-load-error" *ngIf="!loading && loadError" role="alert">
+      <span>{{ loadError }}</span>
+      <button type="button" class="vintage-btn gold-sm" (click)="load()">Reintentar</button>
     </div>
-    <p class="empty-msg" *ngIf="holidays.length === 0">No hay días no laborables registrados para esta sede.</p>
+
+    <ng-container *ngIf="!loading && !loadError">
+      <div class="holiday-item" *ngFor="let h of holidays; trackBy: trackById">
+        <div class="holiday-info">
+          <strong>📅 {{ formatDate(h.date) }}</strong>
+          <span>{{ h.reason }}</span>
+        </div>
+        <button type="button" class="btn-delete" (click)="removeHoliday(h)"
+          [disabled]="deletingId !== null"
+          [attr.aria-busy]="deletingId === h.id"
+          [attr.aria-label]="'Eliminar ' + formatDate(h.date)">{{ deletingId === h.id ? '…' : '❌' }}</button>
+      </div>
+      <p class="empty-msg" *ngIf="holidays.length === 0">No hay días no laborables registrados para esta sede.</p>
+    </ng-container>
   </div>
 
   <p class="holiday-note">
-    Los días se guardan en este navegador mientras el sistema habilita su registro en el servidor.
+    Estos días aplican a todo el equipo: los clientes no podrán reservar ni hacer fila en esas fechas.
   </p>
 </div>

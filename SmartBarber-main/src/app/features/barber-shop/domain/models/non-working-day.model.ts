@@ -1,15 +1,24 @@
-/** Día no laborable o festivo de una barbería. */
-export interface Holiday {
+/**
+ * Día no laborable o festivo de una barbería (aplica a todo su equipo).
+ * Contrato del backend: /non-working-day-service.
+ */
+export interface NonWorkingDay {
     id: string;
     /** Fecha local en formato ISO: AAAA-MM-DD. */
     date: string;
     reason: string;
 }
 
-export const HOLIDAY_REASON_MIN = 3;
-export const HOLIDAY_REASON_MAX = 80;
+/** Datos para registrar un día; la barbería la determina el backend con la sesión. */
+export interface NonWorkingDayRequest {
+    date: string;
+    reason: string;
+}
 
-export interface HolidayDraft {
+export const NON_WORKING_DAY_REASON_MIN = 3;
+export const NON_WORKING_DAY_REASON_MAX = 80;
+
+export interface NonWorkingDayDraft {
     /** Valor del campo de fecha (AAAA-MM-DD) o vacío. */
     date: string;
     /** true cuando el navegador recibió una fecha escrita que no existe (p. ej. 29/02/2026). */
@@ -21,9 +30,9 @@ export interface HolidayDraft {
  * Valida un día no laborable. Devuelve el mensaje de error para el usuario,
  * con el campo afectado, o null si es válido.
  */
-export function validateHoliday(
-    draft: HolidayDraft,
-    existing: readonly Holiday[],
+export function validateNonWorkingDay(
+    draft: NonWorkingDayDraft,
+    existing: readonly Pick<NonWorkingDay, 'date'>[],
     today: Date = new Date()
 ): { field: 'date' | 'reason'; message: string } | null {
     if (draft.dateIsUnparseable) {
@@ -48,18 +57,18 @@ export function validateHoliday(
         return { field: 'date', message: 'No puedes registrar una fecha que ya pasó.' };
     }
 
-    if (existing.some(holiday => holiday.date === draft.date)) {
+    if (existing.some(day => day.date === draft.date)) {
         return { field: 'date', message: 'Esa fecha ya está registrada como día no laborable.' };
     }
 
     const reason = normalizeReason(draft.reason);
 
-    if (reason.length < HOLIDAY_REASON_MIN) {
-        return { field: 'reason', message: `Escribe el motivo (mínimo ${HOLIDAY_REASON_MIN} caracteres).` };
+    if (reason.length < NON_WORKING_DAY_REASON_MIN) {
+        return { field: 'reason', message: `Escribe el motivo (mínimo ${NON_WORKING_DAY_REASON_MIN} caracteres).` };
     }
 
-    if (reason.length > HOLIDAY_REASON_MAX) {
-        return { field: 'reason', message: `El motivo puede tener máximo ${HOLIDAY_REASON_MAX} caracteres.` };
+    if (reason.length > NON_WORKING_DAY_REASON_MAX) {
+        return { field: 'reason', message: `El motivo puede tener máximo ${NON_WORKING_DAY_REASON_MAX} caracteres.` };
     }
 
     return null;
