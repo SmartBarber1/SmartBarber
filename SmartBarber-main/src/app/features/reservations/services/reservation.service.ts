@@ -3,18 +3,14 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { getAuth } from 'firebase/auth';
-import {CreateReservationPayload} from '../models/reservation.model'
-
 import { environment } from '../../../../environments/environment';
+import { HistoryScope, ReservationHistoryItem } from '../models/reservation.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReservationService {
-  private apiUrl = environment.apiUrl;
-
-  // Endpoint de creación de reservas: POST {apiUrl}/reservation-service/create
-  private readonly createReservationUrl = `${this.apiUrl}/reservation-service/create`;
+  private apiUrl = environment.apiUrl || 'http://localhost:8080';
 
   constructor(private http: HttpClient) {}
 
@@ -88,10 +84,25 @@ export class ReservationService {
     );
   }
 
-  createReservation(payload: CreateReservationPayload): Observable<any> {
-    console.log("Http"+JSON.stringify(payload));
+  // Historial de reservas segun alcance: customer | employee | barbershop
+  // Nota: en reservation-service la barberia se consulta como /barber/{id}
+  getReservationHistory(scope: HistoryScope, id: string): Observable<ReservationHistoryItem[]> {
+    const segment = scope === 'barbershop' ? 'barber' : scope;
     return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.post(this.createReservationUrl, payload, { headers }))
+      switchMap(headers =>
+        this.http.get<ReservationHistoryItem[]>(
+          `${this.apiUrl}/reservation-service/${segment}/${id}`,
+          { headers }
+        )
+      )
+    );
+  }
+
+  createReservation(payload: any): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers =>
+        this.http.post(`${this.apiUrl}/reservation-service`, payload, { headers })
+      )
     );
   }
 }

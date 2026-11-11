@@ -190,11 +190,10 @@ export class PanelNavigationService {
               true
           },
 
-
-          {
+           {
             id: 'reservation-history',
 
-            label: 'Historial',
+            label: 'Historial reserva',
 
             description:
               'Consulta tus reservas y servicios anteriores.',
@@ -202,19 +201,20 @@ export class PanelNavigationService {
             icon: 'history',
 
             route:
-              '/panel/history',
+              '/panel/reservation-history',
 
             roles: [
               'CLIENT'
             ],
 
             status:
-              'COMING_SOON',
+              'AVAILABLE',
 
             visible:
               true
           },
 
+         
 
           {
             id: 'notifications',
@@ -332,7 +332,6 @@ export class PanelNavigationService {
             visible:
               true
           }
-
         ]
       },
 
@@ -400,6 +399,17 @@ export class PanelNavigationService {
               true
           },
 
+          
+          {
+            id: 'client-barber-history',
+            label: 'Historial Clientes y Barberos',
+            description:'Administra el equipo y los usuarios.',
+            route: '/panel/clients-barbers/history',
+            icon: 'users', 
+            status: 'AVAILABLE',
+            roles: [ 'ADMIN' ],
+            visible: false
+          },
           {
             id: 'services',
 
@@ -423,7 +433,7 @@ export class PanelNavigationService {
             visible:
               true
           },
-
+          
           {
             id: 'subscription',
 
@@ -471,7 +481,39 @@ export class PanelNavigationService {
             visible:
               true
           },
+          {
+            id: 'subscription-history',
 
+            label: 'Historial de suscripción',
+
+            description:
+              'Consulta los registros y cambios de suscripción de tu barbería.',
+
+            icon: 'history',
+
+            route:
+              '/panel/subscription/subscription-history',
+
+            roles: [
+              'ADMIN'
+            ],
+
+            status:
+              'AVAILABLE',
+
+            visible:
+              true
+          },
+                    {
+            id: 'reservations-history',
+            label: 'Historial General de Reservas',
+            description: 'Consulta el historial de reservas de los barberos y de toda la barbería en un solo lugar.',
+            icon: 'history',
+            route: '/panel/reservations-history',
+            roles: ['ADMIN'],
+            status: 'AVAILABLE',
+            visible: true
+          },
           {
             id: 'statistics',
 

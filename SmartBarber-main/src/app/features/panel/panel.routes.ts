@@ -158,6 +158,21 @@ export const PANEL_ROUTES: Routes = [
           )
       },
 
+      {
+  path: 'reservations-history',
+  canActivate: [authGuard, roleGuard],
+  data: {
+    roles: ['ADMIN']
+  },
+  loadComponent: () =>
+    import('../reservations/pages/reservation-history-barber/reservation-history-barber.component')
+      .then(m => m.ReservationHistoryBarberComponent)
+},
+      {
+        path: 'clients-barbers-history',
+        redirectTo: 'home'
+      },
+
 
       // ========================================================
       // SERVICIOS
@@ -256,6 +271,19 @@ export const PANEL_ROUTES: Routes = [
           ).then(
             m => m.RESERVATION_ROUTES
           )
+      },
+
+        // ========================================================
+      // HISTORIAL DE RESERVAS
+      // ========================================================
+
+      {
+        path: 'reservation-history',
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['CLIENT'] },
+        loadComponent: () =>
+          import('../reservations/pages/reservation-history/reservation-history.component')
+            .then(m => m.ReservationHistoryComponent)
       },
       /*
        * COLA VIRTUAL

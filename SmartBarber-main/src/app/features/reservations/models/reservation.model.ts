@@ -50,3 +50,21 @@ export interface RangoOcupado {
   ini: number; // minutos desde las 00:00 (hora Colombia)
   fin: number;
 }
+
+export type HistoryScope = 'customer' | 'employee' | 'barbershop';
+
+export interface ReservationHistoryItem {
+  id: string;
+  barbershopId: string;
+  customerId: string;
+  employeeId: string;
+  status: string;
+  reservationType: string;
+  notes?: string;
+  duration: number;
+  startTime: string;
+  endTime: string;
+  queueEntryTime?: string | null;
+  creationDate: string;
+  updatedDate: string;
+}
