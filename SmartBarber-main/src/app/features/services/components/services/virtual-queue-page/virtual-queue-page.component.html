@@ -1,0 +1,101 @@
+<div class="queue-page">
+  <section class="queue-header">
+    <div>
+      <span class="eyebrow">MI EXPERIENCIA</span>
+      <h1>Cola virtual</h1>
+      <p>Consulta los turnos de la cola en tiempo real.</p>
+    </div>
+
+    <div class="connection-status">
+      <span class="status-dot" [class.online]="connectionStatus === 'connected'" [class.offline]="connectionStatus === 'error' ||
+                         connectionStatus === 'disconnected'">
+      </span>
+      {{ statusLabel }}
+    </div>
+  </section>
+
+  <div *ngIf="!employeeId" class="message-card">
+    <h2>No has seleccionado una cola</h2>
+    <p>
+      Ingresa a Mis reservas, selecciona la barbería y el barbero,
+      y únete a la cola virtual para consultar sus turnos aquí.
+    </p>
+  </div>
+
+  <div *ngIf="employeeId && connectionStatus === 'connecting' && !queue" class="message-card">
+    Conectando con la cola virtual...
+  </div>
+
+  <div *ngIf="employeeId && connectionStatus === 'error'" class="message-card error">
+    No fue posible conectar con la cola virtual.
+    Verifica tu sesión y que el backend esté disponible.
+  </div>
+
+  <ng-container *ngIf="queue as data">
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span class="summary-label">Turnos en espera</span>
+        <strong>{{ data.waitingTurns.length }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-label">Recepción de clientes</span>
+        <strong>
+          {{ data.acceptingClients ? 'Activa' : 'Pausada' }}
+        </strong>
+      </article>
+    </section>
+
+    <section class="turns-card">
+      <div class="turns-heading">
+        <div>
+          <h2>Turnos registrados</h2>
+        </div>
+        <span class="turn-count">{{ data.waitingTurns.length }} turnos</span>
+      </div>
+
+      <div *ngIf="data.waitingTurns.length === 0" class="empty-state">
+        No hay turnos en espera en este momento.
+      </div>
+
+      <div class="table-wrapper" *ngIf="data.waitingTurns.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Turno</th>
+              <th>Cliente</th>
+              <th>Duración</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let turn of waitingTurns; trackBy: trackByReservation">
+
+              <td>
+                <span class="turn-number">#{{ turn.position }}</span>
+              </td>
+
+              <td>
+                {{ turn.customer?.name || 'Cliente no disponible' }}
+              </td>
+
+              <td>{{ turn.durationMinutes }} min</td>
+
+              <td>
+                <span class="turn-status" [class.waiting]="turn.status === 'WAITING'">
+                  {{ getTurnStatus(turn.status) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="updated-at" *ngIf="data.updatedAt">
+        Última actualización:
+        {{ data.updatedAt | date:'dd/MM/yyyy, HH:mm:ss' }}
+      </p>
+    </section>
+  </ng-container>
+</div>
