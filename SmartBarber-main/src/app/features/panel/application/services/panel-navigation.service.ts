@@ -168,26 +168,13 @@ export class PanelNavigationService {
 
           {
             id: 'virtual-queue',
-
             label: 'Cola virtual',
-
-            description:
-              'Consulta turnos disponibles y tiempos aproximados.',
-
+            description: 'Consulta barberías y barberos con colas virtuales abiertas.',
             icon: 'queue',
-
-            route:
-              '/panel/virtual-queue',
-
-            roles: [
-              'CLIENT'
-            ],
-
-            status:
-              'COMING_SOON',
-
-            visible:
-              true
+            route: '/panel/virtual-queue-available',
+            roles: ['CLIENT'],
+            status: 'AVAILABLE',
+            visible: true
           },
 
            {
@@ -590,22 +577,22 @@ export class PanelNavigationService {
                 item.visible &&
                 item.roles.includes(
                   role
-                  ) &&
-                  (
-                    subscriptionRestricted
-                        ? ['dashboard', 'profile', 'subscription'].includes(item.id)
-                        : true
-                  )
-              ).map(item =>
-                subscriptionRestricted && item.id === 'subscription'
-                  ? {
-                      ...item,
-                      label: 'Adquirir suscripción',
-                      description: 'Selecciona un plan e inicia la transacción para tu barbería.',
-                      route: '/panel/subscription/status'
-                    }
-                  : item
-              )
+                ) &&
+                (
+                  subscriptionRestricted
+                    ? ['dashboard', 'profile', 'subscription'].includes(item.id)
+                    : true
+                )
+            ).map(item =>
+              subscriptionRestricted && item.id === 'subscription'
+                ? {
+                  ...item,
+                  label: 'Adquirir suscripción',
+                  description: 'Selecciona un plan e inicia la transacción para tu barbería.',
+                  route: '/panel/subscription/status'
+                }
+                : item
+            )
 
         })
       )

@@ -1,0 +1,353 @@
+
+.queues-page {
+  padding: 24px;
+  color: #202124;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.page-header p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.connection-status.connected {
+  background: #e8f7ed;
+  color: #18743b;
+}
+
+.connection-status.disconnected {
+  background: #fff1f0;
+  color: #b42318;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.queues-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.queue-card {
+  padding: 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgb(0 0 0 / 4%);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.barbershop-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f3f4f6;
+  font-size: 22px;
+}
+
+.open-label {
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #e8f7ed;
+  color: #18743b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.queue-card h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+}
+
+.location {
+  margin: 0 0 22px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.employee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+
+.employee-label {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.queue-card button {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 9px;
+  background: #202124;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.queue-card button:hover {
+  opacity: 0.85;
+}
+
+.empty-state {
+  padding: 56px 24px;
+  border: 1px dashed #d1d5db;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.empty-state h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.notice {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #fff1f0;
+  color: #b42318;
+}
+
+@media (max-width: 600px) {
+  .queues-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+  }
+}
+
+
+/* Botón principal de cada tarjeta */
+.queue-card .select-queue-button {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 9px;
+  background: #202124;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Formulario de ingreso */
+.join-form {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.join-form h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #202124;
+}
+
+.form-description {
+  margin: 0 0 16px;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.form-message {
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.warning-message {
+  background: #fff7e6;
+  color: #92400e;
+}
+
+.service-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.service-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.service-option:has(input:checked) {
+  border-color: #202124;
+  background: #f9fafb;
+}
+
+.service-option input {
+  margin-top: 4px;
+  accent-color: #202124;
+}
+
+.service-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.service-details strong {
+  color: #202124;
+  font-size: 14px;
+}
+
+.service-details small {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.service-price {
+  color: #202124;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.notes-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.notes-field label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.notes-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.notes-field textarea:focus {
+  outline: 2px solid #d1d5db;
+  outline-offset: 1px;
+}
+
+.form-alert {
+  padding: 11px 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error-alert {
+  background: #fff1f0;
+  color: #b42318;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.queue-card .reserve-button,
+.queue-card .cancel-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.queue-card .reserve-button {
+  background: #18743b;
+  color: #fff;
+}
+
+.queue-card .cancel-button {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.queue-card .reserve-button:disabled,
+.queue-card .cancel-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+

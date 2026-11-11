@@ -1,0 +1,180 @@
+
+<section class="queues-page">
+  <header class="page-header">
+    <div>
+      <h1>Colas virtuales disponibles</h1>
+      <p>
+        Selecciona una barbería y elige los servicios para ingresar a su cola virtual.
+      </p>
+    </div>
+
+    <span
+      class="connection-status"
+      [class.connected]="connected"
+      [class.disconnected]="!connected"
+    >
+      <span class="status-dot"></span>
+      {{ connected ? 'Conectado' : 'Conectando...' }}
+    </span>
+  </header>
+
+  <div *ngIf="connectionError" class="notice">
+    No se pudo establecer la conexión de notificaciones. Intentando reconectar...
+  </div>
+
+  <div *ngIf="availableQueues.length === 0" class="empty-state">
+    <h2>No hay colas disponibles</h2>
+    <p>
+      Cuando una barbería abra su cola virtual, aparecerá aquí automáticamente.
+    </p>
+  </div>
+
+  <div *ngIf="availableQueues.length > 0" class="queues-grid">
+    <article
+      class="queue-card"
+      *ngFor="let queue of availableQueues"
+    >
+      <div class="card-top">
+        <div class="barbershop-icon">✂</div>
+        <span class="open-label">Cola abierta</span>
+      </div>
+
+      <h2>{{ queue.barbershopName }}</h2>
+      <p class="location">
+        {{ queue.location || 'Ubicación no disponible' }}
+      </p>
+
+      <div class="employee-info">
+        <span class="employee-label">Barbero disponible</span>
+        <strong>{{ queue.employeeName }}</strong>
+      </div>
+
+      <button
+        type="button"
+        class="select-queue-button"
+        (click)="selectQueue(queue)"
+      >
+        {{
+          selectedQueue?.employeeId === queue.employeeId
+            ? 'Cancelar selección'
+            : 'Seleccionar Servicios'
+        }}
+      </button>
+
+      <!-- Formulario para ingresar a esta cola -->
+      <div
+        class="join-form"
+        *ngIf="selectedQueue?.employeeId === queue.employeeId"
+      >
+        <h3>Selecciona tus servicios</h3>
+        <p class="form-description">
+          Elige los servicios que deseas realizar con este barbero.
+        </p>
+
+        <div *ngIf="loadingServicios" class="form-message">
+          Cargando servicios disponibles...
+        </div>
+
+        <div
+          *ngIf="!loadingServicios && serviciosDisponibles.length === 0"
+          class="form-message warning-message"
+        >
+          No hay servicios disponibles o no fue posible cargarlos.
+        </div>
+
+        <div
+          *ngIf="!loadingServicios && serviciosDisponibles.length > 0"
+          class="service-options"
+        >
+          <label
+            class="service-option"
+            *ngFor="let service of serviciosDisponibles"
+          >
+            <input
+              type="checkbox"
+              [checked]="isServiceSelected(service)"
+              (change)="toggleServiceSelection(service)"
+            />
+
+            <span class="service-details">
+              <strong>
+                {{
+                  service.name ||
+                  service.nombre ||
+                  'Servicio'
+                }}
+              </strong>
+
+              <small *ngIf="service.description || service.descripcion">
+                {{ service.description || service.descripcion }}
+              </small>
+
+              <small *ngIf="service.duration || service.duracion">
+                Duración: {{ service.duration || service.duracion }} minutos
+              </small>
+            </span>
+
+            <span class="service-price" *ngIf="
+              service.price != null ||
+              service.precio != null ||
+              service.special_price != null ||
+              service.precio_oferta != null
+            ">
+              {{
+                service.special_price ??
+                service.precio_oferta ??
+                service.price ??
+                service.precio
+                | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </span>
+          </label>
+        </div>
+
+        <div class="notes-field">
+          <label for="queue-notes">Notas (opcional)</label>
+          <textarea
+            id="queue-notes"
+            rows="3"
+            maxlength="300"
+            [(ngModel)]="notes"
+            placeholder="Ej. Corte de cabello"
+          ></textarea>
+        </div>
+
+        <div *ngIf="queueError" class="form-alert error-alert">
+          {{ queueError }}
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="reserve-button"
+            (click)="joinSelectedQueue()"
+            [disabled]="
+              loadingServicios ||
+              serviciosDisponibles.length === 0 ||
+              selectedServicesIds.length === 0 ||
+              isJoiningQueue
+            "
+          >
+            {{
+              isJoiningQueue
+                ? 'Reservando turno...'
+                : 'Reservar turno'
+            }}
+          </button>
+
+          <button
+            type="button"
+            class="cancel-button"
+            (click)="cancelSelection()"
+            [disabled]="isJoiningQueue"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
