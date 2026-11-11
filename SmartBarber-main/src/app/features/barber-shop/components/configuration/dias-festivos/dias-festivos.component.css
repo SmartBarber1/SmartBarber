@@ -51,9 +51,15 @@
   font-size: 0.85rem;
 }
 
+.holiday-info strong {
+  /* Color propio: el tema del panel pinta los <strong> en oscuro. */
+  color: #f3e9d2;
+  font-weight: 600;
+}
+
 .holiday-info span {
-  color: #9e845c;
-  font-size: 0.75rem;
+  color: #c9ab78;
+  font-size: 0.78rem;
 }
 
 .btn-delete {
