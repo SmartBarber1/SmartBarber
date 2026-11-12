@@ -38,6 +38,9 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
   private readonly subscriptionWs = inject(SubscriptionWsService);
   private paymentSubscription?: Subscription;
 
+  private readonly PAYMENT_RESPONSE_TIMEOUT_MS = 15000;
+  private paymentTimeoutId?: ReturnType<typeof setTimeout>;
+
   readonly accessState = this.subscriptionAccess.state;
   readonly plans = signal<SubscriptionCatalogPlan[]>([]);
   readonly selectedPlanId = signal<number | null>(null);
@@ -48,6 +51,7 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
   readonly submitting = signal(false);
   readonly errorMessage = signal('');
   readonly paymentMessage = signal('');
+  readonly paymentDelayNotice = signal(false);
   readonly createdSubscription = signal<SubscriptionCreationResponse | null>(null);
 
   ngOnInit(): void {
@@ -55,15 +59,21 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clearPaymentTimeout();
     this.paymentSubscription?.unsubscribe();
     this.subscriptionWs.disconnectWebSocket();
   }
 
   selectPlan(planId: number): void {
+    if (this.submitting() || this.paymentInProgress()) {
+      return;
+    }
+
     this.selectedPlanId.set(planId);
     this.errorMessage.set('');
     this.paymentMessage.set('');
     this.createdSubscription.set(null);
+    this.clearPaymentTimeout();
   }
 
   canAcquireSubscription(): boolean {
@@ -73,6 +83,38 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
       'declined',
       'refunded'
     ].includes(this.accessState().status);
+  }
+
+  paymentInProgress(): boolean {
+    if (this.createdSubscription() === null) {
+      return false;
+    }
+    // Solicitud creada: sigue en proceso salvo que el pago haya sido rechazado/reembolsado/vencido.
+    return !['declined', 'refunded', 'expired'].includes(this.accessState().status);
+  }
+
+  isPurchaseBlocked(): boolean {
+    return (
+      this.submitting() ||
+      this.loading() ||
+      !this.canAcquireSubscription() ||
+      this.paymentInProgress()
+    );
+  }
+
+  purchaseButtonLabel(): string {
+    if (this.submitting()) {
+      return 'CREANDO SOLICITUD...';
+    }
+
+    const status = this.accessState().status;
+    if (status === 'active') {
+      return 'SUSCRIPCIÓN ACTIVA';
+    }
+    if (status === 'pending' || status === 'approved' || this.paymentInProgress()) {
+      return 'SOLICITUD EN PROCESO';
+    }
+    return 'CONTINUAR CON EL PLAN';
   }
 
   subscriptionStatusLabel(): string {
@@ -103,7 +145,7 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
   acquireSubscription(): void {
     const plan = this.selectedPlan();
 
-    if (!plan || this.submitting() || !this.canAcquireSubscription()) {
+    if (!plan || this.isPurchaseBlocked()) {
       return;
     }
 
@@ -197,8 +239,11 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
     response: SubscriptionCreationResponse
   ): void {
     this.paymentSubscription?.unsubscribe();
+    this.clearPaymentTimeout();
+
     this.paymentSubscription = this.subscriptionWs.getPaymentStatus().subscribe({
       next: event => {
+        console.log('Evento de pago recibido:', event); // temporal: quitar al terminar de probar
         this.paymentMessage.set(this.getPaymentUpdateMessage(event));
         this.subscriptionAccess.refresh();
       },
@@ -209,6 +254,8 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
         );
       }
     });
+
+    this.startPaymentTimeout();
 
     try {
       this.subscriptionWs.connectWebSocket(response.orderId);
@@ -223,6 +270,41 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
         })
       );
     }
+  }
+
+  showPaymentDelayNotice(): boolean {
+    const status = this.accessState().status;
+    return this.paymentDelayNotice() && status !== 'active' && status !== 'approved';
+  }
+
+  private startPaymentTimeout(): void {
+    const initialStatus = this.accessState().status;
+
+    this.paymentTimeoutId = setTimeout(() => {
+      this.paymentTimeoutId = undefined;
+      if (!this.isPaymentResolved(initialStatus)) {
+        this.paymentDelayNotice.set(true);
+      }
+    }, this.PAYMENT_RESPONSE_TIMEOUT_MS);
+  }
+
+  private isPaymentResolved(initialStatus: string): boolean {
+    const status = this.accessState().status;
+    if (status === 'active' || status === 'approved') {
+      return true;
+    }
+    return (
+      status !== initialStatus &&
+      ['declined', 'refunded', 'expired'].includes(status)
+    );
+  }
+
+  private clearPaymentTimeout(): void {
+    if (this.paymentTimeoutId) {
+      clearTimeout(this.paymentTimeoutId);
+      this.paymentTimeoutId = undefined;
+    }
+    this.paymentDelayNotice.set(false);
   }
 
   private getPaymentUpdateMessage(event: unknown): string {

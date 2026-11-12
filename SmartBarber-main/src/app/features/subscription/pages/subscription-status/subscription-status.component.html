@@ -100,6 +100,15 @@
         {{ paymentMessage() }}
       </div>
 
+      <div
+        *ngIf="showPaymentDelayNotice()"
+        class="form-alert form-alert-info"
+        role="alert"
+        aria-live="assertive">
+        <strong>Estamos confirmando tu pago.</strong>
+        Tu suscripción se confirmará en un lapso máximo de 2 horas.
+      </div>
+
       <section class="renewal-note">
         <span class="renewal-note-icon" aria-hidden="true">↻</span>
         <div>
@@ -111,17 +120,11 @@
       </section>
 
       <button
-        *ngIf="canAcquireSubscription()"
         type="button"
         class="btn-complete-payment"
-        [disabled]="
-          submitting() ||
-          loading() ||
-          selectedPlanId() === null ||
-          !canAcquireSubscription()
-        "
+        [disabled]="isPurchaseBlocked() || selectedPlanId() === null"
         (click)="acquireSubscription()">
-        {{ submitting() ? 'CREANDO SOLICITUD...' : 'CONTINUAR CON EL PLAN' }}
+        {{ purchaseButtonLabel() }}
       </button>
 
       <p class="request-footnote">
