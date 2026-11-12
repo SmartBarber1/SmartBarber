@@ -101,7 +101,7 @@ export class ReservationService {
   createReservation(payload: any): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers =>
-        this.http.post(`${this.apiUrl}/reservation-service`, payload, { headers })
+        this.http.post(`${this.apiUrl}/reservation-service/create`, payload, { headers })
       )
     );
   }
