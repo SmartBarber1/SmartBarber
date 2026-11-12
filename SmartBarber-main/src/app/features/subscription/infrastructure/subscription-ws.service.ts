@@ -6,6 +6,10 @@ import { SessionService } from '../../../core/auth/services/session.service';
 import { environment } from '../../../../environments/environment';
 
 import { UserFacingError } from '../../../core/errors';
+
+import { FirebaseAuthService }
+  from '../../../core/auth/services/firebase-auth.service';
+
 export type SubscriptionType = 'CREATE' | 'RENEW';
 export const SUBSCRIPTION_DURATION = 60;
 export type SubscriptionBarberStatus =
@@ -62,8 +66,10 @@ export class SubscriptionService {
 
   constructor(
     private readonly http: HttpClient,
-    private readonly sessionService: SessionService
-  ) {}
+    private readonly sessionService: SessionService,
+    private readonly firebaseAuthService: FirebaseAuthService
+
+  ) { }
 
   createSubscription(
     payload: SubscriptionPayload
@@ -95,7 +101,7 @@ export class SubscriptionService {
     );
   }
 
-  connectWebSocket(orderId: string | null | undefined): void {
+  async connectWebSocket(orderId: string | null | undefined): Promise<void> {
     this.disconnectWebSocket();
 
     if (!orderId?.trim()) {
@@ -104,10 +110,19 @@ export class SubscriptionService {
       );
     }
 
-    const apiUrl = new URL(environment.apiUrl);
-    const protocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+    const token =
+      await this.firebaseAuthService.getIdToken();
+
+    if (!token) {
+      throw new UserFacingError(
+        'No fue posible obtener el token de autenticación.'
+      );
+    }
+
+    //const apiUrl = new URL(environment.apiUrl);
+    //const protocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
     const paymentUrl =
-      `${protocol}//${apiUrl.host}/ws/payment?orderId=${encodeURIComponent(orderId)}`;
+      `${environment.wsUrl}/ws/payment?orderId=${encodeURIComponent(orderId)}&token=${encodeURIComponent(token)}`;
 
     const socket = new WebSocket(paymentUrl);
     this.socket = socket;
