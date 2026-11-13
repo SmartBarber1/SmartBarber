@@ -1,0 +1,314 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+/* Reset y Contenedor Principal */
+.history-container {
+  padding: 2.5rem;
+  background-color: #fcfbfa; /* Beige muy suave editorial */
+  color: #3e2723; /* Café oscuro clásico */
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+}
+
+/* Header Clásico */
+.classic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+  border-bottom: 2px solid #e8dfd5; /* Línea divisoria café beige tenue */
+  padding-bottom: 1.5rem;
+}
+
+.classic-tag {
+  color: #8c6d58; /* Café suave */
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.title-classic {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #2c1b18;
+  margin: 0.35rem 0;
+  letter-spacing: -0.5px;
+}
+
+.text-brown-highlight {
+  color: #795548; /* Accent café refinado */
+  font-style: italic;
+  font-weight: 400;
+}
+
+.subtitle {
+  color: #6d5d53;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Botón Sincronizar Tradicional */
+.btn-classic-refresh {
+  background: #ffffff;
+  border: 1px solid #c8b9ab;
+  color: #4e342e;
+  padding: 0.65rem 1.4rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(62, 39, 35, 0.04);
+  transition: all 0.25s ease;
+}
+
+.btn-classic-refresh:hover {
+  background: #4e342e;
+  color: #ffffff;
+  border-color: #4e342e;
+}
+
+/* Tarjetas Métricas (Manteniendo los 3 ítems exactos) */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.luxury-card {
+  background: #ffffff;
+  border: 1px solid #e6ded6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 12px rgba(62, 39, 35, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.luxury-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(62, 39, 35, 0.06);
+  border-color: #d7ccc8;
+}
+
+.card-icon-box {
+  font-size: 1.5rem;
+  background: #f5efe9; /* Fondo beige claro */
+  border: 1px solid #e0d5c9;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-label {
+  color: #7c6a5d;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #3e2723;
+  margin-top: 0.1rem;
+}
+
+/* Tabla Clásica */
+.table-wrapper-card {
+  background: #ffffff;
+  border: 1px solid #e6ded6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(62, 39, 35, 0.03);
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.classic-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.classic-table th {
+  background: #f7f3ee;
+  color: #5d4037;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid #e0d5c9;
+}
+
+.classic-table td {
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid #efebe9;
+  font-size: 0.9rem;
+  color: #3e2723;
+}
+
+.classic-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.classic-table tbody tr:hover {
+  background-color: #faf7f2;
+}
+
+.tx-hash {
+  font-family: monospace;
+  background: #f5efe9;
+  color: #5d4037;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  border: 1px solid #e0d5c9;
+}
+
+.service-name {
+  font-weight: 500;
+  color: #2c1b18;
+}
+
+.duration-text {
+  font-weight: 600;
+  color: #5d4037;
+}
+
+.date-text.muted {
+  color: #8d6e63;
+}
+
+/* Chips de Estado Sobrios */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.3rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.chip-active {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.chip-pending {
+  background: #fff8e1;
+  color: #f57f17;
+  border: 1px solid #ffe082;
+}
+
+.chip-expired {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Carga y Estados Vacíos */
+.loader-box, .empty-classic-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #7c6a5d;
+  background: #ffffff;
+  border: 1px solid #e6ded6;
+  border-radius: 8px;
+}
+
+.custom-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #efebe9;
+  border-top: 3px solid #6d4c41;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Card Clásica */
+.custom-error-card {
+  background: #ffffff;
+  border: 1px solid #d7ccc8;
+  border-left: 4px solid #c62828;
+  border-radius: 6px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.error-badge {
+  background: #ffebee;
+  color: #c62828;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+}
+
+.error-details h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: #2c1b18;
+}
+
+.error-details p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6d5d53;
+}
+
+.btn-retry {
+  margin-left: auto;
+  background: #5d4037;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.btn-retry:hover {
+  background: #3e2723;
+}

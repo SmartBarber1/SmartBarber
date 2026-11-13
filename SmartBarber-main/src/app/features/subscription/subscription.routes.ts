@@ -34,6 +34,16 @@ export const SUBSCRIPTION_ROUTES: Routes = [
         .then(m => m.SubscriptionModuleComponent)
   },
   {
+  path: 'subscription-history',
+  data: {
+    title: 'Historial de Suscripción',
+    description: 'Consulta los registros y cambios de suscripción de tu barbería.'
+  },
+  loadComponent: () =>
+    import('./pages/subscription-history/subscription-history.component')
+      .then(m => m.SubscriptionHistoryComponent)
+},
+  {
     path: '**',
     redirectTo: ''
   }

@@ -1,0 +1,129 @@
+<div class="history-container">
+  <!-- Header Clásico Tradicional -->
+  <header class="classic-header">
+    <div class="header-content">
+      <span class="classic-tag font-serif">✦ PANEL DE CONTROL UNIFICADO</span>
+      <h1 class="title-classic">
+        Historial de <span class="text-brown-highlight">Reservas y Barberos</span>
+      </h1>
+      <p class="subtitle">
+        Seguimiento detallado de la actividad operativa, empleados y barberos de la red.
+      </p>
+    </div>
+
+    <button type="button" class="btn-classic-refresh" (click)="loadCombinedHistory()">
+      <svg class="spin-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+      </svg>
+      <span>Sincronizar</span>
+    </button>
+  </header>
+
+  <!-- Pestañas: por barbero / toda la barbería -->
+  <nav class="history-tabs">
+    <button type="button" class="history-tab" [class.active]="activeTab === 'EMPLOYEE'" (click)="selectTab('EMPLOYEE')">
+      Por Barbero
+    </button>
+    <button type="button" class="history-tab" [class.active]="activeTab === 'BARBER'" (click)="selectTab('BARBER')">
+      Toda la Barbería
+    </button>
+  </nav>
+
+  <!-- Tarjetas métricas (Los 3 ítems exactos solicitados) -->
+  <section class="metrics-row" *ngIf="!isLoading && !errorMessage">
+    <div class="luxury-card">
+      <div class="card-icon-box">📅</div>
+      <div class="card-info">
+        <span class="card-label">Total Reservas</span>
+        <span class="card-value">{{ historyList.length }}</span>
+      </div>
+    </div>
+
+    <div class="luxury-card">
+      <div class="card-icon-box">⚡</div>
+      <div class="card-info">
+        <span class="card-label">Estado Activo</span>
+        <span class="card-value">{{ activeReservesCount > 0 ? 'Con Cita' : 'Al Día' }}</span>
+      </div>
+    </div>
+
+    <div class="luxury-card">
+      <div class="card-icon-box">💎</div>
+      <div class="card-info">
+        <span class="card-label">Minutos en Servicio</span>
+        <span class="card-value">{{ totalMinutes }} min</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Estado de carga -->
+  <div *ngIf="isLoading" class="loader-box">
+    <div class="custom-spinner"></div>
+    <p class="loading-text">Sincronizando registros de empleados y barberos...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage && !isLoading" class="custom-error-card">
+    <div class="error-badge">AVISO</div>
+    <div class="error-details">
+      <h3>Interrupción Temporal de Conexión</h3>
+      <p>{{ errorMessage }}</p>
+    </div>
+    <button type="button" class="btn-retry" (click)="loadCombinedHistory()">Reintentar</button>
+  </div>
+
+  <!-- Contenido principal -->
+  <main *ngIf="!isLoading && !errorMessage" class="table-wrapper-card">
+    <div *ngIf="historyList.length === 0" class="empty-classic-state">
+      <div class="empty-badge">📜</div>
+      <h3>Sin registros encontrados</h3>
+      <p>No se encontraron movimientos previos registrados para este empleado o barbero.</p>
+    </div>
+
+    <div class="table-scroll" *ngIf="historyList.length > 0">
+      <table class="classic-table">
+        <thead>
+          <tr>
+            <th>ID Referencia</th>
+            <th>Origen / Rol</th>
+            <th>Servicio / Notas</th>
+            <th *ngIf="activeTab === 'BARBER'">Barbero</th>
+            <th>Estado</th>
+            <th>Fecha de Cita</th>
+            <th>Duración</th>
+            <th>Fecha Registro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of historyList">
+            <td class="tx-cell">
+              <span class="tx-hash">#{{ item.id | slice:0:10 }}...</span>
+            </td>
+            <td>
+              <span class="source-badge" [ngClass]="{'source-barber': item.source === 'BARBER', 'source-employee': item.source === 'EMPLOYEE'}">
+                {{ item.source }}
+              </span>
+            </td>
+            <td class="service-name">{{ item.notes }}</td>
+            <td *ngIf="activeTab === 'BARBER'" class="tx-cell">
+              <span class="tx-hash">{{ item.employeeId | slice:0:8 }}…</span>
+            </td>
+            <td>
+              <span class="status-chip" [ngClass]="{
+                'chip-active': item.status === 'CONFIRMED' || item.status === 'COMPLETED' || item.status === 'APPROVED' || item.status === 'ACTIVE',
+                'chip-pending': item.status === 'PENDING',
+                'chip-expired': item.status === 'CANCELLED' || item.status === 'EXPIRED' || item.status === 'DECLINED'
+              }">
+                <span class="chip-dot"></span>
+                {{ item.status }}
+              </span>
+            </td>
+            <td class="date-text">{{ item.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="duration-text">{{ item.duration }} min</td>
+            <td class="date-text muted">{{ item.creationDate | date: 'mediumDate' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>

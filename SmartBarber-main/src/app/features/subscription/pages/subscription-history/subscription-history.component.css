@@ -1,0 +1,332 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.history-page {
+  position: relative;
+  min-height: 100vh;
+  background-color: #f7f4ef; /* Fondo base crema/beige */
+  padding: 2.5rem 2rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Destello ambiental en la esquina superior */
+.bg-glow {
+  position: absolute;
+  top: -150px;
+  right: -150px;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(215, 204, 200, 0.4) 0%, rgba(247, 244, 239, 0) 70%);
+  pointer-events: none;
+}
+
+.history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header & Titulares Creativos */
+.creative-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px dashed #e4ded7;
+}
+
+.beige-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #e8e2d8;
+  color: #5c4033;
+  font-size: 0.725rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  border: 1px solid #d9d0c3;
+}
+
+.title-highlight {
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: #2b1a14; /* Marrón café oscuro */
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.5px;
+}
+
+/* EFECTO DESTACADO BEIGE EN EL TEXTO */
+.text-beige-box {
+  background: linear-gradient(120deg, #e6ded3 0%, #d8ccc0 100%);
+  color: #3b241c;
+  padding: 0.1rem 0.6rem;
+  border-radius: 8px;
+  box-shadow: 2px 3px 0px #8c6d58;
+  display: inline-block;
+}
+
+.subtitle {
+  color: #7a6558;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Botón Sincronizar */
+.btn-refresh-luxury {
+  background: #3b241c;
+  color: #f7f4ef;
+  border: 1px solid #57392d;
+  padding: 0.75rem 1.4rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(59, 36, 28, 0.15);
+  transition: all 0.25s ease;
+}
+
+.btn-refresh-luxury:hover {
+  background: #2b1a14;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px rgba(59, 36, 28, 0.25);
+}
+
+.btn-refresh-luxury:hover .spin-icon {
+  transform: rotate(180deg);
+  transition: transform 0.5s ease;
+}
+
+/* Métricas Tarjetas */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.luxury-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1.35rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  border: 1px solid #eae3d9;
+  box-shadow: 0 4px 14px rgba(92, 64, 51, 0.04);
+  overflow: hidden;
+}
+
+.card-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #8c6d58;
+}
+
+.card-icon-box {
+  width: 48px;
+  height: 48px;
+  background-color: #f4efe8;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  border: 1px solid #e2d9cd;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-label {
+  font-size: 0.8rem;
+  color: #8c7668;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #2b1a14;
+}
+
+/* Tabla Estilizada Creativa */
+.table-wrapper-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #eae3d9;
+  box-shadow: 0 8px 30px rgba(92, 64, 51, 0.06);
+  overflow: hidden;
+}
+
+.creative-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.creative-table th {
+  background-color: #f2ebd9; /* Fondo beige elegante para cabeceras */
+  color: #4a3429;
+  padding: 1.2rem 1.5rem;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-bottom: 2px solid #e0d5c5;
+}
+
+.creative-table td {
+  padding: 1.15rem 1.5rem;
+  border-bottom: 1px solid #f3ede5;
+  color: #3b241c;
+  font-size: 0.9rem;
+}
+
+.creative-table tbody tr:hover {
+  background-color: #fbf9f5;
+}
+
+.tx-hash {
+  font-family: 'Courier New', Courier, monospace;
+  background: #f4efe8;
+  color: #6b4e3d;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid #e4dad0;
+}
+
+/* Status Chips */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.chip-active {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+.chip-active .chip-dot { background-color: #2e7d32; }
+
+.chip-pending {
+  background-color: #fff8e1;
+  color: #b78103;
+}
+.chip-pending .chip-dot { background-color: #f57f17; }
+
+.chip-expired {
+  background-color: #ffebee;
+  color: #b71c1c;
+}
+.chip-expired .chip-dot { background-color: #c62828; }
+
+.price-text {
+  font-weight: 800;
+  color: #2b1a14;
+}
+
+.date-text {
+  color: #6b5548;
+}
+
+/* Card de Error 503 */
+.custom-error-card {
+  background: #ffffff;
+  border: 1px solid #f5c6cb;
+  border-left: 6px solid #d9534f;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 8px 20px rgba(217, 83, 79, 0.08);
+}
+
+.error-badge {
+  background: #f8d7da;
+  color: #721c24;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+}
+
+.error-details h3 {
+  margin: 0 0 0.25rem 0;
+  color: #2b1a14;
+  font-size: 1.1rem;
+}
+
+.error-details p {
+  margin: 0;
+  color: #6b5548;
+  font-size: 0.9rem;
+}
+
+.btn-retry {
+  margin-left: auto;
+  background-color: #8c6d58;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-retry:hover {
+  background-color: #6b4e3d;
+}
+
+/* Loader */
+.loader-box {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.custom-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e8e2d8;
+  border-top-color: #3b241c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
