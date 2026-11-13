@@ -30,16 +30,6 @@ export interface Barbero {
   scheduleId?: number | string | null;
 }
 
-export interface Servicio {
-  id: number;
-  name: string;
-  description?: string;
-  duration?: number;
-  price: number;
-  special_price?: number | null;
-  offert?: boolean;
-}
-
 export interface SlotHorario {
   hora: string;
   disponible: boolean;
@@ -49,6 +39,19 @@ export interface SlotHorario {
 export interface RangoOcupado {
   ini: number; // minutos desde las 00:00 (hora Colombia)
   fin: number;
+}
+
+// Servicio ofrecido por una barbería (lo usan appointment, servicio-list y resumen-reserva)
+export interface Servicio {
+  id: number;
+  id_servicio?: number;
+  name: string;
+  description?: string;
+  duration?: number;
+  price: number;
+  special_price?: number;
+  offert?: boolean;
+  [key: string]: any; // el backend puede enviar campos extra
 }
 
 export type HistoryScope = 'customer' | 'employee' | 'barbershop';

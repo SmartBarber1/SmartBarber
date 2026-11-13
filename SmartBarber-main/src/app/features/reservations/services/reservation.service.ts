@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, from, throwError } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { Observable, from, of, throwError } from 'rxjs';
+import { switchMap, catchError, map } from 'rxjs/operators';
 import { getAuth } from 'firebase/auth';
 import { environment } from '../../../../environments/environment';
 import { HistoryScope, ReservationHistoryItem } from '../models/reservation.model';
@@ -67,14 +67,14 @@ export class ReservationService {
     );
   }
 
-  // Horario del empleado: GET /schedule-service/empleado/{idEmpleado}
-  getScheduleById(employeeId: number | string): Observable<any> {
+  // El id es el del HORARIO (numerico), por ejemplo /schedule-service/id/5
+  getScheduleById(scheduleId: number | string): Observable<any> {
     return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.get(`${this.apiUrl}/schedule-service/empleado/${employeeId}`, { headers }))
+      switchMap(headers => this.http.get(`${this.apiUrl}/schedule-service/empleado/${scheduleId}`, { headers }))
     );
   }
 
-  // Reservas del empleado en un día (YYYY-MM-DD): GET /reservation-service/employee/{idEmpleado}?date=
+  // Endpoint que debe crear el backend: reservas del empleado en un dia (YYYY-MM-DD)
   getReservationsByEmployee(employeeId: string, date: string): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.get(
@@ -90,19 +90,29 @@ export class ReservationService {
     const segment = scope === 'barbershop' ? 'barber' : scope;
     return this.getAuthHeaders().pipe(
       switchMap(headers =>
-        this.http.get<ReservationHistoryItem[]>(
-          `${this.apiUrl}/reservation-service/${segment}/${id}`,
-          { headers }
-        )
+        this.http.get<any>(`${this.apiUrl}/reservation-service/${segment}/${id}`, { headers })
+      ),
+      // El backend puede responder una lista directa o { data: [...] }
+      map(res => (Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : [])) as ReservationHistoryItem[]),
+      // Cuando no hay reservas el backend responde 409 con codigo RES_002: se trata como lista vacia
+      catchError(err =>
+        err?.error?.data?.code === 'RES_002' || err?.error?.code === 'RES_002'
+          ? of([] as ReservationHistoryItem[])
+          : throwError(() => err)
       )
+    );
+  }
+
+  // Datos de un barbero (employee-service/id/{id})
+  getEmployeeById(employeeId: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.get(`${this.apiUrl}/employee-service/id/${employeeId}`, { headers }))
     );
   }
 
   createReservation(payload: any): Observable<any> {
     return this.getAuthHeaders().pipe(
-      switchMap(headers =>
-        this.http.post(`${this.apiUrl}/reservation-service`, payload, { headers })
-      )
+      switchMap(headers => this.http.post(`${this.apiUrl}/reservation-service/create`, payload, { headers }))
     );
   }
 }

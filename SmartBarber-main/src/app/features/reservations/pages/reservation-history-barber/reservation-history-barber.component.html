@@ -29,6 +29,31 @@
     </button>
   </nav>
 
+  <!-- Filtros: barbería y barbero -->
+  <section class="filters-row">
+    <div class="filter-group">
+      <label class="filter-label" for="barberiaSelect">Barbería</label>
+      <select id="barberiaSelect" class="filter-select" (change)="onBarberiaChange($any($event.target).value)">
+        <option *ngIf="barberias.length === 0" value="" disabled selected>Sin barberías disponibles</option>
+        <option *ngFor="let b of barberias" [value]="b.id" [selected]="b.id === selectedBarberiaId">{{ b.name }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group" *ngIf="activeTab === 'EMPLOYEE'">
+      <label class="filter-label" for="barberoSelect">Barbero</label>
+      <select id="barberoSelect" class="filter-select" (change)="onBarberoChange($any($event.target).value)">
+        <option *ngIf="barberos.length === 0" value="" disabled selected>Sin barberos en esta sede</option>
+        <option *ngFor="let e of barberos" [value]="e.id" [selected]="e.id === selectedEmployeeId">{{ e.name }}</option>
+      </select>
+    </div>
+
+    <div class="barber-detail" *ngIf="activeTab === 'EMPLOYEE' && selectedEmployee">
+      <strong>{{ selectedEmployee.name }}</strong>
+      <span *ngIf="selectedEmployee.email">{{ selectedEmployee.email }}</span>
+      <span *ngIf="selectedEmployee.phone">{{ selectedEmployee.phone }}</span>
+    </div>
+  </section>
+
   <!-- Tarjetas métricas (Los 3 ítems exactos solicitados) -->
   <section class="metrics-row" *ngIf="!isLoading && !errorMessage">
     <div class="luxury-card">
@@ -106,7 +131,7 @@
             </td>
             <td class="service-name">{{ item.notes }}</td>
             <td *ngIf="activeTab === 'BARBER'" class="tx-cell">
-              <span class="tx-hash">{{ item.employeeId | slice:0:8 }}…</span>
+              <span class="tx-hash">{{ barberName(item.employeeId) }}</span>
             </td>
             <td>
               <span class="status-chip" [ngClass]="{

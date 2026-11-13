@@ -364,3 +364,82 @@
   color: #3e2723;
   border-bottom-color: #795548;
 }
+/* ---- Filtros ---- */
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 240px;
+}
+
+.filter-label {
+  color: #7c6a5d;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.filter-select {
+  padding: 0.65rem 2.5rem 0.65rem 1rem;
+  border: 1px solid #c8b9ab;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #3e2723;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238c6d58' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  box-shadow: 0 2px 4px rgba(62, 39, 35, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-select:hover {
+  border-color: #8c6d58;
+}
+
+.filter-select:focus {
+  border-color: #795548;
+  box-shadow: 0 0 0 3px rgba(121, 85, 72, 0.15);
+}
+
+/* Tarjeta con los datos del barbero seleccionado */
+.barber-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 1rem;
+  border-left: 3px solid #795548;
+  background: #f7f3ee;
+  border-radius: 4px;
+}
+
+.barber-detail strong {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #2c1b18;
+  font-size: 1.05rem;
+}
+
+.barber-detail span {
+  color: #6d5d53;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 600px) {
+  .filter-group {
+    min-width: 100%;
+  }
+}
