@@ -30,9 +30,6 @@ export interface SelectedEmployee {
   phone?: string;
 }
 
-// ID de barberia de respaldo si la lista de barberias no carga y la sesion no lo trae
-const DEFAULT_BARBERSHOP_ID = '55c1c44d-49ab-4267-b6f5-f6e78028b9f6';
-
 @Component({
   selector: 'app-reservation-history-barber',
   standalone: true,
@@ -46,12 +43,13 @@ export class ReservationHistoryBarberComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
 
   // EMPLOYEE -> reservas del barbero seleccionado (/reservation-service/employee/{employeeId})
-  // BARBER   -> todas las reservas de la barberia (/reservation-service/barber/{barbershopId})
+  // BARBER   -> todas las reservas de la barbería de la sesión (/reservation-service/barber/{barbershopId})
   activeTab: BarberHistoryTab = 'EMPLOYEE';
 
-  barberias: SelectOption[] = [];
+  // La barbería se reconoce automáticamente desde la sesión
+  barbershopId = '';
+
   barberos: SelectOption[] = [];
-  selectedBarberiaId = '';
   selectedEmployeeId = '';
   selectedEmployee: SelectedEmployee | null = null;
 
@@ -63,45 +61,35 @@ export class ReservationHistoryBarberComponent implements OnInit {
     this.init();
   }
 
-  private async init(): Promise<void> {
-    this.isLoading = true;
-    this.cdr.markForCheck();
+  private resolveBarbershopId(): string {
+    const s: any = this.sessionService.currentSession;
+    return s?.barbershopId ?? '';
+  }
 
-    try {
-      const res: any = await firstValueFrom(this.reservationService.getBarberias());
-      const raw = res?.data ?? res;
-      const list = Array.isArray(raw) ? raw : (raw ? [raw] : []);
-      this.barberias = list.map((b: any) => ({
-        id: b.id || b.id_barberia,
-        name: b.location ? `${b.name} - ${b.location}` : (b.name || b.nombre || 'Barbería')
-      }));
-    } catch (err) {
-      console.error('Error al cargar barberías:', err);
-      this.barberias = [];
+  private async init(): Promise<void> {
+    this.barbershopId = this.resolveBarbershopId();
+
+    if (!this.barbershopId) {
+      this.historyList = [];
+      this.isLoading = false;
+      this.errorMessage = 'No se encontró la barbería asociada a la sesión actual.';
+      this.cdr.markForCheck();
+      return;
     }
 
-    this.selectedBarberiaId = this.pickDefaultBarberiaId();
     await this.loadBarberos();
     await this.loadCombinedHistory();
   }
 
-  private pickDefaultBarberiaId(): string {
-    const s: any = this.sessionService.currentSession;
-    const ids = this.barberias.map(b => b.id);
-    const preferred = [s?.barbershopId, DEFAULT_BARBERSHOP_ID].find(id => id && ids.includes(id));
-    return preferred ?? ids[0] ?? s?.barbershopId ?? DEFAULT_BARBERSHOP_ID;
-  }
-
+  // Barberos de la barbería de la sesión
   private async loadBarberos(): Promise<void> {
     this.barberos = [];
     this.selectedEmployeeId = '';
     this.selectedEmployee = null;
 
-    if (!this.selectedBarberiaId) return;
-
     try {
       const res: any = await firstValueFrom(
-        this.reservationService.getEmployeesByBarberiaId(this.selectedBarberiaId)
+        this.reservationService.getEmployeesByBarberiaId(this.barbershopId)
       );
       const raw = res?.data ?? res;
       const list = Array.isArray(raw) ? raw : (raw ? [raw] : []);
@@ -149,15 +137,18 @@ export class ReservationHistoryBarberComponent implements OnInit {
     this.loadCombinedHistory();
   }
 
-  async onBarberiaChange(id: string): Promise<void> {
-    this.selectedBarberiaId = id;
-    await this.loadBarberos();
-    await this.loadCombinedHistory();
-  }
-
   async onBarberoChange(id: string): Promise<void> {
     this.selectedEmployeeId = id;
     await this.loadSelectedEmployee();
+    await this.loadCombinedHistory();
+  }
+
+  // Botones "Sincronizar" y "Reintentar"
+  async reload(): Promise<void> {
+    if (!this.barbershopId) {
+      await this.init();
+      return;
+    }
     await this.loadCombinedHistory();
   }
 
@@ -172,12 +163,12 @@ export class ReservationHistoryBarberComponent implements OnInit {
 
   async loadCombinedHistory(): Promise<void> {
     const isEmployee = this.activeTab === 'EMPLOYEE';
-    const id = isEmployee ? this.selectedEmployeeId : this.selectedBarberiaId;
+    const id = isEmployee ? this.selectedEmployeeId : this.barbershopId;
 
     this.errorMessage = '';
 
     if (!id) {
-      // Sin barbero/barbería seleccionados: se muestra el estado vacío
+      // Sin barbero disponible: se muestra el estado vacío
       this.historyList = [];
       this.isLoading = false;
       this.cdr.markForCheck();
