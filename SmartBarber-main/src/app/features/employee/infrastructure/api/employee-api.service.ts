@@ -35,13 +35,25 @@ import {
 } from '../../domain/models/employee-registration.model';
 
 import {
+    AccessAction,
+    TeamMember
+} from '../../domain/models/team-member.model';
+
+import {
     EmployeeResponse,
+    TeamMemberResponse,
     mapEmployeeResponse,
-    mapOnboardingResponse
+    mapOnboardingResponse,
+    mapTeamMemberResponse
 } from '../mappers/employee.mapper';
 
 /** Código con el que el backend responde "empleado no encontrado" (HTTP 409). */
 const EMPLOYEE_NOT_FOUND_CODE = 'CT_004';
+
+const ACCESS_PATH: Record<AccessAction, string> = {
+    BLOCK: 'block-employee',
+    UNBLOCK: 'unblock-employee'
+};
 
 @Injectable({
     providedIn: 'root'
@@ -98,6 +110,31 @@ export class EmployeeApiService
                 ),
                 // Sin barberos, el backend responde "no encontrado".
                 catchError(error => isNotFound(error) ? of([]) : throwError(() => error))
+            );
+    }
+
+    override getTeam(): Observable<TeamMember[]> {
+        return this.http
+            .get<TeamMemberResponse[] | null>(`${this.baseUrl}/employee-service/team`)
+            .pipe(
+                map(response =>
+                    (Array.isArray(response) ? response : []).map(mapTeamMemberResponse)
+                )
+            );
+    }
+
+    override changeAccess(
+        employeeId: string,
+        action: AccessAction,
+        reason: string | null
+    ): Observable<TeamMember> {
+        return this.http
+            .patch<TeamMemberResponse>(
+                `${this.baseUrl}/employee-service/${ACCESS_PATH[action]}/${encodeURIComponent(employeeId)}`,
+                { reason }
+            )
+            .pipe(
+                map(mapTeamMemberResponse)
             );
     }
 

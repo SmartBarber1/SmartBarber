@@ -5,7 +5,7 @@ import { roleGuard } from '../../core/auth/guards/role.guard';
 
 import { GetStatisticsDashboardUseCase } from './application/use-cases/get-statistics-dashboard.use-case';
 import { StatisticsRepository } from './domain/repositories/statistics.repository';
-import { StatisticsMockRepository } from './infrastructure/mock/statistics-mock.repository';
+import { StatisticsApiRepository } from './infrastructure/api/statistics-api.repository';
 
 export const STATISTICS_ROUTES: Routes = [
   {
@@ -21,8 +21,9 @@ export const STATISTICS_ROUTES: Routes = [
     },
 
     providers: [
-      // Datos quemados: reemplazar por el adaptador HTTP cuando exista el endpoint.
-      { provide: StatisticsRepository, useClass: StatisticsMockRepository },
+      // Datos reales del backend. Para una demostración sin backend se puede
+      // registrar StatisticsMockRepository (infrastructure/mock) en su lugar.
+      { provide: StatisticsRepository, useClass: StatisticsApiRepository },
       GetStatisticsDashboardUseCase
     ],
 

@@ -37,7 +37,14 @@ import {
   formatRating
 } from '../../utils/statistics-format';
 
+import { toApiError } from '../../../../core/errors';
+
 type RevenueBreakdown = 'SERVICE' | 'BARBER';
+
+const STATISTICS_ERROR_MESSAGES = {
+  HTTP_401: 'Tu sesión expiró. Vuelve a iniciar sesión para ver las estadísticas.',
+  DEFAULT: 'No se pudieron cargar las estadísticas. Intenta de nuevo en unos minutos.'
+} as const;
 
 type LoadResult =
   | { dashboard: StatisticsDashboard }
@@ -319,11 +326,11 @@ export class StatisticsDashboardComponent {
       return;
     }
 
-    // No se exponen detalles técnicos del error al usuario.
+    // No se exponen detalles técnicos: solo los mensajes del catálogo de errores.
     this.errorMessage.set(
       error instanceof StatisticsAccessError
         ? error.message
-        : 'No se pudieron cargar las estadísticas. Intenta de nuevo en unos minutos.'
+        : toApiError(error, STATISTICS_ERROR_MESSAGES).message
     );
   }
 }

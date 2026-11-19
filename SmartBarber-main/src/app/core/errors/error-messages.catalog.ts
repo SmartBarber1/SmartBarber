@@ -29,6 +29,10 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
 
     // Barberos (empleados)
     EY_001: 'Los datos del barbero no son válidos.',
+    EY_002: 'Solo el administrador de la barbería puede bloquear o desbloquear barberos.',
+    EY_003: 'No puedes bloquear ni desbloquear tu propia cuenta.',
+    EY_004: 'Solo se puede bloquear o desbloquear a los barberos.',
+    EY_005: 'Escribe el motivo del bloqueo (entre 5 y 200 caracteres).',
 
     // Clientes y empleados (el backend usa los mismos códigos para ambos)
     CT_001: 'Los datos enviados no son válidos.',
@@ -86,6 +90,10 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
     ND_005: 'El rango de fechas consultado no es válido.',
     ND_006: 'La barbería no atiende en esa fecha. Elige otro día.',
     ND_007: 'Solo el administrador de la barbería puede gestionar los días no laborables.',
+
+    // Estadísticas
+    AN_001: 'El rango de fechas no es válido. Revisa que la fecha inicial no sea posterior a la final ni a hoy.',
+    AN_002: 'Solo el administrador de la barbería puede consultar las estadísticas.',
 
     // Errores técnicos
     TECH_001: 'Hay datos con formato inválido. Revisa la información e inténtalo de nuevo.',
