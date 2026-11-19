@@ -397,6 +397,16 @@ export class PanelNavigationService {
             roles: [ 'ADMIN' ],
             visible: false
           },
+{
+  id: 'agenda',
+  label: 'Agenda de reservas',
+  description: 'Historial, confirmación, cancelación y calificación de reservas.',
+  icon: 'calendar',
+  route: '/panel/agenda',
+  roles: ['BARBER', 'ADMIN'],
+  status: 'AVAILABLE',
+  visible: true
+},
           {
             id: 'services',
 

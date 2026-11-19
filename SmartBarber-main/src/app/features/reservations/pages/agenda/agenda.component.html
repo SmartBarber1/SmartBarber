@@ -1,0 +1,57 @@
+<div class="agenda-container">
+  <header class="agenda-header">
+    <div>
+      <span class="agenda-tag">✦ PANEL DE BARBERO</span>
+      <h1 class="agenda-title">Mi <span class="agenda-accent">Agenda</span></h1>
+      <p class="agenda-subtitle">Tus citas organizadas por día. Para confirmar, cancelar o calificar usa el historial de reservas.</p>
+    </div>
+    <button type="button" class="btn-refresh" (click)="load()">Sincronizar</button>
+  </header>
+
+  <nav class="agenda-tabs">
+    <button type="button" class="agenda-tab" *ngFor="let v of views"
+            [class.active]="activeView === v.key" (click)="setView(v.key)">
+      {{ v.label }}
+      <span class="tab-count" *ngIf="!isLoading && !errorMessage">{{ countFor(v.key) }}</span>
+    </button>
+  </nav>
+
+  <div *ngIf="isLoading" class="state-box">Cargando agenda...</div>
+
+  <div *ngIf="errorMessage && !isLoading" class="state-box state-error">
+    <p>{{ errorMessage }}</p>
+    <button type="button" class="btn-primary" (click)="load()">Reintentar</button>
+  </div>
+
+  <main *ngIf="!isLoading && !errorMessage">
+    <div *ngIf="days.length === 0" class="state-box">
+      {{ activeView === 'PROXIMAS' ? 'No tienes citas próximas.' : 'No hay citas anteriores.' }}
+    </div>
+
+    <section class="day-group" *ngFor="let day of days">
+      <h2 class="day-title">
+        <span class="day-name">{{ day.date | date: 'EEEE d \'de\' MMMM' }}</span>
+        <span class="today-badge" *ngIf="day.isToday">Hoy</span>
+        <span class="day-count">{{ day.items.length }} {{ day.items.length === 1 ? 'cita' : 'citas' }}</span>
+      </h2>
+
+      <ul class="slot-list">
+        <li class="slot" *ngFor="let item of day.items">
+          <div class="slot-time">
+            <strong>{{ item.startTime | date: 'HH:mm' }}</strong>
+            <span>{{ endTime(item) | date: 'HH:mm' }}</span>
+          </div>
+
+          <div class="slot-body">
+            <span class="slot-title">{{ item.notes || 'Servicio' }}</span>
+            <span class="slot-meta">
+              {{ item.duration }} min · <span class="id-chip">#{{ item.id | slice:0:8 }}…</span>
+            </span>
+          </div>
+
+          <span class="status-chip" [ngClass]="statusClass(item.status)">{{ item.status }}</span>
+        </li>
+      </ul>
+    </section>
+  </main>
+</div>

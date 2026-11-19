@@ -168,6 +168,14 @@ export const PANEL_ROUTES: Routes = [
     import('../reservations/pages/reservation-history-barber/reservation-history-barber.component')
       .then(m => m.ReservationHistoryBarberComponent)
 },
+{
+  path: 'agenda',
+  canActivate: [authGuard, roleGuard],
+  data: { roles: ['BARBER', 'ADMIN'] },
+  loadComponent: () =>
+    import('../reservations/pages/agenda/agenda.component')
+      .then(m => m.AgendaComponent)
+},
       {
         path: 'clients-barbers-history',
         redirectTo: 'home'

@@ -46,7 +46,10 @@
     </div>
   </section>
 
-  <!-- Tarjetas métricas (Los 3 ítems exactos solicitados) -->
+  <!-- Mensaje de resultado de las acciones -->
+  <p class="history-feedback" *ngIf="feedback" role="status">{{ feedback }}</p>
+
+  <!-- Tarjetas métricas -->
   <section class="metrics-row" *ngIf="!isLoading && !errorMessage">
     <div class="luxury-card">
       <div class="card-icon-box">📅</div>
@@ -109,36 +112,77 @@
             <th>Fecha de Cita</th>
             <th>Duración</th>
             <th>Fecha Registro</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of historyList">
-            <td class="tx-cell">
-              <span class="tx-hash">#{{ item.id | slice:0:10 }}...</span>
-            </td>
-            <td>
-              <span class="source-badge" [ngClass]="{'source-barber': item.source === 'BARBER', 'source-employee': item.source === 'EMPLOYEE'}">
-                {{ item.source }}
-              </span>
-            </td>
-            <td class="service-name">{{ item.notes }}</td>
-            <td *ngIf="activeTab === 'BARBER'" class="tx-cell">
-              <span class="tx-hash">{{ barberName(item.employeeId) }}</span>
-            </td>
-            <td>
-              <span class="status-chip" [ngClass]="{
-                'chip-active': item.status === 'CONFIRMED' || item.status === 'COMPLETED' || item.status === 'APPROVED' || item.status === 'ACTIVE',
-                'chip-pending': item.status === 'PENDING',
-                'chip-expired': item.status === 'CANCELLED' || item.status === 'EXPIRED' || item.status === 'DECLINED'
-              }">
-                <span class="chip-dot"></span>
-                {{ item.status }}
-              </span>
-            </td>
-            <td class="date-text">{{ item.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
-            <td class="duration-text">{{ item.duration }} min</td>
-            <td class="date-text muted">{{ item.creationDate | date: 'mediumDate' }}</td>
-          </tr>
+          <ng-container *ngFor="let item of historyList">
+            <tr>
+              <td class="tx-cell">
+                <span class="tx-hash">#{{ item.id | slice:0:10 }}...</span>
+              </td>
+              <td>
+                <span class="source-badge" [ngClass]="{'source-barber': item.source === 'BARBER', 'source-employee': item.source === 'EMPLOYEE'}">
+                  {{ item.source }}
+                </span>
+              </td>
+              <td class="service-name">{{ item.notes }}</td>
+              <td *ngIf="activeTab === 'BARBER'" class="tx-cell">
+                <span class="tx-hash">{{ barberName(item.employeeId) }}</span>
+              </td>
+              <td>
+                <span class="status-chip" [ngClass]="{
+                  'chip-active': item.status === 'CONFIRMED' || item.status === 'COMPLETED' || item.status === 'APPROVED' || item.status === 'ACTIVE',
+                  'chip-pending': item.status === 'PENDING',
+                  'chip-expired': item.status === 'CANCELLED' || item.status === 'EXPIRED' || item.status === 'DECLINED'
+                }">
+                  <span class="chip-dot"></span>
+                  {{ item.status }}
+                </span>
+              </td>
+              <td class="date-text">{{ item.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="duration-text">{{ item.duration }} min</td>
+              <td class="date-text muted">{{ item.creationDate | date: 'mediumDate' }}</td>
+
+              <!-- Acciones según el estado de la reserva -->
+              <td class="action-cell">
+                <div class="action-group" *ngIf="hasActions(item)">
+                  <button type="button" class="btn-primary" *ngIf="canConfirm(item)"
+                          [disabled]="busyId === item.id" (click)="confirm(item)">Confirmar</button>
+
+                  <button type="button" class="btn-danger" *ngIf="canCancel(item)"
+                          [disabled]="busyId === item.id" (click)="cancel(item)">Cancelar</button>
+
+                  <ng-container *ngIf="canRate(item)">
+                    <span *ngIf="isRated(item.id)" class="rated-label">Calificada ✓</span>
+                    <button type="button" class="btn-outline" *ngIf="!isRated(item.id)"
+                            (click)="toggleRate(item)">
+                      {{ ratingOpenId === item.id ? 'Cerrar' : 'Calificar' }}
+                    </button>
+                  </ng-container>
+                </div>
+                <span class="no-action" *ngIf="!hasActions(item)">—</span>
+              </td>
+            </tr>
+
+            <!-- Fila desplegable para calificar -->
+            <tr class="rate-row" *ngIf="ratingOpenId === item.id && canRate(item) && !isRated(item.id)">
+              <td colspan="9">
+                <div class="rate-box">
+                  <div class="stars" role="radiogroup" aria-label="Calificación">
+                    <button type="button" *ngFor="let n of stars" class="star"
+                            [class.on]="n <= draft(item.id).rating"
+                            [attr.aria-label]="n + ' estrellas'" (click)="setRating(item.id, n)">★</button>
+                  </div>
+                  <input type="text" class="rate-input" placeholder="Comentario (opcional)"
+                         [value]="draft(item.id).comment"
+                         (input)="setComment(item.id, $any($event.target).value)" />
+                  <button type="button" class="btn-primary" [disabled]="busyId === item.id"
+                          (click)="submitRating(item)">Enviar calificación</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
       </table>
     </div>
