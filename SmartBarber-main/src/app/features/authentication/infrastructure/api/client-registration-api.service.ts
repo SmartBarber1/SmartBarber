@@ -58,11 +58,11 @@ export class ClientRegistrationApiService
 
 
     private readonly clientApiUrl =
-        `${environment.apiUrl}/public/client-service`;
+        `${environment.apiUrl}/public/customer-service`;
 
 
     private readonly onboardingApiUrl =
-        `${environment.apiUrl}/public/customer-service/onboarding`;
+        `${environment.apiUrl}/customer-service/onboarding`;
 
 
     /*

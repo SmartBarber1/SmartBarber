@@ -31,7 +31,7 @@ export abstract class ClientRegistrationRepository {
      * =====================================================
      * ONBOARDING CLIENTE
      *
-     * POST /public/customer-service/onboarding
+     * POST /customer-service/onboarding
      * =====================================================
      */
 

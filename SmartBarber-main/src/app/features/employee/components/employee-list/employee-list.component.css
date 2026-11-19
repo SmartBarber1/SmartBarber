@@ -234,6 +234,230 @@
     white-space: nowrap;
 }
 
+.card-subtitle {
+    max-width: 560px;
+    margin: 6px 0 0;
+    color: #71685e;
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.feedback {
+    margin-bottom: 16px;
+}
+
+.success-message {
+    border-color: #c7dcc4;
+    background: #f4faf3;
+    color: #2f5a2b;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.role-label {
+    display: block;
+    margin-top: 3px;
+    color: #8a7f72;
+    font-size: 12px;
+}
+
+/* Estado de la cuenta */
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border: 1px solid #c7dcc4;
+    border-radius: 999px;
+    background: #f4faf3;
+    color: #2f5a2b;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-badge[data-status='BLOCKED'] {
+    border-color: #e7c3bc;
+    background: #fff6f4;
+    color: #8e3931;
+}
+
+.status-badge[data-status='PENDING'],
+.status-badge[data-status='UNKNOWN'] {
+    border-color: #e1d7c8;
+    background: #faf7f1;
+    color: #6b5333;
+}
+
+tr.is-blocked td {
+    background: #fdf9f7;
+}
+
+tr.is-blocked td strong {
+    color: #6f655b;
+}
+
+.status-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.block-reason {
+    max-width: 220px;
+    color: #8e3931;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.block-date {
+    color: #8a7f72;
+}
+
+.reason-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #80633e;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.reason-input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 64px;
+    padding: 9px 11px;
+    border: 1px solid #d8cbb8;
+    border-radius: 7px;
+    background: #fff;
+    color: #29231e;
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.reason-input:focus {
+    border-color: #8b683b;
+    outline: 2px solid rgba(139, 104, 59, 0.2);
+    outline-offset: 0;
+}
+
+.reason-input[aria-invalid='true'] {
+    border-color: #c98a80;
+}
+
+.reason-hint {
+    display: block;
+    margin: 6px 0 10px;
+    color: #8a7f72;
+    font-size: 12px;
+}
+
+.reason-hint.reason-error {
+    color: #8e3931;
+}
+
+/* Bloquear / desbloquear */
+.access-cell {
+    min-width: 132px;
+    text-align: right;
+}
+
+.access-button {
+    white-space: nowrap;
+}
+
+.access-button:not(.unblock):hover:not(:disabled) {
+    border-color: #c98a80;
+    background: #fff6f4;
+    color: #8e3931;
+}
+
+.access-button:disabled {
+    cursor: not-allowed;
+}
+
+.access-confirm {
+    min-width: 240px;
+    padding: 12px;
+    border: 1px solid #e6ded2;
+    border-radius: 8px;
+    background: #fffdfa;
+    text-align: left;
+}
+
+.access-confirm p {
+    margin: 0 0 10px;
+    color: #4d443a;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.access-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.danger-button,
+.primary-button {
+    min-height: 44px;
+    padding: 9px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    transition: 0.2s ease;
+}
+
+.danger-button {
+    background: #a3433a;
+}
+
+.danger-button:hover:not(:disabled) {
+    background: #86342c;
+}
+
+.primary-button {
+    background: #8b683b;
+}
+
+.primary-button:hover:not(:disabled) {
+    background: #6f522d;
+}
+
+.danger-button:disabled,
+.primary-button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.muted {
+    color: #b3a796;
+}
+
+button:focus-visible {
+    outline: 2px solid #8b683b;
+    outline-offset: 2px;
+}
+
 /* Celular: cada barbero se muestra como una tarjeta */
 @media (max-width: 760px) {
     .card-heading,
@@ -281,6 +505,18 @@
 
     .employee-table td:last-child {
         border-bottom: 0;
+    }
+
+    .access-cell {
+        text-align: left;
+    }
+
+    .access-confirm {
+        min-width: 0;
+    }
+
+    .access-actions button {
+        flex: 1 1 auto;
     }
 
     .employee-table td::before {

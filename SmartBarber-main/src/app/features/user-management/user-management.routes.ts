@@ -26,8 +26,11 @@ import {
     CreateEmployeeUseCase
 } from '../employee/application/use-cases/create-employee.use-case';
 import {
-    GetEmployeesByBarbershopUseCase
-} from '../employee/application/use-cases/get-employees-by-barbershop.use-case';
+    GetTeamUseCase
+} from '../employee/application/use-cases/get-team.use-case';
+import {
+    ChangeEmployeeAccessUseCase
+} from '../employee/application/use-cases/change-employee-access.use-case';
 import {
     SearchEmployeeUseCase
 } from '../employee/application/use-cases/search-employee.use-case';
@@ -59,7 +62,8 @@ export const USER_MANAGEMENT_ROUTES:
                 },
 
                 CreateEmployeeUseCase,
-                GetEmployeesByBarbershopUseCase,
+                GetTeamUseCase,
+                ChangeEmployeeAccessUseCase,
                 SearchEmployeeUseCase
             ],
 

@@ -2,6 +2,7 @@
     <div>
         <span class="card-eyebrow">EQUIPO</span>
         <h2 id="employee-list-title">Barberos de la barbería</h2>
+        <p class="card-subtitle">Un barbero bloqueado no puede iniciar sesión ni atender clientes hasta que lo desbloquees.</p>
     </div>
 
     <div class="heading-actions">
@@ -13,6 +14,15 @@
         </button>
     </div>
 </div>
+
+@if (feedback(); as message) {
+    <div class="message feedback"
+         [class.success-message]="message.kind === 'success'"
+         [class.error-message]="message.kind === 'error'"
+         [attr.role]="message.kind === 'error' ? 'alert' : 'status'">
+        {{ message.text }}
+    </div>
+}
 
 @if (loading() && employees().length === 0) {
     <div class="list-state" role="status">
@@ -40,17 +50,20 @@
                     <th scope="col">Contacto</th>
                     <th scope="col">Especialidades</th>
                     <th scope="col">Registro</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col"><span class="visually-hidden">Acceso</span></th>
                 </tr>
             </thead>
             <tbody>
                 @for (employee of employees(); track employee.id) {
-                    <tr>
+                    <tr [class.is-blocked]="employee.status === 'BLOCKED'">
                         <td data-label="Barbero">
                             <span>
                                 <strong>{{ employee.name }}</strong>
                                 @if (employee.id === currentEmployeeId) {
                                     <span class="you-badge">Tú</span>
                                 }
+                                <span class="role-label">{{ roleLabel(employee) }}</span>
                             </span>
                         </td>
                         <td data-label="Documento">
@@ -77,6 +90,82 @@
                         </td>
                         <td data-label="Registro">
                             {{ employee.createAt ? (employee.createAt | date: 'dd/MM/yyyy') : '—' }}
+                        </td>
+                        <td data-label="Estado">
+                            <span class="status-cell">
+                                <span class="status-badge" [attr.data-status]="employee.status">
+                                    {{ statusLabel(employee) }}
+                                </span>
+                                @if (employee.status === 'BLOCKED' && employee.blockReason) {
+                                    <span class="block-reason">
+                                        {{ employee.blockReason }}
+                                        @if (employee.blockedAt) {
+                                            <span class="block-date">· desde {{ employee.blockedAt | date: 'dd/MM/yyyy' }}</span>
+                                        }
+                                    </span>
+                                }
+                            </span>
+                        </td>
+                        <td data-label="Acceso" class="access-cell">
+                            @if (accessActionFor(employee); as action) {
+                                @if (isPending(employee)) {
+                                    <div class="access-confirm" role="group"
+                                         [attr.aria-label]="(action === 'BLOCK' ? 'Confirmar bloqueo de ' : 'Confirmar desbloqueo de ') + employee.name">
+                                        <p>
+                                            @if (action === 'BLOCK') {
+                                                ¿Bloquear a <strong>{{ employee.name }}</strong>? No podrá iniciar sesión ni atender clientes.
+                                            } @else {
+                                                ¿Desbloquear a <strong>{{ employee.name }}</strong>? Podrá volver a iniciar sesión.
+                                            }
+                                        </p>
+                                        @if (action === 'BLOCK') {
+                                            <label class="reason-label" [attr.for]="'block-reason-' + employee.id">Motivo del bloqueo</label>
+                                            <textarea class="reason-input"
+                                                      rows="2"
+                                                      [id]="'block-reason-' + employee.id"
+                                                      [attr.maxlength]="reasonMax"
+                                                      [value]="reasonDraft()"
+                                                      (input)="updateReason($any($event.target).value)"
+                                                      [attr.aria-invalid]="reasonError() ? 'true' : null"
+                                                      [attr.aria-describedby]="'block-reason-hint-' + employee.id"
+                                                      placeholder="Ej. No se presentó a sus turnos de la semana"></textarea>
+                                            <span class="reason-hint" [id]="'block-reason-hint-' + employee.id"
+                                                  [class.reason-error]="reasonError()">
+                                                {{ reasonError() ?? 'Queda registrado en el historial. Mínimo 5 caracteres.' }}
+                                            </span>
+                                        }
+                                        <div class="access-actions">
+                                            <button type="button" class="secondary-button"
+                                                    (click)="cancelAccessChange()"
+                                                    [disabled]="processingId() === employee.id">
+                                                Cancelar
+                                            </button>
+                                            <button type="button"
+                                                    [class.danger-button]="action === 'BLOCK'"
+                                                    [class.primary-button]="action === 'UNBLOCK'"
+                                                    (click)="confirmAccessChange(employee)"
+                                                    [disabled]="processingId() === employee.id">
+                                                @if (processingId() === employee.id) {
+                                                    Guardando…
+                                                } @else {
+                                                    {{ action === 'BLOCK' ? 'Sí, bloquear' : 'Sí, desbloquear' }}
+                                                }
+                                            </button>
+                                        </div>
+                                    </div>
+                                } @else {
+                                    <button type="button"
+                                            class="secondary-button access-button"
+                                            [class.unblock]="action === 'UNBLOCK'"
+                                            (click)="requestAccessChange(employee, action)"
+                                            [disabled]="processingId() !== null"
+                                            [attr.aria-label]="(action === 'BLOCK' ? 'Bloquear a ' : 'Desbloquear a ') + employee.name">
+                                        {{ action === 'BLOCK' ? 'Bloquear' : 'Desbloquear' }}
+                                    </button>
+                                }
+                            } @else {
+                                <span class="muted" aria-hidden="true">—</span>
+                            }
                         </td>
                     </tr>
                 }

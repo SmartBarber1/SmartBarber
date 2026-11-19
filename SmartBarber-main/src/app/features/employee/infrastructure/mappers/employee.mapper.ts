@@ -6,6 +6,12 @@ import {
     EmployeeRegistrationResponse
 } from '../../domain/models/employee-registration.model';
 
+import {
+    AccountStatus,
+    TeamMember,
+    TeamRole
+} from '../../domain/models/team-member.model';
+
 /** Respuesta de GET /employee-service/barbershop/{id} (EmployeeRsDto). */
 export interface EmployeeResponse {
     id: string;
@@ -54,5 +60,30 @@ export function mapOnboardingResponse(
         specialty: response.specialty,
         createAt: response.createAt,
         updateAt: response.updateAt ?? null
+    };
+}
+
+/** Respuesta de GET /employee-service/team y de bloquear/desbloquear (TeamMemberRsDto). */
+export interface TeamMemberResponse extends EmployeeResponse {
+    status: string | null;
+    role: string | null;
+    blockReason?: string | null;
+    blockedAt?: string | null;
+}
+
+const ACCOUNT_STATUSES: readonly AccountStatus[] = ['ACTIVE', 'BLOCKED', 'PENDING'];
+
+const TEAM_ROLES: readonly TeamRole[] = ['ADMIN', 'BARBER'];
+
+export function mapTeamMemberResponse(response: TeamMemberResponse): TeamMember {
+    const status = ACCOUNT_STATUSES.find(value => value === response.status) ?? 'UNKNOWN';
+    const role = TEAM_ROLES.find(value => value === response.role) ?? null;
+
+    return {
+        ...mapEmployeeResponse(response),
+        status,
+        role,
+        blockReason: response.blockReason?.trim() || null,
+        blockedAt: response.blockedAt ?? null
     };
 }

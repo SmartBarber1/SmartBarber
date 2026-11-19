@@ -35,13 +35,25 @@ import {
 } from '../../domain/models/employee-registration.model';
 
 import {
+    AccessAction,
+    TeamMember
+} from '../../domain/models/team-member.model';
+
+import {
     EmployeeResponse,
+    TeamMemberResponse,
     mapEmployeeResponse,
-    mapOnboardingResponse
+    mapOnboardingResponse,
+    mapTeamMemberResponse
 } from '../mappers/employee.mapper';
 
 /** Código con el que el backend responde "empleado no encontrado" (HTTP 409). */
 const EMPLOYEE_NOT_FOUND_CODE = 'CT_004';
+
+const ACCESS_PATH: Record<AccessAction, string> = {
+    BLOCK: 'block-employee',
+    UNBLOCK: 'unblock-employee'
+};
 
 @Injectable({
     providedIn: 'root'
@@ -56,9 +68,9 @@ export class EmployeeApiService
         environment.apiUrl;
 
     /**
-     * El backend identifica la cuenta nueva con el token que llega en
-     * Authorization, por eso aquí va el token del barbero y no el del
-     * administrador (el interceptor no lo reemplaza si ya existe).
+     * Authorization: token del administrador (lo agrega el interceptor y el
+     * backend verifica que sea ADMIN de esta barbería).
+     * idToken: token de la cuenta de Google del barbero nuevo.
      */
     override createEmployee(
         request: EmployeeRegistration,
@@ -71,7 +83,6 @@ export class EmployeeApiService
                 request,
                 {
                     headers: new HttpHeaders({
-                        Authorization: `Bearer ${employeeIdToken}`,
                         idToken: `Bearer ${employeeIdToken}`
                     })
                 }
@@ -99,6 +110,31 @@ export class EmployeeApiService
                 ),
                 // Sin barberos, el backend responde "no encontrado".
                 catchError(error => isNotFound(error) ? of([]) : throwError(() => error))
+            );
+    }
+
+    override getTeam(): Observable<TeamMember[]> {
+        return this.http
+            .get<TeamMemberResponse[] | null>(`${this.baseUrl}/employee-service/team`)
+            .pipe(
+                map(response =>
+                    (Array.isArray(response) ? response : []).map(mapTeamMemberResponse)
+                )
+            );
+    }
+
+    override changeAccess(
+        employeeId: string,
+        action: AccessAction,
+        reason: string | null
+    ): Observable<TeamMember> {
+        return this.http
+            .patch<TeamMemberResponse>(
+                `${this.baseUrl}/employee-service/${ACCESS_PATH[action]}/${encodeURIComponent(employeeId)}`,
+                { reason }
+            )
+            .pipe(
+                map(mapTeamMemberResponse)
             );
     }
 

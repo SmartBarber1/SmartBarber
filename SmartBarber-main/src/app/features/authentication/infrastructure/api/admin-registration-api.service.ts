@@ -101,7 +101,7 @@ export class AdminRegistrationApiService
         Observable<BarberShopOnboardingResponse> {
 
         return this.http.post<BarberShopOnboardingResponse>(
-            `${this.baseUrl}/public/barber-service/onboarding`,
+            `${this.baseUrl}/barber-service/onboarding`,
             request
         );
     }

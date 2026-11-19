@@ -74,6 +74,7 @@ import {
 
 /** Mensajes propios del registro de barberos (sobrescriben el catálogo general). */
 const EMPLOYEE_ERROR_MESSAGES: ErrorMessageOverrides = {
+    US_006: 'Solo el administrador de esta barbería puede registrar barberos.',
     US_002: 'La cuenta de Google seleccionada ya pertenece a otro usuario de SmartBarber. Vincula una cuenta diferente.',
     CT_002: 'Ya existe un barbero registrado con ese número de documento.',
     VALIDATION: 'Revisa los campos marcados en el formulario.',

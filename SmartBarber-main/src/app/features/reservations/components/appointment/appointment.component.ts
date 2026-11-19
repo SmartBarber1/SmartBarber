@@ -13,6 +13,7 @@ import { Turno } from '../../models/schedule.model';
 import { extraerLista, idBarberia, idServicio, toBarbero } from '../../mappers/reservation.mapper';
 import { buildReservationPayload } from '../../mappers/reservation-payload.builder';
 import { aFechaIso } from '../../utils/calendar.utils';
+import { NonWorkingDayRepository } from '../../../barber-shop/domain/repositories/non-working-day.repository';
 import { calcularEstadoBarbero, construirSlots } from '../../utils/schedule.utils';
 import { mensajeErrorReserva } from '../../utils/http-error.utils';
 
@@ -48,6 +49,13 @@ export class AppointmentComponent implements OnInit {
   private readonly currentUser = inject(CurrentUserService);
   private readonly sessionService = inject(SessionService);
   private readonly route = inject(ActivatedRoute);
+  private readonly nonWorkingDays = inject(NonWorkingDayRepository);
+
+  /** Días no laborables de la barbería elegida: fecha (AAAA-MM-DD) → motivo. */
+  private diasNoLaborables = new Map<string, string>();
+
+  /** Días del mes visible en que la barbería no atiende (para el calendario). */
+  diasCerradosMes: ReadonlySet<number> = new Set<number>();
 
   // Sede y barberos
   barberias: Barberia[] = [];
@@ -105,6 +113,7 @@ export class AppointmentComponent implements OnInit {
         }
 
         if (this.selectedBarberiaId) {
+          this.cargarDiasNoLaborables(this.selectedBarberiaId);
           this.cargarEmpleados(this.selectedBarberiaId);
           this.cargarServicios(this.selectedBarberiaId);
         }
@@ -139,6 +148,43 @@ export class AppointmentComponent implements OnInit {
     });
   }
 
+  /**
+   * Días en que la barbería no atiende. Si la consulta falla no se bloquea la
+   * reserva: el backend igual rechaza la fecha (ND_006).
+   */
+  private cargarDiasNoLaborables(barberiaId: string): void {
+    this.diasNoLaborables = new Map();
+    this.actualizarDiasCerradosMes();
+
+    this.nonWorkingDays.list(barberiaId).subscribe({
+      next: dias => {
+        if (this.selectedBarberiaId !== barberiaId) return;
+        this.diasNoLaborables = new Map(dias.map(d => [d.date, d.reason]));
+        this.actualizarDiasCerradosMes();
+        if (this.selectedFecha && this.diasNoLaborables.has(this.selectedFecha) && this.selectedBarbero) {
+          this.generarHorariosDisponibles();
+        }
+      },
+      error: () => {
+        this.diasNoLaborables = new Map();
+        this.actualizarDiasCerradosMes();
+      }
+    });
+  }
+
+  private actualizarDiasCerradosMes(): void {
+    const prefijo = aFechaIso(this.currentDate, 1).slice(0, 8); // AAAA-MM-
+    const dias = new Set<number>();
+
+    for (const fecha of this.diasNoLaborables.keys()) {
+      if (fecha.startsWith(prefijo)) {
+        dias.add(Number(fecha.slice(8, 10)));
+      }
+    }
+
+    this.diasCerradosMes = dias;
+  }
+
   private cargarServicios(barberiaId: string): void {
     if (!barberiaId) return;
 
@@ -170,6 +216,7 @@ export class AppointmentComponent implements OnInit {
     this.selectedHora = '';
     this.availability.clearCache();
     if (barberiaId) {
+      this.cargarDiasNoLaborables(barberiaId);
       this.cargarEmpleados(barberiaId);
       this.cargarServicios(barberiaId);
     }
@@ -203,6 +250,7 @@ export class AppointmentComponent implements OnInit {
   cambiarMes(delta: number): void {
     // Se fija el día 1 para evitar saltos de mes cuando hoy es 29/30/31
     this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + delta, 1);
+    this.actualizarDiasCerradosMes();
     this.actualizarMes();
   }
 
@@ -254,6 +302,15 @@ export class AppointmentComponent implements OnInit {
     const barbero = this.selectedBarbero;
     const fecha = this.selectedFecha;
     if (!barbero || !fecha) return;
+
+    const motivoCierre = this.diasNoLaborables.get(fecha);
+    if (motivoCierre) {
+      this.loadingHorarios = false;
+      this.avisoOcupacion = '';
+      this.limpiarTurno();
+      this.errorHorario = `La barbería no atiende este día (${motivoCierre}). Elige otra fecha.`;
+      return;
+    }
 
     this.loadingHorarios = true;
     this.errorHorario = '';

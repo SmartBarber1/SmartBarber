@@ -99,7 +99,7 @@ export class ProfileApiService
         const clientRequest =
             session.clientId
                 ? this.http.get<ClientProfile>(
-                    `${this.apiUrl}/client-service/id/${session.clientId}`
+                    `${this.apiUrl}/customer-service/id/${session.clientId}`
                 )
                 : of(null);
 
@@ -213,7 +213,7 @@ export class ProfileApiService
         Observable<ClientProfile> {
 
         return this.http.put<ClientProfile>(
-            `${this.apiUrl}/client-service/actualizar-cliente/${clientId}`,
+            `${this.apiUrl}/customer-service/update-customer/${clientId}`,
             request
         );
     }

@@ -14,10 +14,10 @@ import {
   DemandCell,
   RevenuePoint,
   StatisticsDashboard,
-  StatisticsDateRange,
-  StatisticsKpi
+  StatisticsDateRange
 } from '../../domain/models/statistics.model';
 import { StatisticsRepository } from '../../domain/repositories/statistics.repository';
+import { StatisticsTotals, buildStatisticsKpis } from '../../domain/models/statistics-kpis';
 
 import {
   CLOSING_HOUR,
@@ -33,14 +33,6 @@ import {
 const MOCK_LATENCY_MS = 350;
 
 const SERVICE_BY_ID = new Map(MOCK_SERVICES.map(service => [service.id, service]));
-
-interface PeriodTotals {
-  revenue: number;
-  completed: number;
-  occupancy: number;
-  effectiveRate: number | null;
-  averageWait: number | null;
-}
 
 /**
  * Adaptador con datos quemados. Hace la agregación que en producción hará el
@@ -95,7 +87,7 @@ export class StatisticsMockRepository extends StatisticsRepository {
       range,
       generatedAt: new Date().toISOString(),
       isSample: true,
-      kpis: buildKpis(totals, previousTotals),
+      kpis: buildStatisticsKpis(totals, previousTotals),
       revenueByDay: buildRevenueByDay(completed, range),
       revenueByMonth: buildRevenueByMonth(completed, range),
       revenueByService: MOCK_SERVICES
@@ -158,7 +150,7 @@ function inRange(records: MockReservation[], range: StatisticsDateRange): MockRe
   return records.filter(r => r.date >= range.from && r.date <= range.to);
 }
 
-function periodTotals(records: MockReservation[], workingDays: number): PeriodTotals {
+function periodTotals(records: MockReservation[], workingDays: number): StatisticsTotals {
   const completed = records.filter(r => r.status === 'COMPLETED');
   const scheduled = records.filter(r => r.type === 'SERVICE_RESERVATION');
   const available = workingDays * WORKDAY_MINUTES * MOCK_BARBERS.length;
@@ -174,62 +166,6 @@ function periodTotals(records: MockReservation[], workingDays: number): PeriodTo
       records.filter(r => r.type === 'VIRTUAL_QUEUE').map(r => r.waitMinutes ?? 0)
     )
   };
-}
-
-function buildKpis(current: PeriodTotals, previous: PeriodTotals | null): StatisticsKpi[] {
-  const ticket = (totals: PeriodTotals) => totals.completed ? totals.revenue / totals.completed : 0;
-
-  return [
-    {
-      id: 'revenue',
-      label: 'Ingresos operacionales',
-      value: current.revenue,
-      previous: previous?.revenue ?? null,
-      format: 'currency',
-      hint: 'Solo servicios finalizados'
-    },
-    {
-      id: 'completed',
-      label: 'Servicios finalizados',
-      value: current.completed,
-      previous: previous?.completed ?? null,
-      format: 'number',
-      hint: 'Reservas y turnos de cola'
-    },
-    {
-      id: 'ticket',
-      label: 'Ticket promedio',
-      value: ticket(current),
-      previous: previous ? ticket(previous) : null,
-      format: 'currency',
-      hint: 'Ingreso por servicio finalizado'
-    },
-    {
-      id: 'occupancy',
-      label: 'Ocupación promedio',
-      value: current.occupancy,
-      previous: previous?.occupancy ?? null,
-      format: 'percent',
-      hint: 'Minutos atendidos / disponibles'
-    },
-    {
-      id: 'effective-rate',
-      label: 'Reservas efectivas',
-      value: current.effectiveRate ?? 0,
-      previous: previous?.effectiveRate ?? null,
-      format: 'percent',
-      hint: 'Sin cancelaciones ni inasistencias'
-    },
-    {
-      id: 'queue-wait',
-      label: 'Espera promedio en cola',
-      value: current.averageWait ?? 0,
-      previous: previous?.averageWait ?? null,
-      format: 'minutes',
-      hint: 'Desde el ingreso hasta la atención',
-      lowerIsBetter: true
-    }
-  ];
 }
 
 function buildOccupancy(completed: MockReservation[], workingDays: number): BarberOccupancy[] {
