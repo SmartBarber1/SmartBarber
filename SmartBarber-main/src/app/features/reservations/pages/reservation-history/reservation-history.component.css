@@ -399,3 +399,66 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   font-family: inherit;
 }
 .rate-error { color: #c62828; font-size: 0.8rem; width: 100%; }
+
+/* ---- Celular: encabezado apilado y reservas como tarjetas ---- */
+@media (max-width: 640px) {
+  .classic-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .title-classic {
+    font-size: 1.6rem;
+    line-height: 1.2;
+  }
+
+  .classic-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .classic-table,
+  .classic-table tbody,
+  .classic-table tr,
+  .classic-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .classic-table tr:not(.rate-row) {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.25rem;
+    border: 1px solid #eae5de;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .classic-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0.75rem;
+    border: none;
+    text-align: right;
+  }
+
+  .classic-table td::before {
+    content: attr(data-label);
+    color: #8d7b6a;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .rate-row td::before {
+    content: none;
+  }
+
+  .table-scroll {
+    overflow-x: visible;
+  }
+}

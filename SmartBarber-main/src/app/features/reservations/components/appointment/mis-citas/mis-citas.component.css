@@ -1,0 +1,143 @@
+:host {
+  display: block;
+}
+
+.citas {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #eae5de;
+  border-radius: 10px;
+  background: #faf8f5;
+}
+
+.citas__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.citas__header h3 {
+  margin: 0;
+  color: #2c2c2c;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.citas__hint,
+.citas__state {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.citas__state {
+  margin: 0;
+}
+
+.citas__error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #e0a59b;
+  border-radius: 8px;
+  background: #fbecea;
+  color: #8a2f22;
+  font-size: 0.85rem;
+}
+
+.citas__list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cita {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e2ded8;
+  border-left: 3px solid #c29b68;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.cita--active {
+  box-shadow: 0 0 0 2px rgba(194, 155, 104, 0.35);
+}
+
+.cita__info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.cita__info strong {
+  color: #2c2c2c;
+  font-size: 0.92rem;
+  text-transform: capitalize;
+}
+
+.cita__services {
+  overflow-wrap: anywhere;
+}
+
+.cita__status {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #8a6a3c;
+}
+
+.cita__status[data-status='CONFIRMED'] {
+  color: #2f6b3f;
+}
+
+.cita__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.cita__locked {
+  color: #999;
+  font-size: 0.78rem;
+}
+
+.citas__btn {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #c8b9ab;
+  border-radius: 6px;
+  background: #fff;
+  color: #4e342e;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.citas__btn:hover:not(:disabled) {
+  background: #f7f3ee;
+}
+
+.citas__btn--danger {
+  border-color: #e0a59b;
+  color: #a33a2b;
+}
+
+.citas__btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 600px) {
+  .citas { padding: 1rem; }
+  .cita { grid-template-columns: 1fr; }
+}

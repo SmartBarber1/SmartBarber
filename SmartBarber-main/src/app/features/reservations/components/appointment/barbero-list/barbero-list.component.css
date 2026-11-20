@@ -4,13 +4,17 @@
 
 .barberos-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
   gap: 1rem;
   max-height: 420px;
   overflow-y: auto;
 }
 
 .barber-card {
+  min-width: 0;
+  width: 100%;
+  font: inherit;
+  color: inherit;
   border: 1px solid #e2ded8;
   border-radius: 10px;
   padding: 0.8rem;
@@ -81,4 +85,25 @@
 .status-text {
   color: #555;
   font-weight: 600;
+}
+
+.barber-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.barber-card:focus-visible {
+  outline: 2px solid #c29b68;
+  outline-offset: 2px;
+}
+
+.barber-name,
+.barber-spec {
+  overflow-wrap: anywhere;
+}
+
+.barbers-empty {
+  margin: 0.5rem 0 1rem;
+  color: #666;
+  font-size: 0.85rem;
 }

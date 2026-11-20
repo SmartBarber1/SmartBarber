@@ -40,7 +40,9 @@ export function mapBackendAuthentication(
         clientId,
         firebaseUid: firebaseUser.uid,
         email: firebaseUser.email ?? '',
-        displayName: firebaseUser.displayName ?? '',
+        // Se usa el nombre del perfil en SmartBarber; el de la cuenta de Google
+        // solo si el perfil no tiene nombre.
+        displayName: response.displayName?.trim() || firebaseUser.displayName || '',
         role,
         status: 'ACTIVE',
         tenantId: barbershopId,

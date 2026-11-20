@@ -1,8 +1,11 @@
-<div class="barberos-grid">
-  <div
+<div class="barberos-grid" role="group" aria-label="Barberos disponibles">
+  <button
+    type="button"
     *ngFor="let barbero of barberos"
     class="barber-card"
     [class.selected]="selected?.id === barbero.id"
+    [attr.aria-pressed]="selected?.id === barbero.id"
+    [disabled]="locked && selected?.id !== barbero.id"
     (click)="barberoSeleccionado.emit(barbero)"
   >
     <div class="barber-avatar-container">
@@ -16,5 +19,7 @@
         <span class="status-text">{{ barbero.estadoTexto }}</span>
       </div>
     </div>
-  </div>
+  </button>
 </div>
+
+<p class="barbers-empty" *ngIf="barberos.length === 0">Esta barbería no tiene barberos disponibles para reservar.</p>

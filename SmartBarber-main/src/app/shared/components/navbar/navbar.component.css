@@ -421,3 +421,16 @@ nav ul li.has-dropdown:focus-within .dropdown-menu {
     height: 34px;
   }
 }
+
+/* "Cerrar sesión" es un botón con el mismo aspecto que los enlaces del menú */
+button.nav-cta,
+button.drawer-button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button.nav-cta:disabled,
+button.drawer-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}

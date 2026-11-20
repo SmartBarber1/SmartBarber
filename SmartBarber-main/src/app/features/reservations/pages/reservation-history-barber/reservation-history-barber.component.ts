@@ -275,9 +275,9 @@ export class ReservationHistoryBarberComponent implements OnInit {
       id: item.id,
       source,
       notes:
+        (Array.isArray(item.services) && item.services.length > 0 ? item.services.join(', ') : '') ||
         item.notes ||
-        item.serviceName ||
-        (source === 'EMPLOYEE' ? 'Servicio de Empleado' : 'Corte / Servicio Barbero'),
+        'Servicio',
       status: item.status || 'PENDING',
       startTime: item.startTime || item.date || new Date().toISOString(),
       duration: item.duration || 0,

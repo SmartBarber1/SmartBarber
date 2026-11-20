@@ -124,6 +124,10 @@ export class FirebaseAuthService {
 
     async getIdToken(): Promise<string | null> {
 
+        // Tras recargar la página Firebase restaura la sesión de forma
+        // asíncrona: se espera para no enviar peticiones sin token.
+        await this.auth.authStateReady();
+
         const user =
             this.auth.currentUser;
 

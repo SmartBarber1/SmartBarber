@@ -88,13 +88,13 @@
         <tbody>
           <ng-container *ngFor="let item of historyList">
           <tr>
-            <td class="tx-cell">
+            <td class="tx-cell" data-label="Referencia">
               <span class="tx-hash">#{{ item.id | slice:0:10 }}...</span>
             </td>
-            <td class="service-name">{{ item.notes || 'Corte / Servicio General' }}</td>
-            <td *ngIf="scope !== 'customer'" class="tx-cell"><span class="tx-hash">{{ item.customerId | slice:0:8 }}…</span></td>
-            <td *ngIf="scope === 'barbershop'" class="tx-cell"><span class="tx-hash">{{ item.employeeId | slice:0:8 }}…</span></td>
-            <td>
+            <td class="service-name" data-label="Servicio">{{ serviceText(item) }}</td>
+            <td *ngIf="scope !== 'customer'" class="tx-cell" data-label="Cliente"><span class="tx-hash">{{ item.customerId | slice:0:8 }}…</span></td>
+            <td *ngIf="scope === 'barbershop'" class="tx-cell" data-label="Barbero"><span class="tx-hash">{{ item.employeeId | slice:0:8 }}…</span></td>
+            <td data-label="Estado">
               <span class="status-chip" [ngClass]="{
                 'chip-active': item.status === 'CONFIRMED' || item.status === 'COMPLETED' || item.status === 'APPROVED',
                 'chip-pending': item.status === 'PENDING',
@@ -104,10 +104,10 @@
                 {{ statusLabel(item.status) }}
               </span>
             </td>
-            <td class="date-text">{{ item.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
-            <td class="duration-text">{{ item.duration }} min</td>
-            <td class="date-text muted">{{ item.creationDate | date: 'dd/MM/yyyy' }}</td>
-            <td *ngIf="isCustomer" class="action-cell">
+            <td class="date-text" data-label="Fecha de cita">{{ item.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="duration-text" data-label="Duración">{{ item.duration }} min</td>
+            <td class="date-text muted" data-label="Registro">{{ item.creationDate | date: 'dd/MM/yyyy' }}</td>
+            <td *ngIf="isCustomer" class="action-cell" data-label="Acción">
               <div class="action-group" *ngIf="canCancel(item) || canRate(item); else noAction">
                 <button type="button" class="btn-danger" *ngIf="canCancel(item)"
                         [disabled]="busyId === item.id" (click)="cancel(item)">Cancelar</button>

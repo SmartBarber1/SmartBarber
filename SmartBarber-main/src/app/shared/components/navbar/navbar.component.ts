@@ -2,7 +2,9 @@ import { Component, DestroyRef, ElementRef, HostListener, ViewChild, inject } fr
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs';
+import { Observable, filter, map } from 'rxjs';
+import { SessionService } from '../../../core/auth/services/session.service';
+import { LogoutService } from '../../../core/auth/services/logout.service';
 
 interface NavSubLink {
   label: string;
@@ -33,7 +35,26 @@ const DESKTOP_MIN_WIDTH = 1200;
 })
 export class NavbarComponent {
 
-  private readonly document = inject(DOCUMENT);
+    private readonly document = inject(DOCUMENT);
+  private readonly logoutService = inject(LogoutService);
+
+  /** Con la sesión iniciada se ofrecen "Ir a mi panel" y "Cerrar sesión". */
+  readonly isLoggedIn$: Observable<boolean> = inject(SessionService).session$.pipe(
+    map(session => session !== null)
+  );
+
+  loggingOut = false;
+
+  async logout(): Promise<void> {
+    if (this.loggingOut) return;
+    this.loggingOut = true;
+    this.closeMenu();
+    try {
+      await this.logoutService.execute();
+    } finally {
+      this.loggingOut = false;
+    }
+  }
 
   links: NavLink[] = [
     {

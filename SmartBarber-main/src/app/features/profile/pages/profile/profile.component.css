@@ -912,3 +912,12 @@ button:disabled {
         padding: 14px 0;
     }
 }
+/* El correo y el nombre no se salen de la tarjeta en celular */
+.summary-content {
+    min-width: 0;
+}
+
+.summary-content h2,
+.summary-content p {
+    overflow-wrap: anywhere;
+}

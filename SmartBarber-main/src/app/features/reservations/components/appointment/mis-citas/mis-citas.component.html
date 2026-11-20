@@ -1,0 +1,48 @@
+<section class="citas" aria-labelledby="mis-citas-title">
+  <header class="citas__header">
+    <h3 id="mis-citas-title">Mis próximas citas</h3>
+    <span class="citas__hint">
+      Puedes cancelar o reprogramar hasta {{ avisoMinutos }} minutos antes de la cita.
+    </span>
+  </header>
+
+  <p class="citas__state" *ngIf="loading">Cargando tus citas…</p>
+
+  <div class="citas__error" *ngIf="!loading && error" role="alert">
+    <span>{{ error }}</span>
+    <button type="button" class="citas__btn" (click)="reintentar.emit()">Reintentar</button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+    <p class="citas__state" *ngIf="citas.length === 0">No tienes citas pendientes. Agenda una abajo.</p>
+
+    <ul class="citas__list" *ngIf="citas.length > 0">
+      <li class="cita" *ngFor="let cita of citas; trackBy: trackById"
+          [class.cita--active]="cita.id === reprogramandoId">
+        <div class="cita__info">
+          <strong>{{ cita.start | date: "EEEE d 'de' MMMM, h:mm a" }}</strong>
+          <span>{{ cita.barbershopName }}</span>
+          <span class="cita__services" *ngIf="cita.services.length > 0">{{ cita.services.join(', ') }}</span>
+        </div>
+
+        <span class="cita__status" [attr.data-status]="cita.status">{{ cita.statusLabel }}</span>
+
+        <div class="cita__actions" *ngIf="cita.modifiable; else locked">
+          <button type="button" class="citas__btn"
+                  [disabled]="busyId !== null || (reprogramandoId !== null && reprogramandoId !== cita.id)"
+                  (click)="reprogramar.emit(cita)">
+            {{ cita.id === reprogramandoId ? 'Reprogramando…' : 'Reprogramar' }}
+          </button>
+          <button type="button" class="citas__btn citas__btn--danger"
+                  [disabled]="busyId !== null || reprogramandoId !== null"
+                  (click)="cancelar.emit(cita)">
+            {{ busyId === cita.id ? 'Cancelando…' : 'Cancelar' }}
+          </button>
+        </div>
+        <ng-template #locked>
+          <span class="cita__locked">Ya no se puede modificar</span>
+        </ng-template>
+      </li>
+    </ul>
+  </ng-container>
+</section>

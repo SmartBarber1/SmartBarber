@@ -13,5 +13,7 @@ import { Barberia } from '../../../models/reservation.model';
 export class BarberiaSelectorComponent {
   @Input() barberias: Barberia[] = [];
   @Input() selectedId: string = '';
+  /** Bloquea el cambio de barbería (por ejemplo, al reprogramar una cita). */
+  @Input() disabled = false;
   @Output() barberiaChange = new EventEmitter<string>();
 }

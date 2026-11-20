@@ -132,6 +132,11 @@ export class ReservationHistoryComponent implements OnInit {
       .reduce((acc, item) => acc + (item.duration ?? 0), 0);
   }
 
+    /** Servicios reservados (los envía el back); si no vienen, la nota o "Servicio". */
+  serviceText(item: ReservationHistoryItem): string {
+    return item.services?.length ? item.services.join(', ') : (item.notes || 'Servicio');
+  }
+
   statusLabel(status: string): string {
     return STATUS_LABELS[status] ?? status;
   }

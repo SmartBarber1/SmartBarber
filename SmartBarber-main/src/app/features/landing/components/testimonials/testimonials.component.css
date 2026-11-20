@@ -77,3 +77,15 @@
 .testi-dots button.is-active {
   background: var(--ivory, #f9f6f0);
 }
+/* Aclaración: las opiniones son de ejemplo */
+.testi-note {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+  margin: 18px auto 0;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.75;
+}

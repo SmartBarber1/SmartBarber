@@ -12,5 +12,7 @@ import { Barbero } from '../../../models/reservation.model';
 export class BarberoListComponent {
   @Input() barberos: Barbero[] = [];
   @Input() selected: Barbero | null = null;
+  /** Solo se puede usar el barbero elegido (al reprogramar una cita). */
+  @Input() locked = false;
   @Output() barberoSeleccionado = new EventEmitter<Barbero>();
 }

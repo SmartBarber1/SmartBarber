@@ -5,7 +5,29 @@
     <div class="booking-header">
       <span class="gauge-tag">MIS RESERVAS</span>
       <h2 class="title">Agendar Cita</h2>
-      <p class="subtitle">Selecciona la sede, el barbero y tu horario ideal respetando su jornada de trabajo.</p>
+      <p class="subtitle">Consulta y gestiona tus citas, o agenda una nueva eligiendo la barbería, el barbero y la hora.</p>
+    </div>
+
+    <!-- Mis próximas citas: cancelar o reprogramar -->
+    <app-mis-citas
+      [citas]="citas"
+      [loading]="cargandoCitas"
+      [error]="errorCitas"
+      [busyId]="citaOcupadaId"
+      [reprogramandoId]="reprogramando?.id ?? null"
+      [avisoMinutos]="avisoMinutos"
+      (cancelar)="cancelarCita($event)"
+      (reprogramar)="iniciarReprogramacion($event)"
+      (reintentar)="cargarCitas()">
+    </app-mis-citas>
+
+    <!-- Modo reprogramar -->
+    <div class="reschedule-banner" *ngIf="reprogramando as cita" role="status">
+      <span>
+        Reprogramando la cita del <strong>{{ cita.start | date: "d 'de' MMMM, h:mm a" }}</strong>.
+        Elige la nueva fecha y hora; el barbero y los servicios se mantienen.
+      </span>
+      <button type="button" class="reschedule-banner__cancel" (click)="cancelarReprogramacion()">Salir sin cambios</button>
     </div>
 
     <!-- Contenedor 2 Columnas -->
@@ -14,22 +36,30 @@
       <!-- COLUMNA 1: Paso 1 - Barbería, barberos y servicios -->
       <div class="step-card">
         <div class="step-header">
-          <h3> Seleccionar Barbería (Sede)</h3>
+          <h3>{{ reprogramando ? 'Barbería y barbero de la cita' : 'Seleccionar Barbería (Sede)' }}</h3>
         </div>
 
         <app-barberia-selector
           [barberias]="barberias"
           [selectedId]="selectedBarberiaId"
+          [disabled]="!!reprogramando"
           (barberiaChange)="onBarberiaChange($event)">
         </app-barberia-selector>
 
         <app-barbero-list
           [barberos]="barberosFiltrados"
           [selected]="selectedBarbero"
+          [locked]="!!reprogramando"
           (barberoSeleccionado)="onBarberoSelect($event)">
         </app-barbero-list>
 
+        <p class="reschedule-services" *ngIf="reprogramando as cita">
+          Servicios de la cita: <strong>{{ cita.services.length ? cita.services.join(', ') : 'los reservados' }}</strong>
+          ({{ cita.duration }} min)
+        </p>
+
         <app-servicio-list
+          *ngIf="!reprogramando"
           [servicios]="serviciosDisponibles"
           [selectedIds]="selectedServicesIds"
           [loading]="loadingServicios"
@@ -40,7 +70,7 @@
       <!-- COLUMNA 2: Paso 2 - Calendario, horarios y confirmación -->
       <div class="step-card">
         <div class="step-header">
-          <h3>Seleccionar Barbero y Hora </h3>
+          <h3>{{ reprogramando ? 'Elige la nueva hora' : 'Seleccionar fecha y hora' }}</h3>
         </div>
 
         <app-calendario
@@ -50,6 +80,8 @@
           (cambioMes)="cambiarMes($event)"
           (diaSeleccionado)="seleccionarDia($event)">
         </app-calendario>
+
+        <p class="slots-hint" *ngIf="!selectedBarbero">Elige un barbero para ver sus horarios disponibles.</p>
 
         <app-horarios-slots
           *ngIf="selectedBarbero"
@@ -69,12 +101,13 @@
         </div>
 
         <app-resumen-reserva
-          [servicios]="serviciosSeleccionados"
-          [total]="precioTotal"
+          [servicios]="reprogramando ? [] : serviciosSeleccionados"
+          [total]="reprogramando ? 0 : precioTotal"
           [duracion]="duracionTotal"
           [cargando]="isLoading"
-          [incompleto]="!selectedHora || !selectedBarbero || selectedServicesIds.length === 0"
-          (confirmar)="crearReserva()">
+          [etiqueta]="reprogramando ? 'Confirmar nueva hora' : 'Confirmar Reserva'"
+          [incompleto]="!selectedHora || !selectedBarbero || (!reprogramando && selectedServicesIds.length === 0)"
+          (confirmar)="confirmar()">
         </app-resumen-reserva>
       </div>
 

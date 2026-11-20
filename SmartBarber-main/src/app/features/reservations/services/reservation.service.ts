@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, from, of, throwError } from 'rxjs';
+import { Observable, of, throwError, timeout } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
-import { getAuth } from 'firebase/auth';
 import { environment } from '../../../../environments/environment';
 import { HistoryScope, ReservationHistoryItem } from '../models/reservation.model';
+
+/** Tiempo máximo de espera al crear una reserva (el servidor puede estar despertando). */
+const CREATE_TIMEOUT_MS = 45_000;
 
 export interface ReservationRatingPayload {
   rating: number;
@@ -19,39 +21,14 @@ export class ReservationService {
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Cabeceras de las peticiones. El token de Firebase lo agrega el interceptor
+   * global (firebaseTokenInterceptor), igual que en el resto de la aplicación:
+   * así se usa el token vigente sin forzar su renovación en cada petición (que
+   * podía quedarse esperando) y nunca se lee un token guardado en el navegador.
+   */
   private getAuthHeaders(): Observable<HttpHeaders> {
-    const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (user) {
-      return from(user.getIdToken(true)).pipe(
-        switchMap(token => {
-          const cleanToken = token.replace(/['"]+/g, '').trim();
-          return new Observable<HttpHeaders>(subscriber => {
-            subscriber.next(new HttpHeaders({
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${cleanToken}`
-            }));
-            subscriber.complete();
-          });
-        }),
-        catchError(err => throwError(() => err))
-      );
-    }
-
-    const token = (
-      localStorage.getItem('token') ||
-      localStorage.getItem('smartbarber.token') ||
-      localStorage.getItem('firebaseToken') || ''
-    ).replace(/['"]+/g, '').trim();
-
-    return new Observable<HttpHeaders>(subscriber => {
-      subscriber.next(new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }));
-      subscriber.complete();
-    });
+    return of(new HttpHeaders({ 'Content-Type': 'application/json' }));
   }
 
   confirmReservation(id: string): Observable<any> {
@@ -75,6 +52,18 @@ export class ReservationService {
     return this.getAuthHeaders().pipe(
       switchMap(headers =>
         this.http.patch(`${this.apiUrl}/reservation-service/${encodeURIComponent(id)}/complete`, {}, { headers })
+      )
+    );
+  }
+
+    /**
+   * PATCH /reservation-service/{id}/reschedule (CUSTOMER, ADMIN): nueva hora de
+   * una reserva agendada; conserva barbero y servicios y vuelve a "Pendiente".
+   */
+  rescheduleReservation(id: string, startTime: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers =>
+        this.http.patch(`${this.apiUrl}/reservation-service/${encodeURIComponent(id)}/reschedule`, { startTime }, { headers })
       )
     );
   }
@@ -180,7 +169,9 @@ export class ReservationService {
 
   createReservation(payload: any): Observable<any> {
     return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.post(`${this.apiUrl}/reservation-service/create`, payload, { headers }))
+      switchMap(headers => this.http.post(`${this.apiUrl}/reservation-service/create`, payload, { headers })),
+      // Si el servidor no responde, la pantalla no se queda en "Procesando...".
+      timeout({ first: CREATE_TIMEOUT_MS })
     );
   }
 }

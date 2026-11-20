@@ -68,6 +68,8 @@ export interface ReservationHistoryItem {
   startTime: string;
   endTime: string;
   queueEntryTime?: string | null;
-  creationDate: string;
+    creationDate: string;
   updatedDate: string;
+  /** Nombres de los servicios reservados (los envía el back en los historiales). */
+  services?: string[];
 }

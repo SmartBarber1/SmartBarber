@@ -46,12 +46,22 @@
 
     <!-- Accesos de sesión (escritorio) -->
     <div class="auth-buttons-group">
-      <a [routerLink]="['/auth/login']" class="btn nav-cta">
-        Iniciar sesión
-      </a>
-      <a [routerLink]="['/auth/register']" class="btn nav-cta">
-        Registro
-      </a>
+      <ng-container *ngIf="isLoggedIn$ | async; else guestDesktop">
+        <a routerLink="/panel/home" class="btn nav-cta">
+          Ir a mi panel
+        </a>
+        <button type="button" class="btn nav-cta" (click)="logout()" [disabled]="loggingOut">
+          {{ loggingOut ? 'Cerrando…' : 'Cerrar sesión' }}
+        </button>
+      </ng-container>
+      <ng-template #guestDesktop>
+        <a [routerLink]="['/auth/login']" class="btn nav-cta">
+          Iniciar sesión
+        </a>
+        <a [routerLink]="['/auth/register']" class="btn nav-cta">
+          Registro
+        </a>
+      </ng-template>
     </div>
 
     <!-- Botón del menú lateral (celular y tableta) -->
@@ -105,12 +115,22 @@
   </nav>
 
   <div class="drawer-actions">
-    <a [routerLink]="['/auth/login']" class="btn btn-primary drawer-button" (click)="closeMenu()">
-      Iniciar sesión
-    </a>
-    <a [routerLink]="['/auth/register']" class="btn btn-ghost drawer-button" (click)="closeMenu()">
-      Crear cuenta
-    </a>
+    <ng-container *ngIf="isLoggedIn$ | async; else guestDrawer">
+      <a routerLink="/panel/home" class="btn btn-primary drawer-button" (click)="closeMenu()">
+        Ir a mi panel
+      </a>
+      <button type="button" class="btn btn-ghost drawer-button" (click)="logout()" [disabled]="loggingOut">
+        {{ loggingOut ? 'Cerrando…' : 'Cerrar sesión' }}
+      </button>
+    </ng-container>
+    <ng-template #guestDrawer>
+      <a [routerLink]="['/auth/login']" class="btn btn-primary drawer-button" (click)="closeMenu()">
+        Iniciar sesión
+      </a>
+      <a [routerLink]="['/auth/register']" class="btn btn-ghost drawer-button" (click)="closeMenu()">
+        Crear cuenta
+      </a>
+    </ng-template>
   </div>
 
   <nav class="drawer-legal" aria-label="Información legal">

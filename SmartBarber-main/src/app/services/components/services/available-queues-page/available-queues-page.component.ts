@@ -60,7 +60,11 @@ export class AvailableQueuesPageComponent implements OnInit, OnDestroy {
   queueSuccess = '';
 
   private socket: WebSocket | null = null;
-  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Si el WebSocket no abre en este tiempo se informa y se reintenta. */
+  private connectTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly CONNECT_TIMEOUT_MS = 10_000;
+  private static readonly RECONNECT_DELAY_MS = 3_000;
   private destroyed = false;
 
   constructor(
@@ -79,6 +83,10 @@ export class AvailableQueuesPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.destroyed = true;
+
+    if (this.connectTimer) {
+      clearTimeout(this.connectTimer);
+    }
 
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -110,7 +118,7 @@ export class AvailableQueuesPageComponent implements OnInit, OnDestroy {
         console.error(
           'No hay un usuario autenticado para conectar las notificaciones.'
         );
-        this.connectionError = true;
+        this.ngZone.run(() => (this.connectionError = true));
         return;
       }
 
@@ -122,11 +130,23 @@ export class AvailableQueuesPageComponent implements OnInit, OnDestroy {
       const wsUrl =
         `${baseUrl}/ws/notifications?token=${encodeURIComponent(token)}`;
 
-      this.socket = new WebSocket(wsUrl);
+      const socket = new WebSocket(wsUrl);
+      this.socket = socket;
+
+      // Si el servidor no responde, no se queda en "Conectando..." para siempre.
+      this.connectTimer = setTimeout(() => {
+        if (socket.readyState !== WebSocket.OPEN) {
+          this.ngZone.run(() => (this.connectionError = true));
+          socket.close();
+        }
+      }, AvailableQueuesPageComponent.CONNECT_TIMEOUT_MS);
 
       this.socket.onopen = () => {
-        this.connected = true;
-        this.connectionError = false;
+        this.clearConnectTimer();
+        this.ngZone.run(() => {
+          this.connected = true;
+          this.connectionError = false;
+        });
         console.log('[WS notifications] Conexión establecida');
       };
 
@@ -147,11 +167,12 @@ export class AvailableQueuesPageComponent implements OnInit, OnDestroy {
 
       this.socket.onerror = (event) => {
         console.error('Error en WebSocket de notificaciones:', event);
-        this.connectionError = true;
+        this.ngZone.run(() => (this.connectionError = true));
       };
 
       this.socket.onclose = (event) => {
-        this.connected = false;
+        this.clearConnectTimer();
+        this.ngZone.run(() => (this.connected = false));
         this.socket = null;
 
         console.log(
@@ -163,7 +184,7 @@ export class AvailableQueuesPageComponent implements OnInit, OnDestroy {
         if (!this.destroyed) {
           this.reconnectTimer = setTimeout(
             () => void this.connectToNotifications(),
-            3000
+            AvailableQueuesPageComponent.RECONNECT_DELAY_MS
           );
         }
       };
@@ -178,9 +199,32 @@ export class AvailableQueuesPageComponent implements OnInit, OnDestroy {
       if (!this.destroyed) {
         this.reconnectTimer = setTimeout(
           () => void this.connectToNotifications(),
-          3000
+          AvailableQueuesPageComponent.RECONNECT_DELAY_MS
         );
       }
+    }
+  }
+
+    /** Botón "Reintentar": cierra la conexión pendiente y vuelve a conectar ya. */
+  retryConnection(): void {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.clearConnectTimer();
+    if (this.socket) {
+      this.socket.onclose = null;
+      this.socket.close();
+      this.socket = null;
+    }
+    this.connectionError = false;
+    void this.connectToNotifications();
+  }
+
+  private clearConnectTimer(): void {
+    if (this.connectTimer) {
+      clearTimeout(this.connectTimer);
+      this.connectTimer = null;
     }
   }
 

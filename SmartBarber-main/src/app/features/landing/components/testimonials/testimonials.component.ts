@@ -15,14 +15,18 @@ interface Testimonial {
 })
 export class TestimonialsComponent implements OnInit, OnDestroy {
   // Extend here: add more entries to rotate through more quotes.
+  /**
+   * Opiniones de ejemplo sobre la plataforma (no de un cliente real). La
+   * plantilla lo aclara con una nota hasta tener opiniones de barberías reales.
+   */
   testimonials: Testimonial[] = [
     {
-      quote: 'El mejor arreglo de barba que me han hecho en Bogotá. Muy atentos al detalle y al gusto de cada cliente.',
-      author: 'Felipe Ortega, cliente frecuente'
+      quote: 'Desde que usamos SmartBarber los clientes reservan solos y ya no perdemos citas por teléfono.',
+      author: 'Administrador · barbería de ejemplo'
     },
     {
-      quote: 'Ambiente cómodo, buena música y siempre puntuales con las citas. Un espacio que se siente como en casa.',
-      author: 'David Salazar, cliente'
+      quote: 'La cola virtual nos ayuda a atender en orden a quienes llegan sin cita, sin aglomeraciones.',
+      author: 'Barbero · barbería de ejemplo'
     }
   ];
 

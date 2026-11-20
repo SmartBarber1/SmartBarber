@@ -7,10 +7,10 @@ import { ReservationService } from '../../services/reservation.service';
 import { AvailabilityService } from '../../services/availability.service';
 import { CurrentUserService } from '../../services/current-user.service';
 
-import { Barberia, Barbero, RangoOcupado, Servicio, SlotHorario } from '../../models/reservation.model';
+import { Barberia, Barbero, RangoOcupado, ReservationHistoryItem, Servicio, SlotHorario } from '../../models/reservation.model';
 import { Turno } from '../../models/schedule.model';
 
-import { extraerLista, idBarberia, idServicio, toBarbero } from '../../mappers/reservation.mapper';
+import { extraerLista, idBarberia, toBarbero } from '../../mappers/reservation.mapper';
 import { buildReservationPayload } from '../../mappers/reservation-payload.builder';
 import { aFechaIso } from '../../utils/calendar.utils';
 import { NonWorkingDayRepository } from '../../../barber-shop/domain/repositories/non-working-day.repository';
@@ -23,6 +23,19 @@ import { ServicioListComponent } from './servicio-list/servicio-list.component';
 import { CalendarioComponent } from './calendario/calendario.component';
 import { HorariosSlotsComponent } from './horarios-slots/horarios-slots.component';
 import { ResumenReservaComponent } from './resumen-reserva/resumen-reserva.component';
+import { CitaCliente, MisCitasComponent } from './mis-citas/mis-citas.component';
+import { toApiError, toUserMessage } from '../../../../core/errors';
+
+/** Anticipación mínima para cancelar o reprogramar (la misma regla del servidor, RES_018). */
+const AVISO_MINUTOS = 60;
+
+/** Estados de una cita que todavía no ocurre y sigue activa. */
+const ESTADOS_ACTIVOS = new Set(['PENDING', 'CONFIRMED']);
+
+const ETIQUETAS_ESTADO: Readonly<Record<string, string>> = {
+  PENDING: 'Pendiente',
+  CONFIRMED: 'Confirmada'
+};
 
 /**
  * Componente contenedor (smart): guarda el estado de la pantalla y orquesta a los hijos.
@@ -37,8 +50,9 @@ import { ResumenReservaComponent } from './resumen-reserva/resumen-reserva.compo
     BarberoListComponent,
     ServicioListComponent,
     CalendarioComponent,
-    HorariosSlotsComponent,
-    ResumenReservaComponent
+        HorariosSlotsComponent,
+    ResumenReservaComponent,
+    MisCitasComponent
   ],
   templateUrl: './appointment.component.html',
   styleUrls: ['./appointment.component.css']
@@ -88,6 +102,17 @@ export class AppointmentComponent implements OnInit {
     // Reserva
   isLoading: boolean = false;
 
+    // Mis próximas citas (cancelar / reprogramar)
+  readonly avisoMinutos = AVISO_MINUTOS;
+  citas: CitaCliente[] = [];
+  cargandoCitas = false;
+  errorCitas = '';
+  citaOcupadaId: string | null = null;
+  /** Cita que se está reprogramando: barbería, barbero y servicios quedan fijos. */
+  reprogramando: CitaCliente | null = null;
+  /** Barbero que se debe seleccionar cuando termine de cargar la lista. */
+  private barberoPendienteId: string | null = null;
+
   /** Aviso dentro de la página (reemplaza las ventanas emergentes del navegador). */
   aviso: { tipo: 'exito' | 'error'; texto: string } | null = null;
   private avisoTimer?: ReturnType<typeof setTimeout>;
@@ -99,6 +124,7 @@ export class AppointmentComponent implements OnInit {
   ngOnInit(): void {
     this.actualizarMes();
     this.cargarBarberias();
+    this.cargarCitas();
   }
 
   // ───────────────────────── Carga de datos ─────────────────────────
@@ -107,6 +133,11 @@ export class AppointmentComponent implements OnInit {
     this.reservationService.getBarberias().subscribe({
       next: (res: any) => {
         this.barberias = extraerLista<Barberia>(res);
+        // Las citas pueden haber cargado antes que las barberías: se completa el nombre.
+        this.citas = this.citas.map(cita => ({
+          ...cita,
+          barbershopName: this.barberias.find(b => idBarberia(b) === cita.barbershopId)?.name ?? cita.barbershopName
+        }));
 
         const barberiaIdParam = this.route.snapshot.queryParamMap.get('barberiaId');
 
@@ -134,14 +165,14 @@ export class AppointmentComponent implements OnInit {
       next: (res: any) => {
         this.barberosFiltrados = extraerLista(res).map(toBarbero);
 
-        if (this.barberosFiltrados.length > 0) {
-          this.selectedBarbero = this.barberosFiltrados[0];
-          if (this.selectedFecha) {
-            this.generarHorariosDisponibles();
-          }
-        } else {
-          this.selectedBarbero = null;
-          this.slotsHorarios = [];
+        // Ningún barbero queda elegido por defecto: el cliente lo escoge. Solo
+        // al reprogramar se fija el barbero de la cita.
+        const pendiente = this.barberosFiltrados.find(b => b.id === this.barberoPendienteId) ?? null;
+        this.barberoPendienteId = null;
+        this.selectedBarbero = pendiente;
+        this.slotsHorarios = [];
+        if (pendiente && this.selectedFecha) {
+          this.generarHorariosDisponibles();
         }
       },
       error: (err: any) => {
@@ -197,9 +228,8 @@ export class AppointmentComponent implements OnInit {
     this.reservationService.getServicesByBarberiaId(barberiaId).subscribe({
       next: (res: any) => {
         this.serviciosDisponibles = extraerLista<Servicio>(res);
-        this.selectedServicesIds = this.serviciosDisponibles
-          .map(s => idServicio(s))
-          .filter((id): id is number => id !== undefined && id !== null);
+        // Ningún servicio viene marcado: el cliente elige los que quiere.
+        this.selectedServicesIds = [];
         this.recalcularResumen();
         this.recalcularSlots();
         this.loadingServicios = false;
@@ -217,6 +247,7 @@ export class AppointmentComponent implements OnInit {
   // ───────────────────────── Eventos de los hijos ─────────────────────────
 
   onBarberiaChange(barberiaId: string): void {
+    if (this.reprogramando && barberiaId !== this.reprogramando.barbershopId) return;
     this.selectedBarberiaId = barberiaId;
     this.selectedHora = '';
     this.availability.clearCache();
@@ -228,6 +259,7 @@ export class AppointmentComponent implements OnInit {
   }
 
   onBarberoSelect(barbero: Barbero): void {
+    if (this.reprogramando && barbero.id !== this.reprogramando.employeeId) return;
     this.selectedBarbero = barbero;
     this.selectedHora = '';
     if (this.selectedDia) {
@@ -239,10 +271,6 @@ export class AppointmentComponent implements OnInit {
     const yaElegido = this.selectedServicesIds.includes(servicio.id);
 
     if (yaElegido) {
-      if (this.selectedServicesIds.length <= 1) {
-        this.mostrarAviso('error', 'Debes mantener al menos un servicio seleccionado.');
-        return;
-      }
       this.selectedServicesIds = this.selectedServicesIds.filter(id => id !== servicio.id);
     } else {
       this.selectedServicesIds = [...this.selectedServicesIds, servicio.id];
@@ -295,8 +323,9 @@ export class AppointmentComponent implements OnInit {
     this.precioTotal = this.serviciosSeleccionados
       .reduce((acc, s) => acc + (s.special_price || s.price || 0), 0);
 
-    const duracion = this.serviciosSeleccionados
-      .reduce((acc, s) => acc + (Number(s.duration) || 0), 0);
+    const duracion = this.reprogramando
+      ? this.reprogramando.duration
+      : this.serviciosSeleccionados.reduce((acc, s) => acc + (Number(s.duration) || 0), 0);
     this.duracionTotal = duracion > 0 ? duracion : 30; // mínimo 30 si no hay dato
   }
 
@@ -391,6 +420,15 @@ export class AppointmentComponent implements OnInit {
 
   // ───────────────────────── Crear reserva ─────────────────────────
 
+  /** Botón del resumen: crea la reserva o confirma la nueva hora de la cita. */
+  confirmar(): void {
+    if (this.reprogramando) {
+      this.confirmarReprogramacion();
+    } else {
+      this.crearReserva();
+    }
+  }
+
   crearReserva(): void {
     if (this.isLoading) return;
     this.cerrarAviso();
@@ -432,6 +470,7 @@ export class AppointmentComponent implements OnInit {
       next: () => {
         this.isLoading = false;
         this.mostrarAviso('exito', '¡Reserva creada correctamente!');
+        this.cargarCitas();
         this.selectedHora = '';
         this.generarHorariosDisponibles(); // vuelve a leer la BD y marca el slot como ocupado
       },
@@ -455,5 +494,126 @@ export class AppointmentComponent implements OnInit {
     if (tipo === 'exito') {
       this.avisoTimer = setTimeout(() => (this.aviso = null), 6000);
     }
+  }
+
+  // ───────────────────────── Mis próximas citas ─────────────────────────
+
+  cargarCitas(): void {
+    const clienteId = this.sessionService.getClientId();
+    if (!clienteId) return;
+
+    this.cargandoCitas = true;
+    this.errorCitas = '';
+
+    this.reservationService.getReservationHistory('customer', clienteId).subscribe({
+      next: items => {
+        const ahora = Date.now();
+        const limite = ahora + AVISO_MINUTOS * 60_000;
+        this.citas = items
+          .filter(item => ESTADOS_ACTIVOS.has(String(item.status).toUpperCase()))
+          .map(item => this.aCita(item, limite))
+          .filter(cita => cita.end.getTime() >= ahora)
+          .sort((a, b) => a.start.getTime() - b.start.getTime());
+        this.cargandoCitas = false;
+      },
+      error: err => {
+        this.citas = [];
+        this.errorCitas = toUserMessage(err, { DEFAULT: 'No fue posible cargar tus citas.' });
+        this.cargandoCitas = false;
+      }
+    });
+  }
+
+  cancelarCita(cita: CitaCliente): void {
+    if (this.citaOcupadaId || !window.confirm('¿Seguro que deseas cancelar esta cita?')) return;
+
+    this.citaOcupadaId = cita.id;
+    this.reservationService.cancelReservation(cita.id).subscribe({
+      next: () => {
+        this.citaOcupadaId = null;
+        this.mostrarAviso('exito', 'Cita cancelada.');
+        this.cargarCitas();
+        if (this.selectedBarbero && this.selectedFecha) this.generarHorariosDisponibles();
+      },
+      error: err => {
+        this.citaOcupadaId = null;
+        this.mostrarAviso('error', toUserMessage(err, { DEFAULT: 'No fue posible cancelar la cita.' }));
+      }
+    });
+  }
+
+  /** Abre el calendario con la barbería y el barbero de la cita para elegir otra hora. */
+  iniciarReprogramacion(cita: CitaCliente): void {
+    this.cerrarAviso();
+    this.reprogramando = cita;
+    this.selectedHora = '';
+    this.recalcularResumen();
+
+    this.barberoPendienteId = cita.employeeId;
+    if (this.selectedBarberiaId === cita.barbershopId && this.barberosFiltrados.some(b => b.id === cita.employeeId)) {
+      this.barberoPendienteId = null;
+      this.onBarberoSelect(this.barberosFiltrados.find(b => b.id === cita.employeeId)!);
+    } else {
+      this.onBarberiaChange(cita.barbershopId);
+    }
+  }
+
+  cancelarReprogramacion(): void {
+    this.reprogramando = null;
+    this.selectedHora = '';
+    this.recalcularResumen();
+    this.recalcularSlots();
+  }
+
+  private confirmarReprogramacion(): void {
+    const cita = this.reprogramando;
+    if (!cita || this.isLoading) return;
+    if (!this.selectedFecha || !this.selectedHora) {
+      this.mostrarAviso('error', 'Elige la nueva fecha y hora.');
+      return;
+    }
+
+    this.isLoading = true;
+    const startTime = `${this.selectedFecha}T${this.selectedHora}:00-05:00`;
+
+    this.reservationService.rescheduleReservation(cita.id, startTime).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.reprogramando = null;
+        this.selectedHora = '';
+        this.recalcularResumen();
+        this.mostrarAviso('exito', 'Cita reprogramada. Queda pendiente de confirmación del barbero.');
+        this.cargarCitas();
+        this.generarHorariosDisponibles();
+      },
+      error: err => {
+        this.isLoading = false;
+        const code = toApiError(err).code;
+        this.mostrarAviso('error', toUserMessage(err, {
+          DEFAULT: code === 'RES_011' ? 'Ese horario ya está ocupado. Elige otro.' : 'No fue posible reprogramar la cita.'
+        }));
+      }
+    });
+  }
+
+  private aCita(item: ReservationHistoryItem, limiteModificacion: number): CitaCliente {
+    const start = new Date(item.startTime);
+    const end = item.endTime ? new Date(item.endTime) : new Date(start.getTime() + (Number(item.duration) || 0) * 60_000);
+    const status = String(item.status).toUpperCase();
+    const barberia = this.barberias.find(b => idBarberia(b) === item.barbershopId);
+
+    return {
+      id: item.id,
+      barbershopId: item.barbershopId,
+      employeeId: item.employeeId,
+      barbershopName: barberia?.name ?? 'Barbería',
+      start,
+      end,
+      duration: Number(item.duration) || Math.round((end.getTime() - start.getTime()) / 60_000),
+      status,
+      statusLabel: ETIQUETAS_ESTADO[status] ?? status,
+      services: item.services ?? [],
+      modifiable: start.getTime() >= limiteModificacion && item.reservationType !== 'VIRTUAL_QUEUE'
+    };
   }
 }

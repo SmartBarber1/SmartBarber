@@ -645,7 +645,8 @@
                 class="message message-error"
                 *ngIf="
                     errorMessage() &&
-                    profile()
+                    profile() &&
+                    !editing()
                 ">
 
                 {{ errorMessage() }}

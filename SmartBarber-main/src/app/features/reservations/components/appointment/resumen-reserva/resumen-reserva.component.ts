@@ -16,5 +16,7 @@ export class ResumenReservaComponent {
   @Input() cargando: boolean = false;
   /** Falta elegir servicio, barbero u hora: el botón queda deshabilitado. */
   @Input() incompleto: boolean = false;
+  /** Texto del botón (por ejemplo, "Confirmar nueva hora" al reprogramar). */
+  @Input() etiqueta: string = 'Confirmar Reserva';
   @Output() confirmar = new EventEmitter<void>();
 }
