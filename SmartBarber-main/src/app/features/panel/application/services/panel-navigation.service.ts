@@ -606,28 +606,13 @@ export class PanelNavigationService {
 
           ...group,
 
-          items:
-            group.items.filter(
-              item =>
-                item.visible &&
-                item.roles.includes(
-                  role
-                ) &&
-                (
-                  subscriptionRestricted
-                    ? ['dashboard', 'profile', 'subscription'].includes(item.id)
-                    : true
-                )
-            ).map(item =>
-              subscriptionRestricted && item.id === 'subscription'
-                ? {
-                  ...item,
-                  label: 'Adquirir suscripción',
-                  description: 'Selecciona un plan e inicia la transacción para tu barbería.',
-                  route: '/panel/subscription/status'
-                }
-                : item
+          items: group.items
+            .filter(item =>
+              item.visible &&
+              item.roles.includes(role) &&
+              this.isShown(item)
             )
+            .map(item => this.adaptForAccess(item, subscriptionRestricted))
 
         })
       )
@@ -636,6 +621,47 @@ export class PanelNavigationService {
         group =>
           group.items.length > 0
       );
+  }
+
+
+    // =====================================================
+  // ACCESO SEGÚN LA SUSCRIPCIÓN
+  // =====================================================
+
+  /** Módulos que siguen disponibles cuando la barbería no tiene un plan activo. */
+  private static readonly OPEN_WITHOUT_SUBSCRIPTION =
+    new Set(['dashboard', 'profile', 'subscription']);
+
+  /**
+   * "Adquirir suscripción" solo tiene sentido sin un plan activo; con plan activo
+   * la renovación se hace desde "Suscripción y pagos". Sin plan activo,
+   * "Suscripción y pagos" pasa a ser la entrada para adquirirlo.
+   */
+  private isShown(item: PanelNavigationItem): boolean {
+    return item.id !== 'subscription-acquire';
+  }
+
+  private adaptForAccess(
+    item: PanelNavigationItem,
+    subscriptionRestricted: boolean
+  ): PanelNavigationItem {
+
+    if (!subscriptionRestricted) {
+      return item;
+    }
+
+    if (item.id === 'subscription') {
+      return {
+        ...item,
+        label: 'Adquirir suscripción',
+        description: 'Selecciona un plan e inicia la transacción para tu barbería.',
+        route: '/panel/subscription/status'
+      };
+    }
+
+    return PanelNavigationService.OPEN_WITHOUT_SUBSCRIPTION.has(item.id)
+      ? item
+      : { ...item, locked: true };
   }
 
 
@@ -656,7 +682,8 @@ export class PanelNavigationService {
       .filter(
         item =>
           item.status ===
-          'AVAILABLE'
+          'AVAILABLE' &&
+          !item.locked
       );
   }
 

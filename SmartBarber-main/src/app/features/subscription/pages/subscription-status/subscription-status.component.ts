@@ -49,6 +49,8 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
   );
   readonly loading = signal(true);
   readonly submitting = signal(false);
+  /** La barbería elige si el plan se renueva solo al vencer (activado por defecto). */
+  readonly automaticRenew = signal(true);
   readonly errorMessage = signal('');
   readonly paymentMessage = signal('');
   readonly paymentDelayNotice = signal(false);
@@ -158,7 +160,7 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
       request = this.subscriptionWs.createSubscription({
         subscriptionId: plan.id,
         duration: SUBSCRIPTION_DURATION,
-        automaticRenew: false
+        automaticRenew: this.automaticRenew()
       });
     } catch (error: unknown) {
       this.submitting.set(false);

@@ -91,7 +91,7 @@
                             isCurrentRoute(item.route)
                         " [class.coming-soon]="
                             item.status === 'COMING_SOON'
-                        " [title]="
+                        " [class.locked]="item.locked" [title]="
                             sidebarCollapsed()
                                 ? item.label
                                 : ''
@@ -130,10 +130,20 @@
 
                         <span class="navigation-status" *ngIf="
                                 !sidebarCollapsed() &&
-                                item.status === 'COMING_SOON'
+                                item.status === 'COMING_SOON' &&
+                                !item.locked
                             ">
 
                             Próximamente
+
+                        </span>
+
+                        <!-- BLOQUEADO SIN SUSCRIPCIÓN -->
+
+                        <span class="navigation-status navigation-status--locked" *ngIf="item.locked"
+                            [attr.aria-label]="'Bloqueado: requiere una suscripción activa'">
+
+                            🔒
 
                         </span>
 
@@ -474,407 +484,395 @@
 
 
                 <!-- =================================================
-                     MÉTRICAS
+                     CONTENIDO SEGÚN EL ROL
                 ================================================== -->
 
-                <section class="metrics-grid" aria-label="Indicadores">
+                <ng-container *ngIf="!homeRestricted(); else restrictedHome">
 
+                    <!-- INDICADORES -->
 
-                    <!-- TURNOS -->
+                    <section class="metrics-grid" aria-label="Indicadores">
 
-                    <article class="metric-card">
+                        <article class="metric-card" *ngFor="let metric of homeMetrics()">
 
-                        <span class="metric-icon">
-
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" stroke-linejoin="round">
-
-                                <path
-                                    d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z">
-                                </path>
-
-                            </svg>
-
-                        </span>
-
-                        <span class="metric-label">
-                            Turnos de hoy
-                        </span>
-
-                        <strong class="metric-value">
-                            {{ homeData.todayTurns().loading ? '…' : homeData.todayTurns().data.length }}
-                        </strong>
-
-                        <small>
-                            {{ homeData.todayTurns().error || 'Reservas activas para hoy' }}
-                        </small>
-
-                    </article>
-
-
-                    <!-- BARBEROS -->
-
-                    <article class="metric-card">
-
-                        <span class="metric-icon">
-
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" stroke-linejoin="round">
-
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2">
-                                </path>
-
-                                <circle cx="9" cy="7" r="4">
-                                </circle>
-
-                                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75">
-                                </path>
-
-                            </svg>
-
-                        </span>
-
-                        <span class="metric-label">
-                            Barberos activos
-                        </span>
-
-                        <strong class="metric-value">
-                            —
-                        </strong>
-
-                        <small>
-                            Datos pendientes de integración
-                        </small>
-
-                    </article>
-
-
-                    <!-- INGRESOS -->
-
-                    <article class="metric-card">
-
-                        <span class="metric-icon">
-
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                                stroke-linecap="round" stroke-linejoin="round">
-
-                                <path
-                                    d="M12 1v22M17 5.5A4.5 4.5 0 0 0 12.5 3C10 3 8 4.5 8 6.5S10 10 12.5 10s4.5 1.5 4.5 3.5-2 3.5-4.5 3.5A4.5 4.5 0 0 1 8 15">
-                                </path>
-
-                            </svg>
-
-                        </span>
-
-                        <span class="metric-label">
-                            Ingresos del periodo
-                        </span>
-
-                        <strong class="metric-value">
-                            —
-                        </strong>
-
-                        <small>
-                            Datos pendientes de integración
-                        </small>
-
-                    </article>
-
-                </section>
-
-
-                <!-- =================================================
-                     AGENDA / ORGANIZACIÓN / ANALÍTICA
-                ================================================== -->
-
-                <section class="dashboard-grid">
-
-
-                    <!-- AGENDA -->
-
-                    <article class="dashboard-card appointments-card">
-
-                        <div class="card-heading">
-
-                            <div>
-
-                                <span class="section-eyebrow">
-                                    AGENDA
-                                </span>
-
-                                <h2>
-                                    Turnos de hoy
-                                </h2>
-
-                            </div>
-
-                            <a *ngIf="summary()?.roleLabel !== 'Cliente'" routerLink="/panel/agenda" class="card-link">
-                                Ver agenda
-                            </a>
-
-                        </div>
-
-
-                        <ul class="today-turns" *ngIf="homeData.todayTurns().data.length > 0; else noTurns">
-                            <li *ngFor="let turn of homeData.todayTurns().data" class="today-turn">
-                                <strong>{{ turn.start | date: 'HH:mm' }} – {{ turn.end | date: 'HH:mm' }}</strong>
-                                <span>{{ turn.barberName || 'Reserva' }}</span>
-                                <span class="today-turn__status">{{ turn.statusLabel }}</span>
-                            </li>
-                        </ul>
-
-                        <ng-template #noTurns>
-                        <div class="empty-state">
-
-                            <span class="empty-state-icon">
-
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                            <span class="metric-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                                     stroke-linecap="round" stroke-linejoin="round">
-
-                                    <path
-                                        d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z">
-                                    </path>
-
+                                    <path [attr.d]="metricIconPath(metric.icon)"></path>
                                 </svg>
-
                             </span>
 
-                            <strong>
-                                {{
-                                    homeData.todayTurns().loading
-                                        ? 'Cargando los turnos de hoy…'
-                                        : (homeData.todayTurns().error || 'No hay turnos para hoy')
-                                }}
+                            <span class="metric-label">{{ metric.label }}</span>
+
+                            <strong class="metric-value" [class.metric-value--text]="metric.value.length > 7"
+                                [attr.aria-busy]="metric.loading">
+                                {{ metric.loading ? '…' : metric.value }}
                             </strong>
 
-                            <p>
-                                Las reservas del día aparecen aquí con su hora y su estado.
-                            </p>
+                            <small>{{ metric.loading ? 'Cargando…' : metric.hint }}</small>
 
-                        </div>
-                        </ng-template>
+                        </article>
 
-                    </article>
+                    </section>
 
 
-                    <!-- ORGANIZACIÓN -->
+                    <section class="dashboard-grid">
 
-                    <article class="dashboard-card schedule-card">
+                        <!-- AGENDA: hoy (administrador y barbero) o próximas citas (cliente) -->
 
-                        <div class="card-heading">
+                        <article class="dashboard-card appointments-card">
 
-                            <div>
+                            <div class="card-heading">
+                                <div>
+                                    <span class="section-eyebrow">AGENDA</span>
+                                    <h2>
+                                        {{
+                                            homeRole() === 'CLIENT'
+                                                ? 'Mis próximas citas'
+                                                : (homeRole() === 'BARBER' ? 'Mis turnos de hoy' : 'Turnos de hoy')
+                                        }}
+                                    </h2>
+                                </div>
 
-                                <span class="section-eyebrow">
-                                    ORGANIZACIÓN
-                                </span>
-
-                                <h2>
-                                    Horarios de atención
-                                </h2>
-
-                            </div>
-
-                            <span class="card-link">
-                                Configuración
-                            </span>
-
-                        </div>
-
-
-                        <div class="schedule-placeholder">
-
-                            <p class="schedule-note" *ngIf="homeData.workdays().data.length > 0">
-                                Jornada de lunes a domingo, excepto los días no laborables.
-                            </p>
-
-                            <div class="schedule-row" *ngFor="let day of homeData.workdays().data">
-                                <span>{{ day.name }}</span>
-                                <span>
-                                    {{
-                                        day.vacation
-                                            ? 'De vacaciones'
-                                            : (day.workday
-                                                ? day.workday + (day.lunch ? ' · almuerzo ' + day.lunch : '')
-                                                : 'Sin horario')
-                                    }}
-                                </span>
-                            </div>
-
-                            <div class="schedule-row" *ngIf="homeData.workdays().data.length === 0">
-                                <span>
-                                    {{
-                                        homeData.workdays().loading
-                                            ? 'Cargando horarios…'
-                                            : (homeData.workdays().error
-                                                || (summary()?.roleLabel === 'Cliente'
-                                                    ? 'Consulta el horario de cada barbero al reservar.'
-                                                    : 'Aún no hay horarios configurados.'))
-                                    }}
-                                </span>
-                            </div>
-
-                        </div>
-
-
-                        <a *ngIf="
-                                summary()?.roleLabel ===
-                                'Administrador'
-                            " routerLink="/panel/barbershop" class="primary-button">
-
-                            Configurar barbería
-
-                        </a>
-
-                    </article>
-
-
-                    <!-- ANALÍTICA -->
-
-                    <article class="dashboard-card weekly-card">
-
-                        <div class="card-heading">
-
-                            <div>
-
-                                <span class="section-eyebrow">
-                                    ANALÍTICA
-                                </span>
-
-                                <h2>
-                                    Resumen semanal
-                                </h2>
-
-                            </div>
-
-                            <a *ngIf="isAdminUser; else reportsLabel" routerLink="/panel/statistics"
-                                class="card-link card-link--action">
-                                Ver estadísticas →
-                            </a>
-
-                            <ng-template #reportsLabel>
-                                <span class="card-link">
-                                    Reportes
-                                </span>
-                            </ng-template>
-
-                        </div>
-
-
-                        <div class="chart-placeholder" aria-label="Gráfico pendiente de datos">
-
-                            <div class="chart-grid-lines">
-
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                                <span></span>
-
-                            </div>
-
-
-                            <div class="chart-empty">
-
-                                <span class="chart-line">
-                                    ╱ ╲ ╱ ╱ ╲
-                                </span>
-
-                                <strong>
-                                    Gráfico disponible al integrar las métricas
-                                </strong>
-
-                            </div>
-
-
-                            <div class="chart-days">
-
-                                <span>Lun</span>
-                                <span>Mar</span>
-                                <span>Mié</span>
-                                <span>Jue</span>
-                                <span>Vie</span>
-                                <span>Sáb</span>
-                                <span>Dom</span>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-
-                    <!-- ACCESO RÁPIDO -->
-
-                    <article class="dashboard-card modules-card">
-
-                        <div class="card-heading">
-
-                            <div>
-
-                                <span class="section-eyebrow">
-                                    ACCESO RÁPIDO
-                                </span>
-
-                                <h2>
-                                    Módulos disponibles
-                                </h2>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="quick-modules">
-
-                            <ng-container *ngFor="
-                                    let group of navigationGroups()
-                                ">
-
-                                <ng-container *ngFor="
-                                        let item of group.items
-                                    ">
-
-                                    <button *ngIf="
-                                            item.status === 'AVAILABLE' &&
-                                            item.id !== 'dashboard' &&
-                                            item.id !== 'profile'
-                                        " type="button" class="quick-module" (click)="
-                                            navigateToItem(item)
-                                        ">
-
-
-                                        <span>
-
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-
-                                                <path [attr.d]="
-                                                        getIconPath(
-                                                            item.icon
-                                                        )
-                                                    ">
-                                                </path>
-
-                                            </svg>
-
-                                        </span>
-
-
-                                        <small>
-                                            {{ item.label }}
-                                        </small>
-
+                                <div class="card-heading-actions">
+                                    <button type="button" class="card-link card-link--button" (click)="refreshHome()"
+                                        [disabled]="homeData.reservations().loading" aria-label="Actualizar el Inicio">
+                                        Actualizar
                                     </button>
+                                    <a *ngIf="homeRole() !== 'CLIENT'" routerLink="/panel/agenda" class="card-link card-link--action">
+                                        Ver agenda →
+                                    </a>
+                                    <a *ngIf="homeRole() === 'CLIENT'" routerLink="/panel/reservation-history" class="card-link card-link--action">
+                                        Ver historial →
+                                    </a>
+                                </div>
+                            </div>
 
-                                </ng-container>
+                            <ng-container *ngIf="(homeRole() === 'CLIENT' ? homeData.upcomingList() : homeData.todayList()) as turns">
+
+                                <ul class="today-turns" *ngIf="turns.length > 0; else noTurns">
+                                    <li *ngFor="let turn of turns" class="today-turn">
+                                        <strong>{{ homeRole() === 'CLIENT' ? formatTurnDate(turn) : formatTurnTime(turn) }}</strong>
+                                        <span>{{ homeRole() === 'BARBER' ? 'Reserva' : (turn.barberName || 'Barbero por confirmar') }}</span>
+                                        <span class="today-turn__status" [attr.data-status]="turn.status">{{ turn.statusLabel }}</span>
+                                    </li>
+                                </ul>
+
+                                <p class="list-more"
+                                    *ngIf="(homeRole() === 'CLIENT' ? homeData.upcomingTurns().length : homeData.todayTurns().length) > turns.length">
+                                    y {{ (homeRole() === 'CLIENT' ? homeData.upcomingTurns().length : homeData.todayTurns().length) - turns.length }} más
+                                </p>
 
                             </ng-container>
 
-                        </div>
+                            <ng-template #noTurns>
+                                <div class="empty-state">
+                                    <span class="empty-state-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path [attr.d]="getIconPath('calendar')"></path>
+                                        </svg>
+                                    </span>
 
-                    </article>
+                                    <strong>
+                                        {{
+                                            homeData.reservations().loading
+                                                ? 'Cargando las reservas…'
+                                                : (homeData.reservations().error
+                                                    || (homeRole() === 'CLIENT' ? 'No tienes citas pendientes' : 'No hay turnos para hoy'))
+                                        }}
+                                    </strong>
 
-                </section>
+                                    <p *ngIf="!homeData.reservations().loading && !homeData.reservations().error">
+                                        {{
+                                            homeRole() === 'CLIENT'
+                                                ? 'Agenda una cita con tu barbería en pocos pasos.'
+                                                : 'Las reservas del día aparecen aquí con su hora y su estado.'
+                                        }}
+                                    </p>
+
+                                    <button *ngIf="homeData.reservations().error" type="button" class="primary-button" (click)="refreshHome()">
+                                        Reintentar
+                                    </button>
+
+                                    <a *ngIf="homeRole() === 'CLIENT' && !homeData.reservations().loading && !homeData.reservations().error"
+                                        routerLink="/panel/reservas" class="primary-button">
+                                        Agendar cita
+                                    </a>
+                                </div>
+                            </ng-template>
+
+                        </article>
+
+
+                        <!-- ORGANIZACIÓN (administrador y barbero) / RESERVAR (cliente) -->
+
+                        <article class="dashboard-card schedule-card" *ngIf="homeRole() !== 'CLIENT'; else clientBooking">
+
+                            <div class="card-heading">
+                                <div>
+                                    <span class="section-eyebrow">ORGANIZACIÓN</span>
+                                    <h2>{{ homeRole() === 'BARBER' ? 'Mi jornada' : 'Horarios del equipo' }}</h2>
+                                </div>
+
+                                <a *ngIf="homeRole() === 'ADMIN'" routerLink="/panel/horarios" class="card-link card-link--action">
+                                    Configurar →
+                                </a>
+                            </div>
+
+                            <div class="schedule-placeholder">
+
+                                <p class="schedule-note">
+                                    {{
+                                        homeRole() === 'BARBER'
+                                            ? 'Tu horario aplica todos los días, excepto los días no laborables de la barbería. Lo configura el administrador.'
+                                            : 'Cada horario aplica todos los días, excepto los días no laborables.'
+                                    }}
+                                </p>
+
+                                <div class="schedule-row" *ngFor="let day of homeData.workdays().data">
+                                    <span>{{ homeRole() === 'BARBER' ? 'Jornada' : day.name }}</span>
+                                    <span>
+                                        {{
+                                            day.vacation
+                                                ? 'De vacaciones'
+                                                : (day.workday
+                                                    ? day.workday + (day.lunch ? ' · almuerzo ' + day.lunch : '')
+                                                    : 'Sin horario')
+                                        }}
+                                    </span>
+                                </div>
+
+                                <div class="schedule-row" *ngIf="homeData.workdays().data.length === 0">
+                                    <span>
+                                        {{
+                                            homeData.workdays().loading
+                                                ? 'Cargando horarios…'
+                                                : (homeData.workdays().error || 'Aún no hay horarios configurados.')
+                                        }}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            <a *ngIf="homeRole() === 'ADMIN'" routerLink="/panel/barbershop" class="primary-button">
+                                Días no laborables
+                            </a>
+
+                        </article>
+
+                        <ng-template #clientBooking>
+                            <article class="dashboard-card schedule-card">
+
+                                <div class="card-heading">
+                                    <div>
+                                        <span class="section-eyebrow">RESERVAS</span>
+                                        <h2>¿Necesitas un servicio?</h2>
+                                    </div>
+                                </div>
+
+                                <p class="card-copy">
+                                    Elige la barbería, el servicio, el barbero y la hora que prefieras. Si no tienes cita,
+                                    únete a la cola virtual y sigue tu turno en tiempo real.
+                                </p>
+
+                                <div class="card-actions">
+                                    <a routerLink="/panel/reservas" class="primary-button">Agendar cita</a>
+                                    <a routerLink="/panel/virtual-queue-available" class="secondary-button">Unirme a una fila</a>
+                                </div>
+
+                            </article>
+                        </ng-template>
+
+
+                        <!-- RESUMEN SEMANAL (administrador y barbero) / ACTIVIDAD RECIENTE (cliente) -->
+
+                        <article class="dashboard-card weekly-card" *ngIf="homeRole() !== 'CLIENT'; else clientHistory">
+
+                            <div class="card-heading">
+                                <div>
+                                    <span class="section-eyebrow">ANALÍTICA</span>
+                                    <h2>Resumen semanal</h2>
+                                </div>
+
+                                <a *ngIf="homeRole() === 'ADMIN'" routerLink="/panel/statistics" class="card-link card-link--action">
+                                    Ver estadísticas →
+                                </a>
+                                <a *ngIf="homeRole() === 'BARBER'" routerLink="/panel/reservations-history" class="card-link card-link--action">
+                                    Mis reservas →
+                                </a>
+                            </div>
+
+                            <p class="schedule-note">
+                                {{
+                                    homeData.reservations().loading
+                                        ? 'Cargando…'
+                                        : (homeData.reservations().error
+                                            || (homeData.weekTotal() + (homeData.weekTotal() === 1 ? ' reserva' : ' reservas') + ' esta semana (sin canceladas)'))
+                                }}
+                            </p>
+
+                            <div class="week-chart" role="img"
+                                [attr.aria-label]="'Reservas por día de esta semana: ' + homeData.weekTotal() + ' en total'">
+                                <div class="week-bar" *ngFor="let day of homeData.week()" [class.week-bar--today]="day.isToday"
+                                    [attr.title]="day.label + ': ' + day.count">
+                                    <span class="week-bar__count">{{ day.count }}</span>
+                                    <span class="week-bar__track">
+                                        <span class="week-bar__fill" [style.height.%]="day.height"></span>
+                                    </span>
+                                    <span class="week-bar__label">{{ day.label }}</span>
+                                </div>
+                            </div>
+
+                        </article>
+
+                        <ng-template #clientHistory>
+                            <article class="dashboard-card weekly-card">
+
+                                <div class="card-heading">
+                                    <div>
+                                        <span class="section-eyebrow">HISTORIAL</span>
+                                        <h2>Actividad reciente</h2>
+                                    </div>
+
+                                    <a routerLink="/panel/reservation-history" class="card-link card-link--action">
+                                        Ver todo →
+                                    </a>
+                                </div>
+
+                                <ul class="today-turns" *ngIf="homeData.recentHistory().length > 0; else noHistory">
+                                    <li *ngFor="let turn of homeData.recentHistory()" class="today-turn">
+                                        <strong>{{ formatTurnDate(turn) }}</strong>
+                                        <span>{{ turn.barberName || 'Barbero' }}</span>
+                                        <span class="today-turn__status" [attr.data-status]="turn.status">{{ turn.statusLabel }}</span>
+                                    </li>
+                                </ul>
+
+                                <ng-template #noHistory>
+                                    <p class="card-copy">
+                                        {{
+                                            homeData.reservations().loading
+                                                ? 'Cargando…'
+                                                : (homeData.reservations().error || 'Aún no tienes reservas anteriores.')
+                                        }}
+                                    </p>
+                                </ng-template>
+
+                            </article>
+                        </ng-template>
+
+
+                        <!-- ACCESO RÁPIDO -->
+
+                        <article class="dashboard-card modules-card">
+
+                            <div class="card-heading">
+                                <div>
+                                    <span class="section-eyebrow">ACCESO RÁPIDO</span>
+                                    <h2>Módulos disponibles</h2>
+                                </div>
+                            </div>
+
+                            <div class="quick-modules">
+                                <button *ngFor="let item of quickItems()" type="button" class="quick-module"
+                                    (click)="navigateToItem(item)">
+                                    <span aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path [attr.d]="getIconPath(item.icon)"></path>
+                                        </svg>
+                                    </span>
+                                    <small>{{ item.label }}</small>
+                                </button>
+                            </div>
+
+                        </article>
+
+                    </section>
+
+                </ng-container>
+
+
+                <!-- =================================================
+                     SIN SUSCRIPCIÓN ACTIVA (administrador y barbero)
+                ================================================== -->
+
+                <ng-template #restrictedHome>
+                    <section class="dashboard-grid">
+
+                        <article class="dashboard-card locked-card">
+
+                            <div class="card-heading">
+                                <div>
+                                    <span class="section-eyebrow">PLAN INACTIVO</span>
+                                    <h2>
+                                        {{
+                                            homeRole() === 'ADMIN'
+                                                ? 'Activa tu plan para usar SmartBarber'
+                                                : 'Tu barbería no tiene un plan activo'
+                                        }}
+                                    </h2>
+                                </div>
+                            </div>
+
+                            <p class="card-copy">
+                                {{
+                                    homeRole() === 'ADMIN'
+                                        ? 'Mientras la suscripción no esté activa, estos módulos permanecen bloqueados:'
+                                        : 'Hasta que el administrador active el plan, estos módulos permanecen bloqueados:'
+                                }}
+                            </p>
+
+                            <ul class="locked-list">
+                                <li *ngFor="let item of lockedItems()">
+                                    <span aria-hidden="true">🔒</span>
+                                    {{ item.label }}
+                                </li>
+                            </ul>
+
+                            <button *ngIf="homeRole() === 'ADMIN'" type="button" class="primary-button"
+                                (click)="navigateToSubscriptionAcquisition()">
+                                Adquirir suscripción
+                            </button>
+
+                        </article>
+
+                        <article class="dashboard-card modules-card">
+
+                            <div class="card-heading">
+                                <div>
+                                    <span class="section-eyebrow">ACCESO RÁPIDO</span>
+                                    <h2>Disponible ahora</h2>
+                                </div>
+                            </div>
+
+                            <div class="quick-modules">
+                                <button *ngFor="let item of quickItems()" type="button" class="quick-module"
+                                    (click)="navigateToItem(item)">
+                                    <span aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path [attr.d]="getIconPath(item.icon)"></path>
+                                        </svg>
+                                    </span>
+                                    <small>{{ item.label }}</small>
+                                </button>
+
+                                <a routerLink="/panel/profile" class="quick-module">
+                                    <span aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path [attr.d]="getIconPath('profile')"></path>
+                                        </svg>
+                                    </span>
+                                    <small>Mi perfil</small>
+                                </a>
+                            </div>
+
+                        </article>
+
+                    </section>
+                </ng-template>
 
             </section>
 
@@ -892,6 +890,44 @@
         </div>
 
     </main>
+
+
+    <!-- =====================================================
+         MODAL MÓDULO BLOQUEADO (sin suscripción activa)
+    ====================================================== -->
+
+    <div *ngIf="selectedLocked() as locked" class="modal-backdrop" (click)="closeComingSoon()">
+
+        <section class="coming-soon-modal" role="dialog" aria-modal="true" aria-labelledby="locked-title"
+            (click)="$event.stopPropagation()">
+
+            <span class="modal-icon" aria-hidden="true">🔒</span>
+
+            <span class="section-eyebrow">REQUIERE UN PLAN ACTIVO</span>
+
+            <h2 id="locked-title">{{ locked.label }}</h2>
+
+            <p>{{ locked.description }}</p>
+
+            <span class="modal-status">
+                {{
+                    isAdminUser
+                        ? 'Activa la suscripción de tu barbería para usar este módulo.'
+                        : 'Tu barbería no tiene un plan activo. Pide al administrador que lo active.'
+                }}
+            </span>
+
+            <button *ngIf="isAdminUser" type="button" class="primary-button" (click)="goToAcquisitionFromLocked()">
+                Adquirir suscripción
+            </button>
+
+            <button type="button" class="secondary-button" (click)="closeComingSoon()">
+                Cerrar
+            </button>
+
+        </section>
+
+    </div>
 
 
     <!-- =====================================================

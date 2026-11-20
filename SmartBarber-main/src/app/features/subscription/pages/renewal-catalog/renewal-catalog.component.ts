@@ -37,6 +37,8 @@ export class RenewalCatalogComponent implements OnInit, OnDestroy {
   readonly plans = signal<SubscriptionCatalogPlan[]>([]);
   readonly loading = signal(false);
   readonly submittingPlanId = signal<number | null>(null);
+  /** La renovación queda programada para repetirse al vencer (activado por defecto). */
+  readonly automaticRenew = signal(true);
   readonly errorMessage = signal('');
   readonly paymentMessage = signal('');
   readonly createdSubscription = signal<SubscriptionCreationResponse | null>(null);
@@ -83,7 +85,7 @@ export class RenewalCatalogComponent implements OnInit, OnDestroy {
       request = this.subscriptionWs.renewSubscription({
         subscriptionId: plan.id,
         duration: SUBSCRIPTION_DURATION,
-        automaticRenew: false
+        automaticRenew: this.automaticRenew()
       });
     } catch (error: unknown) {
       this.submittingPlanId.set(null);

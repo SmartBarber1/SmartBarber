@@ -113,10 +113,23 @@
     </aside>
 
     <aside class="integration-note">
-      <span class="note-icon" aria-hidden="true">i</span>
-      <p>
-        La renovación es manual. Después de elegir un plan, sigue las instrucciones de pago y espera la confirmación para ver actualizado el estado de tu suscripción. La renovación automática aún no está disponible.
-      </p>
+      <label class="auto-renew-toggle">
+        <input
+          type="checkbox"
+          [checked]="automaticRenew()"
+          (change)="automaticRenew.set($any($event.target).checked)"
+          [disabled]="submittingPlanId() !== null" />
+        <span>
+          <strong>Renovación automática</strong>
+          <p>
+            {{
+              automaticRenew()
+                ? 'Activada: cuando este plan esté por vencer, SmartBarber generará el pago de la siguiente renovación. Después de elegir un plan, sigue las instrucciones de pago y espera la confirmación.'
+                : 'Desactivada: tendrás que volver a renovar manualmente antes de que venza el plan.'
+            }}
+          </p>
+        </span>
+      </label>
     </aside>
     }
   }

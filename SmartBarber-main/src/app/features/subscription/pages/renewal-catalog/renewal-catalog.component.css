@@ -581,3 +581,23 @@
     padding: 18px 14px;
   }
 }
+
+/* Renovación automática: interruptor */
+.auto-renew-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.auto-renew-toggle input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  flex: 0 0 18px;
+  accent-color: #8c683c;
+  cursor: pointer;
+}
+
+.auto-renew-toggle strong { display: block; }
+.auto-renew-toggle p { margin: 4px 0 0; }

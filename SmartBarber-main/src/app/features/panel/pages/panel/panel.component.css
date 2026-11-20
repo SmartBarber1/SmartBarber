@@ -2504,3 +2504,185 @@ button {
   font-size: 0.75rem;
   opacity: 0.7;
 }
+
+/* ===================================================================
+   INICIO POR ROL
+=================================================================== */
+
+/* Valores de texto (fechas, jornadas) más pequeños que las cifras */
+.metric-value.metric-value--text {
+    font-size: 17px;
+    line-height: 1.25;
+}
+
+.card-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.card-link--button {
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+}
+
+.card-link--button:disabled {
+    opacity: .5;
+    cursor: default;
+}
+
+.card-copy {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 15px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--charcoal);
+    background: var(--card);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.secondary-button:hover {
+    border-color: var(--brass-soft);
+}
+
+.list-more {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+/* Estado de cada cita */
+.today-turn__status[data-status='CONFIRMED'],
+.today-turn__status[data-status='COMPLETED'] {
+    color: #2f6b3f;
+    opacity: 1;
+}
+
+.today-turn__status[data-status='CANCELLED'],
+.today-turn__status[data-status='NO_SHOW'] {
+    color: #9c3b2c;
+    opacity: 1;
+}
+
+/* Resumen semanal: barras por día */
+.week-chart {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    align-items: end;
+    min-height: 140px;
+}
+
+.week-bar {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    justify-items: center;
+    gap: 4px;
+    height: 140px;
+}
+
+.week-bar__count {
+    color: var(--charcoal);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.week-bar__track {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    max-width: 34px;
+    height: 100%;
+    border-radius: 6px;
+    background: #f4efe7;
+    overflow: hidden;
+}
+
+.week-bar__fill {
+    width: 100%;
+    min-height: 0;
+    border-radius: 6px;
+    background: var(--brass-soft);
+    transition: height .3s ease;
+}
+
+.week-bar--today .week-bar__fill {
+    background: var(--brass);
+}
+
+.week-bar__label {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.week-bar--today .week-bar__label {
+    color: var(--charcoal);
+    font-weight: 700;
+}
+
+/* Sin suscripción activa */
+.locked-card .primary-button {
+    margin-top: 6px;
+}
+
+.locked-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 8px;
+    margin: 0 0 14px;
+    padding: 0;
+    list-style: none;
+}
+
+.locked-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 11px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.navigation-item.locked {
+    opacity: .55;
+}
+
+.navigation-status--locked {
+    font-size: 11px;
+}
+
+a.quick-module {
+    text-decoration: none;
+    color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .week-bar__fill {
+        transition: none;
+    }
+}

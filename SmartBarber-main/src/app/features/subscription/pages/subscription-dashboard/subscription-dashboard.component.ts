@@ -67,7 +67,7 @@ export class SubscriptionDashboardComponent implements OnInit {
       description: 'Elige un plan para ampliar la vigencia de tu suscripción.',
       route: 'renewal',
       icon: '↻',
-      state: 'Renovación manual',
+      state: 'Renovación automática',
       available: true
     },
     {

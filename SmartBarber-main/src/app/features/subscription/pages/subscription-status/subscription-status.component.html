@@ -110,13 +110,23 @@
       </div>
 
       <section class="renewal-note">
-        <span class="renewal-note-icon" aria-hidden="true">↻</span>
-        <div>
-          <strong>Renovación manual</strong>
-          <p>
-            La renovación debe hacerse manualmente. La opción automática aún no está disponible.
-          </p>
-        </div>
+        <label class="auto-renew-toggle">
+          <input
+            type="checkbox"
+            [checked]="automaticRenew()"
+            (change)="automaticRenew.set($any($event.target).checked)"
+            [disabled]="submitting()" />
+          <span>
+            <strong>Renovación automática</strong>
+            <p>
+              {{
+                automaticRenew()
+                  ? 'Al vencer el plan, SmartBarber generará el pago de la renovación con el mismo plan para que tu barbería no pierda el acceso.'
+                  : 'Tendrás que renovar el plan manualmente antes de que venza desde Suscripción y pagos.'
+              }}
+            </p>
+          </span>
+        </label>
       </section>
 
       <button

@@ -14,8 +14,13 @@ export interface PanelNavigationItem {
     icon: string;
     route: string;
     roles: UserRole[];
-    status: PanelNavigationItemStatus;
+        status: PanelNavigationItemStatus;
     visible: boolean;
+    /**
+     * Módulo bloqueado porque la barbería no tiene una suscripción activa:
+     * se muestra en el menú con candado, pero no se puede abrir.
+     */
+    locked?: boolean;
 }
 
 export interface PanelNavigationGroup {

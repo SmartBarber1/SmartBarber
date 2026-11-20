@@ -4,6 +4,7 @@ import {
   HostListener,
   OnDestroy,
   OnInit,
+    LOCALE_ID,
   ViewChild,
   computed,
   effect,
@@ -11,7 +12,7 @@ import {
   signal
 } from '@angular/core';
 
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT, formatDate, formatNumber } from '@angular/common';
 
 import {
   NavigationEnd,
@@ -37,7 +38,17 @@ import {
 } from '../../domain/models/panel-navigation.model';
 
 import { PanelNavigationService } from '../../application/services/panel-navigation.service';
-import { PanelHomeDataService } from '../../application/services/panel-home-data.service';
+import { HomeTurn, LoadState, PanelHomeDataService } from '../../application/services/panel-home-data.service';
+
+/** Indicador de la fila superior del Inicio. */
+export interface HomeMetric {
+  id: string;
+  label: string;
+  value: string;
+  hint: string;
+  icon: 'calendar' | 'users' | 'money' | 'clock' | 'list' | 'check';
+  loading: boolean;
+}
 import { BarbershopSubscriptionAccessService } from '../../../subscription/application/services/barbershop-subscription-access.service';
 
 
@@ -125,7 +136,26 @@ export class PanelComponent
         filter(event => event instanceof NavigationEnd),
         takeUntilDestroyed()
       )
-      .subscribe(() => this.closeMobileMenu());
+            .subscribe(() => this.closeMobileMenu());
+
+    // Al volver al Inicio desde otro módulo se actualizan sus datos
+    // (por ejemplo, después de confirmar una reserva).
+    let previousUrl: string | null = null;
+    inject(Router).events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed()
+      )
+      .subscribe(event => {
+        const isHome = event.urlAfterRedirects === '/panel' || event.urlAfterRedirects.startsWith('/panel/home');
+        const cameFromModule = previousUrl !== null
+          && previousUrl !== '/panel'
+          && !previousUrl.startsWith('/panel/home');
+        if (isHome && cameFromModule) {
+          this.refreshHome();
+        }
+        previousUrl = event.urlAfterRedirects;
+      });
   }
 
 
@@ -167,6 +197,106 @@ export class PanelComponent
   /** Turnos de hoy y jornadas del equipo para las tarjetas del Inicio. */
   readonly homeData =
     inject(PanelHomeDataService);
+
+  private readonly locale =
+    inject(LOCALE_ID);
+
+  /** Módulo bloqueado que el usuario intentó abrir sin plan activo. */
+  readonly selectedLocked =
+    signal<PanelNavigationItem | null>(null);
+
+  /** Rol de la sesión para elegir el contenido del Inicio. */
+  readonly homeRole =
+    computed(() => this.homeData.role());
+
+  /** Sin plan activo el Inicio muestra qué se habilita, no los indicadores. */
+  readonly homeRestricted =
+    computed(() => this.subscriptionAccess.restrictsModules);
+
+  /** Módulos bloqueados para listarlos en el Inicio sin plan activo. */
+  readonly lockedItems =
+    computed<PanelNavigationItem[]>(() =>
+      this.navigationGroups()
+        .flatMap(group => group.items)
+        .filter(item => item.locked && item.status === 'AVAILABLE')
+    );
+
+  /** Accesos rápidos: los módulos disponibles del rol, sin Inicio ni Mi perfil. */
+  readonly quickItems =
+    computed<PanelNavigationItem[]>(() =>
+      this.navigationGroups()
+        .flatMap(group => group.items)
+        .filter(item =>
+          item.status === 'AVAILABLE' &&
+          !item.locked &&
+          item.id !== 'dashboard' &&
+          item.id !== 'profile'
+        )
+    );
+
+  /** Tres indicadores del Inicio, distintos para cada rol. */
+  readonly homeMetrics =
+    computed<HomeMetric[]>(() => {
+      const data = this.homeData;
+      const reservations = data.reservations();
+
+      switch (this.homeRole()) {
+        case 'ADMIN':
+          return [
+            this.countMetric('today', 'Turnos de hoy', data.todayTurns().length,
+              'Reservas activas de la barbería', 'calendar', reservations),
+            this.loadMetric('barbers', 'Barberos activos', data.activeBarbers(),
+              value => String(value), 'Con la cuenta activa', 'users'),
+            this.loadMetric('revenue', 'Ingresos del mes', data.monthRevenue(),
+              value => '$ ' + formatNumber(value, this.locale, '1.0-0'),
+              'Solo servicios finalizados', 'money')
+          ];
+
+        case 'BARBER': {
+          const workdays = data.workdays();
+          const mine = workdays.data[0] ?? null;
+          return [
+            this.countMetric('today', 'Mis turnos de hoy', data.todayTurns().length,
+              'Citas activas para hoy', 'calendar', reservations),
+            this.countMetric('later', 'Próximas citas', data.laterTurnsCount(),
+              'A partir de mañana', 'list', reservations),
+            {
+              id: 'workday',
+              label: 'Mi jornada',
+              icon: 'clock',
+              loading: workdays.loading,
+              value: workdays.error
+                ? '—'
+                : (mine?.vacation ? 'Vacaciones' : (mine?.workday ?? 'Sin horario')),
+              hint: workdays.error
+                || (mine?.lunch ? `Almuerzo ${mine.lunch}` : 'La configura el administrador')
+            }
+          ];
+        }
+
+        case 'CLIENT': {
+          const next = data.nextTurn();
+          return [
+            {
+              id: 'next',
+              label: 'Próxima cita',
+              icon: 'calendar',
+              loading: reservations.loading,
+              value: reservations.error ? '—' : (next ? this.formatTurnDate(next) : 'Sin citas'),
+              hint: reservations.error
+                || (next ? (next.barberName ? `Con ${next.barberName}` : next.statusLabel) : 'Reserva desde «Mis reservas»')
+            },
+            this.countMetric('active', 'Citas activas', data.upcomingTurns().length,
+              'Pendientes o confirmadas', 'list', reservations),
+            this.countMetric('completed', 'Servicios recibidos', data.completedCount(),
+              'Citas finalizadas en tu historial', 'check', reservations)
+          ];
+        }
+
+        default:
+          return [];
+      }
+    });
 
 
   ngOnInit(): void {
@@ -306,7 +436,7 @@ export class PanelComponent
   @HostListener('document:keydown.escape')
   onEscape(): void {
 
-    if (this.selectedComingSoon()) {
+    if (this.selectedComingSoon() || this.selectedLocked()) {
       this.closeComingSoon();
       return;
     }
@@ -542,6 +672,11 @@ export class PanelComponent
     item: PanelNavigationItem
   ): void {
 
+    if (item.locked) {
+      this.selectedLocked.set(item);
+      return;
+    }
+
     if (
       item.status === 'COMING_SOON'
     ) {
@@ -572,6 +707,67 @@ export class PanelComponent
   closeComingSoon(): void {
 
     this.selectedComingSoon.set(null);
+    this.selectedLocked.set(null);
+  }
+
+  /** Desde el aviso de módulo bloqueado, el administrador va a adquirir el plan. */
+  goToAcquisitionFromLocked(): void {
+    this.selectedLocked.set(null);
+    this.navigateToSubscriptionAcquisition();
+  }
+
+  /** Vuelve a consultar los datos del Inicio. */
+  refreshHome(): void {
+    const session = this.sessionService.currentSession;
+    if (session) {
+      this.homeData.refresh(session);
+    }
+  }
+
+  // ------------------------------------------------------------------ Inicio
+
+  formatTurnDate(turn: HomeTurn): string {
+    return formatDate(turn.start, "EEE d 'de' MMM, h:mm a", this.locale);
+  }
+
+  formatTurnTime(turn: HomeTurn): string {
+    return `${formatDate(turn.start, 'h:mm a', this.locale)} – ${formatDate(turn.end, 'h:mm a', this.locale)}`;
+  }
+
+  private countMetric(
+    id: string,
+    label: string,
+    count: number,
+    hint: string,
+    icon: HomeMetric['icon'],
+    state: LoadState<unknown>
+  ): HomeMetric {
+    return {
+      id,
+      label,
+      icon,
+      loading: state.loading,
+      value: state.error ? '—' : String(count),
+      hint: state.error || hint
+    };
+  }
+
+  private loadMetric<T>(
+    id: string,
+    label: string,
+    state: LoadState<T | null>,
+    format: (value: T) => string,
+    hint: string,
+    icon: HomeMetric['icon']
+  ): HomeMetric {
+    return {
+      id,
+      label,
+      icon,
+      loading: state.loading,
+      value: state.data === null ? '—' : format(state.data),
+      hint: state.error || hint
+    };
   }
 
 
@@ -768,6 +964,19 @@ export class PanelComponent
     }
   }
 
+
+    /** Ícono de cada indicador del Inicio (reutiliza los trazos del menú). */
+  metricIconPath(icon: HomeMetric['icon']): string {
+    const map: Record<HomeMetric['icon'], string> = {
+      calendar: 'calendar',
+      users: 'users',
+      money: 'wallet',
+      clock: 'clock',
+      list: 'history',
+      check: 'scissors'
+    };
+    return this.getIconPath(map[icon]);
+  }
 
   getIconPath(
     icon: string
