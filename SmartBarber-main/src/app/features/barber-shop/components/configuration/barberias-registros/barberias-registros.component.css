@@ -1,369 +1,136 @@
+/* Formulario de edición de Mi barbería: usa los tokens --mb-* del módulo. */
+
 :host {
   display: block;
 }
 
-
-/* ============================================================
-   TARJETA
-============================================================ */
-
-.editor-card {
-  width: 100%;
-
-  background:
-    linear-gradient(
-      145deg,
-      #1f1813 0%,
-      #18120f 100%
-    );
-
-  border: 1px solid #5a4736;
-  border-radius: 12px;
-
-  overflow: hidden;
-
-  box-shadow:
-    0 8px 20px
-    rgba(0, 0, 0, 0.2);
+.editor-intro {
+  margin: 0 0 18px;
+  color: var(--mb-muted, #71685e);
+  font-size: 13px;
 }
-
-
-/* ============================================================
-   HEADER
-============================================================ */
-
-.editor-header {
-  padding: 1.4rem 1.5rem;
-
-  border-bottom: 1px solid #3d3124;
-}
-
-
-.editor-badge {
-  display: inline-block;
-
-  color: #1b1612;
-  background: #c5a880;
-
-  padding: 0.25rem 0.6rem;
-
-  border-radius: 15px;
-
-  font-size: 0.62rem;
-  font-weight: 800;
-
-  letter-spacing: 1px;
-}
-
-
-.editor-header h2 {
-  margin: 0.7rem 0 0.3rem;
-
-  color: #fdfbf7;
-
-  font-size: 1.25rem;
-}
-
-
-.editor-header p {
-  margin: 0;
-
-  color: #bfa893;
-
-  font-size: 0.8rem;
-}
-
-
-/* ============================================================
-   CONSULTA
-============================================================ */
-
-.read-only-content {
-  padding: 1.5rem;
-}
-
-
-.read-only-message {
-  display: flex;
-
-  gap: 0.8rem;
-
-  padding: 1rem;
-
-  background: #241d17;
-
-  border: 1px solid #4a3b2c;
-  border-radius: 8px;
-}
-
-
-.message-icon {
-  color: #c5a880;
-
-  font-size: 1.1rem;
-}
-
-
-.read-only-message strong {
-  color: #f3e9d2;
-
-  font-size: 0.82rem;
-}
-
-
-.read-only-message p {
-  margin: 0.3rem 0 0;
-
-  color: #bfa893;
-
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
-
-.read-only-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-
-  gap: 0.9rem;
-
-  margin-top: 1.2rem;
-}
-
-
-.read-only-grid > div {
-  display: flex;
-  flex-direction: column;
-
-  gap: 0.25rem;
-
-  padding-bottom: 0.7rem;
-
-  border-bottom: 1px solid #3d3124;
-}
-
-
-.read-only-grid span {
-  color: #8f7963;
-
-  font-size: 0.6rem;
-  font-weight: 800;
-
-  letter-spacing: 1px;
-}
-
-
-.read-only-grid strong {
-  color: #d9cabb;
-
-  font-size: 0.78rem;
-
-  line-height: 1.4;
-}
-
-
-/* ============================================================
-   FORMULARIO
-============================================================ */
 
 .editor-form {
-  display: flex;
-  flex-direction: column;
-
-  gap: 1rem;
-
-  padding: 1.5rem;
+  display: grid;
+  gap: 16px;
 }
-
 
 .form-row {
   display: grid;
-
-  grid-template-columns:
-    minmax(0, 0.7fr)
-    minmax(0, 1.3fr);
-
-  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 16px;
 }
-
 
 .form-field {
-  display: flex;
-  flex-direction: column;
-
-  gap: 0.4rem;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
 }
-
 
 .form-field label {
-  color: #e6dfd5;
-
-  font-size: 0.75rem;
+  color: var(--mb-text, #29231e);
+  font-size: 13px;
   font-weight: 600;
 }
-
 
 .form-field input,
 .form-field select,
 .form-field textarea {
   width: 100%;
-
-  box-sizing: border-box;
-
-  padding: 0.7rem 0.75rem;
-
-  color: #fdfbf7;
-  background: #120e0b;
-
-  border: 1px solid #4a3b2c;
+  padding: 10px 12px;
+  border: 1px solid #d8cbb8;
   border-radius: 8px;
-
-  outline: none;
-
-  font-family: inherit;
-  font-size: 0.82rem;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  background: var(--mb-surface, #fff);
+  color: var(--mb-text, #29231e);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 
 .form-field textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 84px;
 }
 
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: #a99d8f;
+}
 
 .form-field input:focus,
 .form-field select:focus,
 .form-field textarea:focus {
-  border-color: #c5a880;
-
-  box-shadow:
-    0 0 8px
-    rgba(197, 168, 128, 0.2);
+  outline: none;
+  border-color: var(--mb-accent, #8b683b);
+  box-shadow: 0 0 0 3px var(--mb-accent-soft, #f2e8d8);
 }
 
+.form-field [aria-invalid='true'] {
+  border-color: var(--mb-danger, #a33a2b);
+}
 
 .form-field small {
-  color: #e98585;
-
-  font-size: 0.68rem;
+  color: var(--mb-danger, #a33a2b);
+  font-size: 12px;
 }
-
-
-/* ============================================================
-   ERROR
-============================================================ */
 
 .form-error {
-  padding: 0.7rem 0.8rem;
-
-  color: #f0b1b1;
-  background: #3a1e1e;
-
-  border: 1px solid #713737;
-  border-radius: 6px;
-
-  font-size: 0.75rem;
+  padding: 12px 14px;
+  border: 1px solid #e0a59b;
+  border-radius: 8px;
+  background: var(--mb-danger-soft, #fbecea);
+  color: var(--mb-danger, #a33a2b);
+  font-size: 13px;
 }
-
-
-/* ============================================================
-   BOTONES
-============================================================ */
 
 .form-actions {
   display: flex;
-
   justify-content: flex-end;
-
-  gap: 0.6rem;
-
-  padding-top: 0.7rem;
-
-  border-top: 1px solid #3d3124;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mb-border, #ece5db);
 }
-
 
 .button-primary,
 .button-secondary {
-  padding: 0.7rem 1rem;
-
-  border-radius: 6px;
-
-  font-size: 0.72rem;
-  font-weight: 800;
-
+  min-height: 42px;
+  padding: 9px 16px;
+  border-radius: 8px;
   cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: filter 0.2s ease, background 0.2s ease;
 }
-
 
 .button-primary {
-  color: #1b1612;
-  background: #c5a880;
-
-  border: 1px solid #c5a880;
+  border: 1px solid transparent;
+  background: var(--mb-accent, #8b683b);
+  color: #fff;
 }
-
 
 .button-primary:hover:not(:disabled) {
-  background: #d2b98f;
+  filter: brightness(0.92);
 }
-
 
 .button-secondary {
-  color: #d1c4b8;
-  background: #1b1612;
-
-  border: 1px solid #5a4736;
+  border: 1px solid #d8cbb8;
+  background: var(--mb-surface-soft, #faf7f1);
+  color: #5b4b39;
 }
-
 
 .button-secondary:hover:not(:disabled) {
-  border-color: #c5a880;
+  background: #f3ece0;
 }
-
 
 .button-primary:disabled,
 .button-secondary:disabled {
-  opacity: 0.5;
-
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-
-/* ============================================================
-   RESPONSIVE
-============================================================ */
-
-@media (max-width: 650px) {
-
-  .read-only-grid {
-    grid-template-columns: 1fr;
-  }
-
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-
-  .form-actions {
-    flex-direction: column-reverse;
-  }
-
-
-  .button-primary,
-  .button-secondary {
-    width: 100%;
-  }
-
+@media (max-width: 760px) {
+  .form-row { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column-reverse; }
 }

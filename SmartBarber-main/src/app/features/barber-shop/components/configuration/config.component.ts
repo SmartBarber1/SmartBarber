@@ -42,8 +42,7 @@ export class BarberConfigComponent implements OnInit {
 
     if (!barbershopId) {
       this.errorMessage =
-        'El backend no devolvió una barbería asociada a este perfil. ' +
-        'Vuelve a iniciar sesión o comunícate con soporte.';
+        'Tu sesión no tiene una barbería asociada. Vuelve a iniciar sesión.';
       return;
     }
 
@@ -87,5 +86,19 @@ export class BarberConfigComponent implements OnInit {
     this.selectedBarberName = item.name;
     this.selectedItem = item;
     this.isEditing = editing;
+  }
+
+  cancelEditing(): void {
+    this.isEditing = false;
+  }
+
+  /** El backend guarda el estado en español ("ACTIVO") o en inglés ("ACTIVE"). */
+  isActive(shop: BarberShopResponse): boolean {
+    const status = (shop.status ?? 'ACTIVO').toUpperCase();
+    return status === 'ACTIVO' || status === 'ACTIVE';
+  }
+
+  statusLabel(shop: BarberShopResponse): string {
+    return this.isActive(shop) ? 'Activa' : 'Inactiva';
   }
 }

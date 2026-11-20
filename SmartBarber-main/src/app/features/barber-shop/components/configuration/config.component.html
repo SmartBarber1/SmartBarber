@@ -1,450 +1,97 @@
 <div class="barber-config-page">
 
-  <!-- ========================================================
-       ENCABEZADO
-  ========================================================= -->
-
-  <section class="module-introduction">
-
-    <div class="introduction-badge">
-      💈 ADMINISTRACIÓN DE BARBERÍA
-    </div>
-
-    <h1>
-      Administra tu barbería
-    </h1>
-
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <span class="eyebrow">MI BARBERÍA</span>
+    <h1>Administra tu barbería</h1>
     <p>
-      Centraliza la información de tu establecimiento,
-      administra sus datos generales y configura las
-      excepciones de atención desde un solo lugar.
+      Mantén al día los datos de tu establecimiento y define los días en que no atiende.
     </p>
+  </header>
 
-  </section>
-
-
-  <!-- ========================================================
-       MENSAJE DE ERROR
-  ========================================================= -->
-
-  <div
-    class="state-message error"
-    *ngIf="errorMessage"
-  >
-
+  <!-- ERROR GENERAL -->
+  <div class="notice notice--error" *ngIf="errorMessage" role="alert">
     {{ errorMessage }}
-
   </div>
 
+  <!-- CARGA -->
+  <section class="card" *ngIf="loading && !errorMessage" aria-busy="true">
+    <p class="state-text">
+      <span class="spinner" aria-hidden="true"></span>
+      Cargando la información de tu barbería…
+    </p>
+  </section>
 
-  <!-- ========================================================
-       CONTENIDO PRINCIPAL
-  ========================================================= -->
+  <ng-container *ngIf="!loading && !errorMessage">
 
-  <section
-    class="management-card"
-    *ngIf="!errorMessage"
-  >
+    <!-- INFORMACIÓN DEL ESTABLECIMIENTO -->
+    <section class="card" *ngIf="selectedItem as shop; else noShop" aria-labelledby="shop-title">
 
-    <!-- ======================================================
-         PANEL DE ORIENTACIÓN / EDICIÓN
-    ======================================================= -->
-
-    <aside class="management-editor">
-
-      <div
-        class="editor-content"
-        *ngIf="!selectedItem"
-      >
-
-        <span class="section-label">
-          PRIMEROS PASOS
-        </span>
-
-        <h2>
-          Configura tu establecimiento
-        </h2>
-
-        <p>
-          Desde este módulo puedes mantener actualizada
-          la información principal de tu barbería.
-        </p>
-
-        <div class="steps-list">
-
-          <div class="step-item">
-
-            <span class="step-number">
-              01
-            </span>
-
-            <div>
-              <strong>
-                Consulta
-              </strong>
-
-              <span>
-                Revisa la información registrada.
-              </span>
-            </div>
-
-          </div>
-
-
-          <div class="step-item">
-
-            <span class="step-number">
-              02
-            </span>
-
-            <div>
-              <strong>
-                Edita
-              </strong>
-
-              <span>
-                Actualiza datos de contacto,
-                identificación y ubicación.
-              </span>
-            </div>
-
-          </div>
-
-
-          <div class="step-item">
-
-            <span class="step-number">
-              03
-            </span>
-
-            <div>
-              <strong>
-                Mantén actualizada
-              </strong>
-
-              <span>
-                Conserva la información de tu sede
-                lista para la operación diaria.
-              </span>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div
-        class="editor-content"
-        *ngIf="selectedItem"
-      >
-
-        <span class="section-label">
-          BARBERÍA ACTIVA
-        </span>
-
-        <h2>
-          {{ selectedItem.name }}
-        </h2>
-
-        <p>
-          Consulta y modifica la información general
-          de tu establecimiento.
-        </p>
-
-        <div class="editor-summary">
-
-          <div>
-            <span>
-              Estado
-            </span>
-
-            <strong>
-              {{ selectedItem.status || 'ACTIVO' }}
-            </strong>
-          </div>
-
-
-          <div>
-            <span>
-              Documento
-            </span>
-
-            <strong>
-              {{ selectedItem.documentType }}
-              {{ selectedItem.document }}
-            </strong>
-          </div>
-
-
-          <div>
-            <span>
-              Ubicación
-            </span>
-
-            <strong>
-              {{ selectedItem.location || 'No registrada' }}
-            </strong>
-          </div>
-
-        </div>
-
-      </div>
-
-    </aside>
-
-
-    <!-- ======================================================
-         LISTADO
-    ======================================================= -->
-
-    <section class="barbershop-list">
-
-      <header class="list-header">
-
+      <header class="card-heading">
         <div>
+          <span class="eyebrow">ESTABLECIMIENTO</span>
+          <h2 id="shop-title">{{ shop.name }}</h2>
+          <p class="card-subtitle">{{ shop.companyName || 'Sin razón social registrada' }}</p>
+        </div>
 
-          <span class="section-label">
-            ESTABLECIMIENTO
+        <div class="heading-actions">
+          <span class="status-badge" [class.status-badge--inactive]="!isActive(shop)">
+            {{ statusLabel(shop) }}
           </span>
 
-          <h2>
-            Información de mi barbería
-          </h2>
-
+          <button
+            *ngIf="!isEditing"
+            type="button"
+            class="primary-button"
+            (click)="onBarberiaSeleccionada(shop, true)">
+            Editar información
+          </button>
         </div>
-
-
-        <span class="counter-badge">
-          {{ barberList.length }}
-          {{ barberList.length === 1 ? 'registro' : 'registros' }}
-        </span>
-
       </header>
 
-
-      <!-- LOADING -->
-
-      <div
-        class="list-state"
-        *ngIf="loading"
-      >
-
-        <span class="loading-indicator"></span>
-
-        Cargando información de la barbería...
-
-      </div>
-
-
-      <!-- LISTA -->
-
-      <div
-        class="barbershop-items"
-        *ngIf="!loading"
-      >
-
-        <article
-          class="barbershop-item"
-          *ngFor="
-            let item of barberList;
-            let index = index
-          "
-        >
-
-          <div class="item-number">
-            {{ (index + 1).toString().padStart(2, '0') }}
-          </div>
-
-
-          <div class="item-main">
-
-            <div class="item-heading">
-
-              <div>
-
-                <h3>
-                  {{ item.name }}
-                </h3>
-
-                <span>
-                  {{ item.companyName || 'Sin razón social registrada' }}
-                </span>
-
-              </div>
-
-
-              <span
-                class="status-badge"
-                [class.inactive]="
-                  item.status !== 'ACTIVO'
-                "
-              >
-                {{ item.status || 'ACTIVO' }}
-              </span>
-
-            </div>
-
-
-            <div class="item-details">
-
-              <div class="detail">
-
-                <span class="detail-label">
-                  DOCUMENTO
-                </span>
-
-                <strong>
-                  {{ item.documentType }}
-                  {{ item.document }}
-                </strong>
-
-              </div>
-
-
-              <div class="detail">
-
-                <span class="detail-label">
-                  TELÉFONO
-                </span>
-
-                <strong>
-                  {{ item.phone || 'No registrado' }}
-                </strong>
-
-              </div>
-
-
-              <div class="detail">
-
-                <span class="detail-label">
-                  UBICACIÓN
-                </span>
-
-                <strong>
-                  {{ item.location || 'No registrada' }}
-                </strong>
-
-              </div>
-
-
-              <div class="detail">
-
-                <span class="detail-label">
-                  DESCRIPCIÓN
-                </span>
-
-                <strong>
-                  {{ item.description || 'Sin descripción' }}
-                </strong>
-
-              </div>
-
-            </div>
-
-
-            <div class="item-actions">
-
-              <button
-                type="button"
-                class="action-button secondary"
-                (click)="onBarberiaSeleccionada(item, false)"
-              >
-
-                <span>
-                  ◉
-                </span>
-
-                Consultar
-
-              </button>
-
-
-              <button
-                type="button"
-                class="action-button primary"
-                (click)="onBarberiaSeleccionada(item, true)"
-              >
-
-                <span>
-                  ✎
-                </span>
-
-                Editar información
-
-              </button>
-
-            </div>
-
-          </div>
-
-        </article>
-
-
-        <!-- SIN REGISTROS -->
-
-        <div
-          class="empty-state"
-          *ngIf="barberList.length === 0"
-        >
-
-          <span class="empty-icon">
-            ◌
-          </span>
-
-          <h3>
-            No hay información disponible
-          </h3>
-
-          <p>
-            No se encontró una barbería asociada
-            al administrador actual.
-          </p>
-
+      <!-- Consulta -->
+      <dl class="details-grid" *ngIf="!isEditing">
+        <div class="detail">
+          <dt>Documento</dt>
+          <dd>{{ shop.documentType }} {{ shop.document || '—' }}</dd>
         </div>
+        <div class="detail">
+          <dt>Teléfono</dt>
+          <dd>{{ shop.phone || 'No registrado' }}</dd>
+        </div>
+        <div class="detail">
+          <dt>Ubicación</dt>
+          <dd>{{ shop.location || 'No registrada' }}</dd>
+        </div>
+        <div class="detail detail--wide">
+          <dt>Descripción</dt>
+          <dd>{{ shop.description || 'Sin descripción' }}</dd>
+        </div>
+      </dl>
 
-      </div>
+      <!-- Edición -->
+      <app-barberias-registros
+        *ngIf="isEditing"
+        [barberList]="barberList"
+        [barberId]="barberId"
+        [seleccionado]="shop"
+        [editing]="true"
+        (barberiaSeleccionada)="onBarberiaSeleccionada($event, false)"
+        (cancelado)="cancelEditing()"
+        (guardado)="loadMyBarbershop()">
+      </app-barberias-registros>
 
     </section>
 
-  </section>
+    <ng-template #noShop>
+      <section class="card">
+        <p class="state-text">No se encontró una barbería asociada a tu cuenta.</p>
+      </section>
+    </ng-template>
 
-  <section
-    class="secondary-section"
-    *ngIf="selectedItem as item"
-  >
-    <app-barberias-registros
-      [barberList]="barberList"
-      [barberId]="barberId"
-      [seleccionado]="item"
-      [editing]="isEditing"
-      (barberiaSeleccionada)="onBarberiaSeleccionada($event, false)"
-      (guardado)="loadMyBarbershop()"
-    >
-    </app-barberias-registros>
-  </section>
+    <!-- DÍAS NO LABORABLES -->
+    <app-dias-festivos *ngIf="barberList.length > 0" [barberList]="barberList"></app-dias-festivos>
 
-
-  <!-- ========================================================
-       DÍAS FESTIVOS
-       Se mantienen dentro de Mi barbería.
-       HORARIOS ya no se renderiza aquí.
-  ========================================================= -->
-
-  <section
-    class="secondary-section"
-    *ngIf="
-      !loading &&
-      barberList.length > 0
-    "
-  >
-
-    <app-dias-festivos
-      [barberList]="barberList"
-    >
-    </app-dias-festivos>
-
-  </section>
+  </ng-container>
 
 </div>

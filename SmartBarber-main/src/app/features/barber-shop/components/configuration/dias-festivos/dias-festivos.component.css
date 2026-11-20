@@ -1,141 +1,230 @@
-/* El host es flex para que la tarjeta se estire a la misma altura que la de horarios */
+/* Días no laborables: usa los tokens --mb-* de Mi barbería. */
+
 :host {
+  display: block;
+}
+
+.card {
+  padding: 24px;
+  border: 1px solid var(--mb-border, #ece5db);
+  border-radius: 12px;
+  background: var(--mb-surface, #fff);
+  box-shadow: 0 4px 14px rgba(41, 35, 30, 0.04);
+  color: var(--mb-text, #29231e);
+}
+
+.card-heading {
   display: flex;
-}
-
-.vintage-card {
-  flex: 1;
-}
-
-.vintage-input {
-  width: 100%;
-  background-color: #141211;
-  border: 1px solid #7c623b;
-  color: #f3e9d2;
-  padding: 10px;
-  border-radius: 4px;
-  font-family: inherit;
-}
-
-.vintage-input:focus {
-  border-color: #c5a059;
-  outline: none;
-  box-shadow: 0 0 5px rgba(197, 160, 89, 0.4);
-}
-
-.holiday-add-box {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 15px;
-}
-
-.holidays-list {
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-.holiday-item {
-  display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  background: #141211;
-  padding: 8px 12px;
-  border: 1px solid #4a3d2c;
-  border-radius: 4px;
-  margin-bottom: 6px;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--mb-border, #ece5db);
 }
 
-.holiday-info {
+.eyebrow {
+  color: var(--mb-accent, #8b683b);
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.card-heading h2 {
+  margin: 6px 0 0;
+  font-family: 'Fraunces', serif;
+  font-size: 23px;
+  font-weight: 500;
+}
+
+.card-subtitle {
+  margin: 4px 0 0;
+  color: var(--mb-muted, #71685e);
+  font-size: 13px;
+}
+
+.record-count {
+  color: var(--mb-accent, #8b683b);
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Formulario para agregar */
+.add-form {
   display: flex;
-  flex-direction: column;
-  font-size: 0.85rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
-.holiday-info strong {
-  /* Color propio: el tema del panel pinta los <strong> en oscuro. */
-  color: #f3e9d2;
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 170px;
+}
+
+.field--grow {
+  flex: 1 1 240px;
+}
+
+.field label {
+  font-size: 13px;
   font-weight: 600;
 }
 
-.holiday-info span {
-  color: #c9ab78;
-  font-size: 0.78rem;
+.field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d8cbb8;
+  border-radius: 8px;
+  background: var(--mb-surface, #fff);
+  color: var(--mb-text, #29231e);
+  font: inherit;
+  font-size: 14px;
 }
 
-.btn-delete {
-  background: transparent;
-  border: none;
+.field input:focus {
+  outline: none;
+  border-color: var(--mb-accent, #8b683b);
+  box-shadow: 0 0 0 3px var(--mb-accent-soft, #f2e8d8);
+}
+
+.field input[aria-invalid='true'] {
+  border-color: var(--mb-danger, #a33a2b);
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 42px;
+  padding: 9px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-}
-
-.holiday-add-box .vintage-input[aria-invalid='true'] {
-  border-color: #d9826f;
-  box-shadow: 0 0 0 2px rgba(217, 130, 111, 0.25);
-}
-
-.holiday-message {
-  margin: -6px 0 12px;
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-.holiday-message:empty {
-  display: none;
-}
-
-.holiday-error {
-  padding: 8px 12px;
-  border: 1px solid #8c4a3d;
-  border-radius: 4px;
-  background: rgba(140, 74, 61, 0.18);
-  color: #f2b8a8;
-}
-
-.holiday-success {
-  color: #b8d8a8;
-}
-
-.holiday-info strong::first-letter {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
 }
 
-.btn-delete {
-  min-width: 40px;
-  min-height: 40px;
+.primary-button {
+  border: 1px solid transparent;
+  background: var(--mb-accent, #8b683b);
+  color: #fff;
 }
 
-.holiday-note {
-  margin: 10px 0 0;
-  color: #9e845c;
-  font-size: 0.75rem;
+.primary-button:hover:not(:disabled) {
+  filter: brightness(0.92);
 }
 
-@media (max-width: 640px) {
-  .holiday-add-box {
-    flex-direction: column;
-  }
-
-  .holiday-add-box .vintage-input {
-    font-size: 16px;
-  }
+.secondary-button {
+  border: 1px solid #d8cbb8;
+  background: var(--mb-surface-soft, #faf7f1);
+  color: #5b4b39;
 }
 
-.holiday-load-error {
+.primary-button:disabled,
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Avisos */
+.notice {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.notice--error {
+  border: 1px solid #e0a59b;
+  background: var(--mb-danger-soft, #fbecea);
+  color: var(--mb-danger, #a33a2b);
+}
+
+.notice--success {
+  border: 1px solid #9cc2a5;
+  background: var(--mb-success-soft, #edf7ef);
+  color: var(--mb-success, #2f6b3f);
+}
+
+.notice--row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 8px 12px;
-  border: 1px solid #8c4a3d;
-  border-radius: 4px;
-  background: rgba(140, 74, 61, 0.18);
-  color: #f2b8a8;
-  font-size: 0.85rem;
+  gap: 12px;
 }
 
-.holiday-add-box .vintage-input:disabled,
-.btn-delete:disabled {
-  opacity: 0.6;
-  cursor: wait;
+.state-text {
+  margin: 4px 0;
+  color: var(--mb-muted, #71685e);
+  font-size: 14px;
+}
+
+/* Lista */
+.holidays {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.holiday {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--mb-border, #ece5db);
+  border-left: 3px solid var(--mb-accent, #8b683b);
+  border-radius: 10px;
+  background: var(--mb-surface-soft, #faf7f1);
+}
+
+.holiday__info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.holiday__info strong {
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.holiday__info span {
+  color: var(--mb-muted, #71685e);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.link-danger {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--mb-danger, #a33a2b);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.link-danger:hover:not(:disabled) {
+  border-color: #e0a59b;
+  background: var(--mb-danger-soft, #fbecea);
+}
+
+.link-danger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 760px) {
+  .card { padding: 18px; }
+  .card-heading { flex-direction: column; align-items: flex-start; }
+  .add-form { flex-direction: column; align-items: stretch; }
 }

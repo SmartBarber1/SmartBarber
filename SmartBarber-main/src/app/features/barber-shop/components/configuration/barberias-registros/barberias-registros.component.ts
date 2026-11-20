@@ -143,6 +143,11 @@ export class BarberiasRegistrosComponent
   guardado =
     new EventEmitter<void>();
 
+  /** El usuario descartó la edición. */
+  @Output()
+  cancelado =
+    new EventEmitter<void>();
+
 
   infoForm!: FormGroup;
 
@@ -310,6 +315,12 @@ export class BarberiasRegistrosComponent
     this.isEditing = false;
 
     this.formError = '';
+
+    if (this.selectedBarber) {
+      this.patchFormValues(this.selectedBarber);
+    }
+
+    this.cancelado.emit();
   }
 
 
