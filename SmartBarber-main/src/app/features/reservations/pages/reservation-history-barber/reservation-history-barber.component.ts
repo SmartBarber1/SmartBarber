@@ -5,6 +5,7 @@ import { SessionService } from '../../../../core/auth/services/session.service';
 import { ReservationService } from '../../services/reservation.service';
 import { ReservationHistoryItem } from '../../models/reservation.model';
 import { mensajeErrorReserva } from '../../utils/http-error.utils';
+import { toUserMessage } from '../../../../core/errors';
 
 export type BarberHistoryTab = 'EMPLOYEE' | 'BARBER';
 
@@ -312,8 +313,44 @@ export class ReservationHistoryBarberComponent implements OnInit {
     return RATING_ENABLED && item.status === 'COMPLETED';
   }
 
+  /** La reserva ya llegó a su hora de inicio (el back valida lo mismo: RES_016). */
+  private hasStarted(item: UnifiedReservationItem): boolean {
+    const start = new Date(item.startTime).getTime();
+    return !isNaN(start) && start <= Date.now();
+  }
+
+  /** Atendida: confirmada o en atención, y ya empezó. */
+  canComplete(item: UnifiedReservationItem): boolean {
+    return ['CONFIRMED', 'IN_PROGRESS'].includes(item.status) && this.hasStarted(item);
+  }
+
+  /** El cliente no llegó: pendiente o confirmada, y ya pasó la hora. */
+  canMarkNoShow(item: UnifiedReservationItem): boolean {
+    return ['PENDING', 'CONFIRMED'].includes(item.status) && this.hasStarted(item);
+  }
+
   hasActions(item: UnifiedReservationItem): boolean {
-    return this.canConfirm(item) || this.canCancel(item) || this.canRate(item);
+    return this.canConfirm(item) || this.canCancel(item) || this.canComplete(item)
+      || this.canMarkNoShow(item) || this.canRate(item);
+  }
+
+  async complete(item: UnifiedReservationItem): Promise<void> {
+    await this.runAction(
+      item,
+      () => this.reservationService.completeReservation(item.id),
+      'COMPLETED',
+      'Reserva finalizada. El cliente ya puede calificar la atención.'
+    );
+  }
+
+  async markNoShow(item: UnifiedReservationItem): Promise<void> {
+    if (!window.confirm('¿Confirmas que el cliente no se presentó a esta reserva?')) return;
+    await this.runAction(
+      item,
+      () => this.reservationService.markNoShow(item.id),
+      'NO_SHOW',
+      'Inasistencia registrada.'
+    );
   }
 
   async confirm(item: UnifiedReservationItem): Promise<void> {
@@ -397,11 +434,8 @@ export class ReservationHistoryBarberComponent implements OnInit {
       raw: err
     });
 
-    return (
-      err?.error?.data?.message ||
-      err?.error?.message ||
-      mensajeErrorReserva(err)
-    );
+    // Mensajes del catálogo (en español), nunca el texto técnico del servidor.
+    return toUserMessage(err, { DEFAULT: mensajeErrorReserva(err) });
   }
 
   private async runAction(

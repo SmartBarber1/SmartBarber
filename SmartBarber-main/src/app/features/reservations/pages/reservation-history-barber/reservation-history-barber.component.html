@@ -153,6 +153,12 @@
                   <button type="button" class="btn-primary" *ngIf="canConfirm(item)"
                           [disabled]="busyId === item.id" (click)="confirm(item)">Confirmar</button>
 
+                  <button type="button" class="btn-primary" *ngIf="canComplete(item)"
+                          [disabled]="busyId === item.id" (click)="complete(item)">Finalizar</button>
+
+                  <button type="button" class="btn-outline" *ngIf="canMarkNoShow(item)"
+                          [disabled]="busyId === item.id" (click)="markNoShow(item)">No asistió</button>
+
                   <button type="button" class="btn-danger" *ngIf="canCancel(item)"
                           [disabled]="busyId === item.id" (click)="cancel(item)">Cancelar</button>
 

@@ -312,3 +312,90 @@
 .btn-retry:hover {
   background: #3e2723;
 }
+/* ---- Feedback de acciones ---- */
+.history-feedback {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #5d4037;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---- Botones de acción por fila ---- */
+.action-cell {
+  white-space: nowrap;
+}
+
+.action-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-danger,
+.btn-outline {
+  border: none;
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.btn-primary { background: #5d4037; color: #ffffff; }
+.btn-primary:hover:not(:disabled) { background: #3e2723; }
+
+.btn-danger { background: #c62828; color: #ffffff; }
+.btn-danger:hover:not(:disabled) { background: #8e1c1c; }
+
+.btn-outline {
+  background: #ffffff;
+  color: #4e342e;
+  border: 1px solid #c8b9ab;
+}
+.btn-outline:hover:not(:disabled) { background: #f7f3ee; }
+
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.no-action { color: #b9a99c; }
+.rated-label { color: #2e7d32; font-weight: 600; font-size: 0.85rem; }
+
+/* ---- Calificar ---- */
+.rate-row td {
+  background: #faf7f2;
+  padding: 1rem 1.5rem;
+}
+
+.rate-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.stars { display: flex; }
+
+.star {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #d7ccc8;
+  cursor: pointer;
+  padding: 0 0.1rem;
+}
+.star.on { color: #f9a825; }
+
+.rate-input {
+  border: 1px solid #d7ccc8;
+  border-radius: 4px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+  min-width: 240px;
+  font-family: inherit;
+}
+.rate-error { color: #c62828; font-size: 0.8rem; width: 100%; }

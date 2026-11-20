@@ -129,7 +129,8 @@ export class AppointmentComponent implements OnInit {
   private cargarEmpleados(barberiaId: string): void {
     if (!barberiaId) return;
 
-    this.reservationService.getEmployeesByBarberiaId(barberiaId).subscribe({
+    // Solo barberos reservables: activos y con rol de barbero (no bloqueados ni el administrador).
+    this.reservationService.getBookableBarbers(barberiaId).subscribe({
       next: (res: any) => {
         this.barberosFiltrados = extraerLista(res).map(toBarbero);
 

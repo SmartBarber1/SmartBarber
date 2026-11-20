@@ -56,7 +56,6 @@ export class ReservationService {
 
   confirmReservation(id: string): Observable<any> {
     return this.getAuthHeaders().pipe(
-      // Ajusta el método HTTP (patch/post/put) y la ruta si tu backend usa otro path
       switchMap(headers =>
         this.http.patch(`${this.apiUrl}/reservation-service/${id}/confirm`, {}, { headers })
       )
@@ -65,19 +64,56 @@ export class ReservationService {
 
   cancelReservation(id: string): Observable<any> {
     return this.getAuthHeaders().pipe(
-      // Ajusta el método HTTP (patch/post/put/delete) y la ruta si tu backend usa otro path
       switchMap(headers =>
         this.http.patch(`${this.apiUrl}/reservation-service/${id}/cancel`, {}, { headers })
       )
     );
   }
 
+  /** PATCH /reservation-service/{id}/complete (BARBER, ADMIN): la reserva fue atendida. */
+  completeReservation(id: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers =>
+        this.http.patch(`${this.apiUrl}/reservation-service/${encodeURIComponent(id)}/complete`, {}, { headers })
+      )
+    );
+  }
+
+  /** PATCH /reservation-service/{id}/no-show (BARBER, ADMIN): el cliente no se presentó. */
+  markNoShow(id: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers =>
+        this.http.patch(`${this.apiUrl}/reservation-service/${encodeURIComponent(id)}/no-show`, {}, { headers })
+      )
+    );
+  }
+
+  /**
+   * POST /reservation-review-service/crear-resena-reserva (CUSTOMER): reseña de
+   * una reserva finalizada del propio cliente, una sola vez.
+   */
   rateReservation(id: string, payload: ReservationRatingPayload): Observable<any> {
     return this.getAuthHeaders().pipe(
-      // Ajusta el método HTTP y la ruta si tu backend usa otro path
       switchMap(headers =>
-        this.http.post(`${this.apiUrl}/reservation-service/${id}/rating`, payload, { headers })
+        this.http.post(`${this.apiUrl}/reservation-review-service/crear-resena-reserva`, {
+          reservationId: id,
+          qualification: payload.rating,
+          comment: payload.comment
+        }, { headers })
       )
+    );
+  }
+
+  /**
+   * Barberos que el cliente puede reservar: cuenta activa y rol BARBER, sin
+   * datos personales (GET /public/employee-service/barbershop/{id}/bookable).
+   */
+  getBookableBarbers(barberiaId: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.get(
+        `${this.apiUrl}/public/employee-service/barbershop/${encodeURIComponent(barberiaId)}/bookable`,
+        { headers }
+      ))
     );
   }
 

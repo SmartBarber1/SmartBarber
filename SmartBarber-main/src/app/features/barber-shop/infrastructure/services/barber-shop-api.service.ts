@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import {
@@ -82,6 +82,16 @@ export class BarberShopApiService {
         return code === 'CT_004' ? of([]) : throwError(() => error);
       })
     );
+  }
+
+    /**
+   * Barberos que un cliente puede reservar (cuenta activa y rol BARBER), sin
+   * datos personales. Es la única consulta de empleados disponible para clientes.
+   */
+  getBookableBarbers(barbershopId: string): Observable<unknown[]> {
+    return this.http.get<unknown[] | null>(
+      `${environment.apiUrl}/public/employee-service/barbershop/${encodeURIComponent(barbershopId)}/bookable`
+    ).pipe(map(list => Array.isArray(list) ? list : []));
   }
 
   getEmpleadoPorId(id: string): Observable<unknown> {

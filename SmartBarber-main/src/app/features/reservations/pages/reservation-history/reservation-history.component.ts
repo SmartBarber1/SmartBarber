@@ -5,6 +5,20 @@ import { firstValueFrom } from 'rxjs';
 import { SessionService } from '../../../../core/auth/services/session.service';
 import { ReservationService } from '../../services/reservation.service';
 import { HistoryScope, ReservationHistoryItem } from '../../models/reservation.model';
+import { toApiError, toUserMessage } from '../../../../core/errors';
+
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  PENDING: 'Pendiente',
+  CONFIRMED: 'Confirmada',
+  IN_PROGRESS: 'En atención',
+  COMPLETED: 'Finalizada',
+  CANCELLED: 'Cancelada',
+  WAITING: 'En espera',
+  NO_SHOW: 'No asistió'
+};
+
+/** Máximo de caracteres del comentario de la reseña. */
+const COMMENT_MAX = 300;
 
 @Component({
   selector: 'app-reservation-history',
@@ -23,6 +37,17 @@ export class ReservationHistoryComponent implements OnInit {
   historyList: ReservationHistoryItem[] = [];
   isLoading = true;
   errorMessage = '';
+
+  // ---- Acciones del cliente: cancelar y calificar ----
+  readonly stars = [1, 2, 3, 4, 5];
+  readonly commentMax = COMMENT_MAX;
+  feedback = '';
+  busyId: string | null = null;
+  ratingOpenId: string | null = null;
+  ratingError = '';
+  private readonly drafts: Record<string, { rating: number; comment: string }> = {};
+  /** Reservas ya calificadas en esta sesión (o que el servidor indicó como calificadas). */
+  private readonly rated = new Set<string>();
 
   ngOnInit(): void {
     this.scope = this.route.snapshot.data['scope'] ?? 'customer';
@@ -50,7 +75,7 @@ export class ReservationHistoryComponent implements OnInit {
     const s: any = this.sessionService.currentSession;
     return {
       customer: s?.clientId,
-      employee: s?.employeeId,
+      employee: s?.barberId ?? s?.employeeId,
       barbershop: s?.barbershopId
     }[this.scope];
   }
@@ -105,5 +130,101 @@ export class ReservationHistoryComponent implements OnInit {
     return this.historyList
       .filter(item => item.status === 'COMPLETED')
       .reduce((acc, item) => acc + (item.duration ?? 0), 0);
+  }
+
+  statusLabel(status: string): string {
+    return STATUS_LABELS[status] ?? status;
+  }
+
+  get isCustomer(): boolean {
+    return this.scope === 'customer';
+  }
+
+  /** El cliente puede cancelar mientras la cita no haya empezado. */
+  canCancel(item: ReservationHistoryItem): boolean {
+    const start = new Date(item.startTime).getTime();
+    return this.isCustomer
+      && ['PENDING', 'CONFIRMED'].includes(item.status)
+      && (isNaN(start) || start > Date.now());
+  }
+
+  /** Solo se califican las reservas finalizadas, una vez. */
+  canRate(item: ReservationHistoryItem): boolean {
+    return this.isCustomer && item.status === 'COMPLETED' && !this.rated.has(item.id);
+  }
+
+  isRated(item: ReservationHistoryItem): boolean {
+    return this.rated.has(item.id);
+  }
+
+  draft(id: string): { rating: number; comment: string } {
+    return (this.drafts[id] ??= { rating: 0, comment: '' });
+  }
+
+  setRating(id: string, rating: number): void {
+    this.draft(id).rating = rating;
+    this.ratingError = '';
+  }
+
+  setComment(id: string, value: string): void {
+    this.draft(id).comment = value.slice(0, COMMENT_MAX);
+  }
+
+  toggleRate(item: ReservationHistoryItem): void {
+    this.feedback = '';
+    this.ratingError = '';
+    this.ratingOpenId = this.ratingOpenId === item.id ? null : item.id;
+  }
+
+  async cancel(item: ReservationHistoryItem): Promise<void> {
+    if (!window.confirm('¿Seguro que deseas cancelar esta reserva?')) return;
+
+    this.busyId = item.id;
+    this.feedback = '';
+    this.cdr.markForCheck();
+
+    try {
+      await firstValueFrom(this.reservationService.cancelReservation(item.id));
+      this.feedback = 'Reserva cancelada.';
+      await this.loadReservationHistory();
+    } catch (err: unknown) {
+      this.feedback = toUserMessage(err, { DEFAULT: 'No fue posible cancelar la reserva.' });
+    } finally {
+      this.busyId = null;
+      this.cdr.markForCheck();
+    }
+  }
+
+  async submitRating(item: ReservationHistoryItem): Promise<void> {
+    const draft = this.draft(item.id);
+    const comment = draft.comment.trim();
+
+    if (draft.rating < 1 || !comment) {
+      this.ratingError = 'Elige de 1 a 5 estrellas y escribe un comentario.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.busyId = item.id;
+    this.ratingError = '';
+    this.cdr.markForCheck();
+
+    try {
+      await firstValueFrom(this.reservationService.rateReservation(item.id, { rating: draft.rating, comment }));
+      this.rated.add(item.id);
+      this.ratingOpenId = null;
+      this.feedback = '¡Gracias! Tu calificación quedó registrada.';
+    } catch (err: unknown) {
+      const message = toUserMessage(err, { DEFAULT: 'No fue posible registrar tu calificación.' });
+      // RW_002: la reserva ya tenía una reseña; se marca como calificada.
+      if (toApiError(err).code === 'RW_002') {
+        this.rated.add(item.id);
+        this.ratingOpenId = null;
+      }
+      this.ratingError = message;
+    } finally {
+      this.busyId = null;
+      this.cdr.markForCheck();
+    }
   }
 }

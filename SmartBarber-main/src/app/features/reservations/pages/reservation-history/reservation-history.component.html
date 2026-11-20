@@ -61,6 +61,8 @@
   </div>
 
   <!-- Contenido principal -->
+  <p class="history-feedback" *ngIf="feedback" role="status">{{ feedback }}</p>
+
   <main *ngIf="!isLoading && !errorMessage" class="table-wrapper-card">
     <div *ngIf="historyList.length === 0" class="empty-classic-state">
       <div class="empty-badge">📜</div>
@@ -80,10 +82,12 @@
             <th>Fecha de Cita</th>
             <th>Duración</th>
             <th>Fecha Registro</th>
+            <th *ngIf="isCustomer">Acción</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of historyList">
+          <ng-container *ngFor="let item of historyList">
+          <tr>
             <td class="tx-cell">
               <span class="tx-hash">#{{ item.id | slice:0:10 }}...</span>
             </td>
@@ -97,13 +101,54 @@
                 'chip-expired': item.status === 'CANCELLED' || item.status === 'EXPIRED'
               }">
                 <span class="chip-dot"></span>
-                {{ item.status }}
+                {{ statusLabel(item.status) }}
               </span>
             </td>
             <td class="date-text">{{ item.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
             <td class="duration-text">{{ item.duration }} min</td>
             <td class="date-text muted">{{ item.creationDate | date: 'dd/MM/yyyy' }}</td>
+            <td *ngIf="isCustomer" class="action-cell">
+              <div class="action-group" *ngIf="canCancel(item) || canRate(item); else noAction">
+                <button type="button" class="btn-danger" *ngIf="canCancel(item)"
+                        [disabled]="busyId === item.id" (click)="cancel(item)">Cancelar</button>
+                <button type="button" class="btn-outline" *ngIf="canRate(item)"
+                        [disabled]="busyId === item.id" (click)="toggleRate(item)"
+                        [attr.aria-expanded]="ratingOpenId === item.id">
+                  {{ ratingOpenId === item.id ? 'Cerrar' : 'Calificar' }}
+                </button>
+              </div>
+              <ng-template #noAction>
+                <span class="rated-label" *ngIf="isRated(item); else dash">Calificada ✓</span>
+                <ng-template #dash><span class="no-action">—</span></ng-template>
+              </ng-template>
+            </td>
           </tr>
+
+          <!-- Calificar una reserva finalizada -->
+          <tr class="rate-row" *ngIf="ratingOpenId === item.id && canRate(item)">
+            <td colspan="7">
+              <div class="rate-box">
+                <div class="stars" role="radiogroup" aria-label="Calificación de 1 a 5 estrellas">
+                  <button type="button" *ngFor="let n of stars" class="star" role="radio"
+                          [class.on]="n <= draft(item.id).rating"
+                          [attr.aria-checked]="n === draft(item.id).rating"
+                          [attr.aria-label]="n + (n === 1 ? ' estrella' : ' estrellas')"
+                          (click)="setRating(item.id, n)">★</button>
+                </div>
+                <input type="text" class="rate-input" [attr.maxlength]="commentMax"
+                       placeholder="Cuéntanos cómo te fue (obligatorio)"
+                       aria-label="Comentario de la calificación"
+                       [value]="draft(item.id).comment"
+                       (input)="setComment(item.id, $any($event.target).value)" />
+                <button type="button" class="btn-primary" [disabled]="busyId === item.id"
+                        (click)="submitRating(item)">
+                  {{ busyId === item.id ? 'Enviando…' : 'Enviar calificación' }}
+                </button>
+                <span class="rate-error" *ngIf="ratingError" role="alert">{{ ratingError }}</span>
+              </div>
+            </td>
+          </tr>
+          </ng-container>
         </tbody>
       </table>
     </div>

@@ -11,7 +11,8 @@ import { FirebaseAuthService }
   from '../../../core/auth/services/firebase-auth.service';
 
 export type SubscriptionType = 'CREATE' | 'RENEW';
-export const SUBSCRIPTION_DURATION = 60;
+/** Vigencia de un periodo (días). El back la fija igual; se envía por compatibilidad. */
+export const SUBSCRIPTION_DURATION = 30;
 export type SubscriptionBarberStatus =
   | 'ACTIVE'
   | 'APPROVED'

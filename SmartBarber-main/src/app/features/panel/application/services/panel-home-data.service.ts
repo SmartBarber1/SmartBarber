@@ -294,7 +294,8 @@ export class PanelHomeDataService {
     const barbershopIds = [...new Set(items.map(item => item.barbershopId).filter(Boolean))];
 
     for (const barbershopId of barbershopIds) {
-      this.barberShopApi.getEmployeesByBarbershop(barbershopId)
+      // El cliente solo puede consultar los barberos reservables (sin datos personales).
+      this.barberShopApi.getBookableBarbers(barbershopId)
         .pipe(
           map(raw => toEmployees(raw)),
           catchError(() => of([] as TeamEmployee[]))

@@ -1,3 +1,4 @@
+import { toUserMessage } from '../../../../../core/errors';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -304,9 +305,10 @@ export class HorariosAtencionComponent implements OnInit {
     const tieneInicioAlmuerzo = Boolean(formValue.horaInicioAlmuerzo);
     const tieneFinAlmuerzo = Boolean(formValue.horaFinAlmuerzo);
 
-    if (tieneInicioAlmuerzo !== tieneFinAlmuerzo) {
+    // El servidor exige el almuerzo completo (SH_003).
+    if (!tieneInicioAlmuerzo || !tieneFinAlmuerzo) {
       this.formError =
-        'Indica el inicio y el fin del almuerzo, o deja ambos vacíos.';
+        'Indica el inicio y el fin del almuerzo.';
       return;
     }
 
@@ -407,8 +409,9 @@ export class HorariosAtencionComponent implements OnInit {
           error
         );
 
-        this.formError =
-          'No fue posible guardar el horario. Intenta de nuevo.';
+        this.formError = toUserMessage(error, {
+          DEFAULT: 'No fue posible guardar el horario. Intenta de nuevo.'
+        });
       }
     });
   }

@@ -45,6 +45,7 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
     BP_002: 'Ya existe una barbería registrada con esos datos.',
     BP_004: 'No se encontró la barbería.',
     BP_005: 'La barbería no tiene una suscripción activa.',
+    BP_006: 'Solo puedes modificar la información de tu propia barbería.',
 
     // Suscripciones de la barbería
     SB_001: 'Los datos de la suscripción no son válidos.',
@@ -81,6 +82,16 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
     RES_011: 'El barbero no está disponible en ese horario. Elige otro.',
     RES_012: 'Esta reserva ya no se puede confirmar.',
     RES_013: 'La fila virtual no está recibiendo clientes en este momento.',
+    RES_014: 'Este barbero no está disponible para recibir reservas. Elige otro.',
+    RES_015: 'Solo se puede finalizar una reserva confirmada o en atención.',
+    RES_016: 'La reserva todavía no ha comenzado.',
+    RES_017: 'Solo se puede registrar la inasistencia de una reserva pendiente o confirmada.',
+    RW_002: 'Ya calificaste esta reserva.',
+    RW_003: 'Elige de 1 a 5 estrellas y escribe un comentario.',
+    RW_005: 'Solo puedes calificar tus reservas finalizadas.',
+    SH_003: 'Completa la jornada y el almuerzo del horario.',
+    SH_005: 'La hora de inicio de la jornada debe ser anterior a la de finalización.',
+    SH_006: 'El almuerzo debe quedar dentro de la jornada y empezar antes de terminar.',
 
     // Días no laborables y festivos
     ND_001: 'Los datos del día no laborable no son válidos.',
