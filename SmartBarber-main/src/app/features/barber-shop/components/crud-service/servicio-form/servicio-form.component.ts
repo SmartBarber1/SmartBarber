@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { BarberServicePayload, ServicioFormValue } from '../models/servicio.model';
 
 /**
@@ -40,14 +40,26 @@ export class ServicioFormComponent implements OnChanges {
     this.serviceForm.get('offert')?.valueChanges.subscribe((isOffert: boolean) => {
       const specialPrice = this.serviceForm.get('special_price');
       if (isOffert) {
-        specialPrice?.setValidators([Validators.required, Validators.min(1)]);
+        specialPrice?.setValidators([Validators.required, Validators.min(1), this.lowerThanPrice]);
       } else {
         specialPrice?.clearValidators();
         specialPrice?.setValue(0);
       }
-      specialPrice?.updateValueAndValidity();
+            specialPrice?.updateValueAndValidity();
     });
+
+    // Si cambia el precio normal, se vuelve a validar el de oferta.
+    this.serviceForm.get('price')?.valueChanges.subscribe(() =>
+      this.serviceForm.get('special_price')?.updateValueAndValidity({ emitEvent: false })
+    );
   }
+
+  /** El precio de oferta debe ser menor que el precio normal (la misma regla del servidor, SC_007). */
+  private readonly lowerThanPrice: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const price = Number(control.parent?.get('price')?.value);
+    const offer = Number(control.value);
+    return !isNaN(price) && !isNaN(offer) && offer > 0 && offer >= price ? { notLower: true } : null;
+  };
 
   get isEditMode(): boolean {
     return this.editando !== null;
@@ -96,7 +108,9 @@ export class ServicioFormComponent implements OnChanges {
       case 'price':
         return e['required'] ? 'Indica el precio del servicio.' : 'El precio no puede ser negativo.';
       case 'special_price':
-        return 'El precio de oferta debe ser mayor que 0.';
+        return e['notLower']
+          ? 'El precio de oferta debe ser menor que el precio normal.'
+          : 'El precio de oferta debe ser mayor que 0.';
       default:
         return 'Revisa este campo.';
     }

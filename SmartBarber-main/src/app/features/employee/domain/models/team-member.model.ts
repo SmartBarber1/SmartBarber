@@ -28,3 +28,13 @@ export interface EmployeeDataChange {
     /** Especialidades separadas por coma. */
     specialty: string;
 }
+
+/** Especialidades que se pueden asignar a un barbero (crear y editar usan la misma lista). */
+export const EMPLOYEE_SPECIALTIES = [
+    'Cortes',
+    'Barba',
+    'Colorimetría',
+    'Tratamientos capilares'
+] as const;
+
+export type EmployeeSpecialty = typeof EMPLOYEE_SPECIALTIES[number];

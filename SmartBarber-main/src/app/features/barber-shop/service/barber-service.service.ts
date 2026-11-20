@@ -20,7 +20,7 @@ export class BarberServiceService {
     return of(new HttpHeaders({ 'Content-Type': 'application/json' }));
   }
 
-  // 🟢 Petición GET para listar servicios
+  /** Servicios de la barbería (el administrador ve también los inactivos). */
   getServicesByBarberiaId(barberiaId: string): Observable<BarberServicePayload[]> {
     return this.getHeadersObservable().pipe(
       switchMap(headers => 
@@ -29,7 +29,7 @@ export class BarberServiceService {
     );
   }
 
-  // 🟢 Petición POST para crear servicio
+  /** Crea un servicio en la barbería del administrador. */
   createService(payload: BarberServicePayload): Observable<any> {
     return this.getHeadersObservable().pipe(
       switchMap(headers => 
@@ -38,11 +38,29 @@ export class BarberServiceService {
     );
   }
 
-  // 🟢 Petición PUT para actualizar servicio
+  /** Actualiza un servicio de la barbería del administrador. */
   updateService(serviceId: number | string, payload: BarberServicePayload): Observable<any> {
     return this.getHeadersObservable().pipe(
       switchMap(headers => 
         this.http.put(`${this.apiUrl}/actualizar-service/${serviceId}`, payload, { headers })
+      )
+    );
+  }
+
+  /** PATCH /services-service/{id}/status: activa o desactiva el servicio. */
+  changeStatus(serviceId: number | string, active: boolean): Observable<any> {
+    return this.getHeadersObservable().pipe(
+      switchMap(headers =>
+        this.http.patch(`${this.apiUrl}/${encodeURIComponent(String(serviceId))}/status`, { active }, { headers })
+      )
+    );
+  }
+
+  /** DELETE /services-service/{id}: si ya se usó en reservas responde SC_006. */
+  deleteService(serviceId: number | string): Observable<void> {
+    return this.getHeadersObservable().pipe(
+      switchMap(headers =>
+        this.http.delete<void>(`${this.apiUrl}/${encodeURIComponent(String(serviceId))}`, { headers })
       )
     );
   }

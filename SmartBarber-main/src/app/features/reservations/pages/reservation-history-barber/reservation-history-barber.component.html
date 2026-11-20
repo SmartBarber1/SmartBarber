@@ -65,8 +65,8 @@
     <div class="luxury-card">
       <div class="card-icon-box">⚡</div>
       <div class="card-info">
-        <span class="card-label">Estado Activo</span>
-        <span class="card-value">{{ activeReservesCount > 0 ? 'Con Cita' : 'Al Día' }}</span>
+        <span class="card-label">Citas abiertas</span>
+        <span class="card-value">{{ activeReservesCount > 0 ? activeReservesCount + (activeReservesCount === 1 ? ' cita' : ' citas') : 'Al día' }}</span>
       </div>
     </div>
 
@@ -108,8 +108,9 @@
         <thead>
           <tr>
             <th>ID Referencia</th>
-            <th>Consulta</th>
-            <th>Servicio / Notas</th>
+            <th>Origen</th>
+            <th>Servicio</th>
+            <th>Notas</th>
             <th *ngIf="activeTab === 'BARBER'">Barbero</th>
             <th>Estado</th>
             <th>Fecha de Cita</th>
@@ -125,11 +126,12 @@
                 <span class="tx-hash">#{{ item.id | slice:0:10 }}...</span>
               </td>
               <td>
-                <span class="source-badge" [ngClass]="{'source-barber': item.source === 'BARBER', 'source-employee': item.source === 'EMPLOYEE'}">
-                  {{ item.source === 'BARBER' ? 'Barbería' : 'Barbero' }}
+                <span class="source-badge" [ngClass]="{'source-barber': item.reservationType === 'VIRTUAL_QUEUE', 'source-employee': item.reservationType !== 'VIRTUAL_QUEUE'}">
+                  {{ originLabel(item) }}
                 </span>
               </td>
-              <td class="service-name">{{ item.notes }}</td>
+              <td class="service-name">{{ item.services }}</td>
+              <td class="date-text muted">{{ item.notes || '—' }}</td>
               <td *ngIf="activeTab === 'BARBER'" class="tx-cell">
                 <span class="tx-hash">{{ barberName(item.employeeId) }}</span>
               </td>
@@ -176,7 +178,7 @@
 
             <!-- Fila desplegable para calificar -->
             <tr class="rate-row" *ngIf="ratingOpenId === item.id && canRate(item) && !isRated(item.id)">
-              <td colspan="9">
+              <td [attr.colspan]="activeTab === 'BARBER' ? 10 : 9">
                 <div class="rate-box">
                   <div class="stars" role="radiogroup" aria-label="Calificación">
                     <button type="button" *ngFor="let n of stars" class="star"

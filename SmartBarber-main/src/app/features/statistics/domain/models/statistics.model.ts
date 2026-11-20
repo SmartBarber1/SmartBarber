@@ -30,6 +30,8 @@ export interface StatisticsKpi {
   hint: string;
   /** Indica si una variación negativa es favorable (por ejemplo, la espera). */
   lowerIsBetter?: boolean;
+  /** El periodo no tiene datos para calcularlo: se muestra "—" y el hint lo explica. */
+  noData?: boolean;
 }
 
 export interface RevenuePoint {

@@ -193,7 +193,7 @@
                                                    [value]="editDraft().name"
                                                    (input)="updateDraft('name', $any($event.target).value)"
                                                    [attr.aria-invalid]="editErrors().name ? 'true' : null" />
-                                            @if (editErrors().name; as msg) { <small class="reason-error" role="alert">{{ msg }}</small> }
+                                            @if (editErrors().name; as msg) { <small class="field-error" role="alert">{{ msg }}</small> }
                                         </label>
                                         <label class="edit-field">
                                             <span>Celular</span>
@@ -201,19 +201,27 @@
                                                    [value]="editDraft().cell"
                                                    (input)="updateDraft('cell', $any($event.target).value)"
                                                    [attr.aria-invalid]="editErrors().cell ? 'true' : null" />
-                                            @if (editErrors().cell; as msg) { <small class="reason-error" role="alert">{{ msg }}</small> }
+                                            @if (editErrors().cell; as msg) { <small class="field-error" role="alert">{{ msg }}</small> }
                                         </label>
-                                        <label class="edit-field edit-field--wide">
-                                            <span>Especialidades (separadas por coma)</span>
-                                            <input type="text" class="reason-input"
-                                                   [attr.maxlength]="specialtyMax"
-                                                   [value]="editDraft().specialty"
-                                                   (input)="updateDraft('specialty', $any($event.target).value)"
-                                                   [attr.aria-invalid]="editErrors().specialty ? 'true' : null"
-                                                   placeholder="Ej. Corte clásico, Barba" />
-                                            @if (editErrors().specialty; as msg) { <small class="reason-error" role="alert">{{ msg }}</small> }
-                                        </label>
+                                        <fieldset class="edit-field edit-field--wide edit-specialties"
+                                                  [attr.aria-invalid]="editErrors().specialty ? 'true' : null">
+                                            <legend>Especialidades</legend>
+                                            <div class="specialty-options">
+                                                @for (option of specialtyOptions; track option) {
+                                                    <label class="specialty-option">
+                                                        <input type="checkbox"
+                                                               [checked]="hasDraftSpecialty(option)"
+                                                               (change)="toggleDraftSpecialty(option, $any($event.target).checked)" />
+                                                        {{ option }}
+                                                    </label>
+                                                }
+                                            </div>
+                                            @if (editErrors().specialty; as msg) { <small class="field-error" role="alert">{{ msg }}</small> }
+                                        </fieldset>
                                     </div>
+                                    @if (hasEditErrors()) {
+                                        <p class="field-error field-error--block" role="alert">Corrige los campos marcados para guardar.</p>
+                                    }
                                     <p class="reason-hint">El documento y el correo no se pueden cambiar desde aquí.</p>
                                     <div class="access-actions">
                                         <button type="button" class="secondary-button" (click)="cancelEdit()" [disabled]="savingEdit()">

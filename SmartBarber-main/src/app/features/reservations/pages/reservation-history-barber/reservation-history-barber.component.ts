@@ -28,7 +28,12 @@ const STATUS_LABELS: Readonly<Record<string, string>> = {
 export interface UnifiedReservationItem {
   id: string;
   source: BarberHistoryTab;
+  /** Servicios de la reserva, separados por coma. */
+  services: string;
+  /** Nota que dejó el cliente (vacía si no hay). */
   notes?: string;
+  /** Origen de la reserva: RESERVATION o VIRTUAL_QUEUE. */
+  reservationType?: string;
   status: string;
   startTime: string;
   duration?: number;
@@ -274,10 +279,10 @@ export class ReservationHistoryBarberComponent implements OnInit {
     return {
       id: item.id,
       source,
-      notes:
-        (Array.isArray(item.services) && item.services.length > 0 ? item.services.join(', ') : '') ||
-        item.notes ||
-        'Servicio',
+      services:
+        Array.isArray(item.services) && item.services.length > 0 ? item.services.join(', ') : 'Servicio',
+      notes: typeof item.notes === 'string' && item.notes.trim() ? item.notes.trim() : undefined,
+      reservationType: item.reservationType,
       status: item.status || 'PENDING',
       startTime: item.startTime || item.date || new Date().toISOString(),
       duration: item.duration || 0,
@@ -287,10 +292,19 @@ export class ReservationHistoryBarberComponent implements OnInit {
     };
   }
 
+  /** Citas que siguen abiertas: pendientes, confirmadas o en atención y aún no vencidas. */
   get activeReservesCount(): number {
-    return this.historyList.filter((item) =>
-      ['CONFIRMED', 'COMPLETED', 'APPROVED', 'ACTIVE'].includes(item.status)
-    ).length;
+    const now = Date.now();
+    return this.historyList.filter((item) => {
+      if (item.status === 'IN_PROGRESS' || item.status === 'WAITING') return true;
+      if (item.status !== 'PENDING' && item.status !== 'CONFIRMED') return false;
+      const start = new Date(item.startTime).getTime();
+      return Number.isNaN(start) || start >= now;
+    }).length;
+  }
+
+  originLabel(item: UnifiedReservationItem): string {
+    return item.reservationType === 'VIRTUAL_QUEUE' ? 'Cola virtual' : 'Reserva';
   }
 
   get totalMinutes(): number {

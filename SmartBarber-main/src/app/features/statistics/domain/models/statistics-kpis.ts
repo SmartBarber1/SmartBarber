@@ -59,17 +59,23 @@ export function buildStatisticsKpis(
       id: 'effective-rate',
       label: 'Reservas efectivas',
       value: current.effectiveRate ?? 0,
-      previous: previous?.effectiveRate ?? null,
+      previous: current.effectiveRate === null ? null : previous?.effectiveRate ?? null,
       format: 'percent',
-      hint: 'Sin cancelaciones ni inasistencias'
+      hint: current.effectiveRate === null
+        ? 'Aún no hay reservas agendadas cerradas'
+        : 'Sin cancelaciones ni inasistencias',
+      noData: current.effectiveRate === null
     },
     {
       id: 'queue-wait',
       label: 'Espera promedio en cola',
       value: current.averageWait ?? 0,
-      previous: previous?.averageWait ?? null,
+      previous: current.averageWait === null ? null : previous?.averageWait ?? null,
       format: 'minutes',
-      hint: 'Desde el ingreso hasta la atención',
+      hint: current.averageWait === null
+        ? 'Aún no hay turnos de cola atendidos'
+        : 'Desde el ingreso hasta la atención',
+      noData: current.averageWait === null,
       lowerIsBetter: true
     }
   ];

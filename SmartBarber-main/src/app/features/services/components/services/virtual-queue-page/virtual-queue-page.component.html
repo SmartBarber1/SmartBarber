@@ -2,8 +2,8 @@
   <section class="queue-header">
     <div>
       <span class="eyebrow">MI EXPERIENCIA</span>
-      <h1>Cola virtual</h1>
-      <p>Consulta los turnos de la cola en tiempo real.</p>
+      <h1>Mi turno en la cola</h1>
+      <p>Sigue tu turno en tiempo real. Por privacidad, los demás turnos aparecen sin datos personales.</p>
     </div>
 
     <div class="connection-status">
@@ -32,6 +32,42 @@
   </div>
 
   <ng-container *ngIf="queue as data">
+
+    <!-- Mi turno -->
+    <section class="my-turn-card" *ngIf="myTurn as turn; else noTurn" aria-labelledby="my-turn-title">
+      <div>
+        <span class="eyebrow">TU TURNO</span>
+        <h2 id="my-turn-title">
+          {{ myTurnInProgress ? 'Te están atendiendo' : 'Turno #' + turn.position }}
+        </h2>
+        <p *ngIf="!myTurnInProgress">
+          Tiempo estimado de espera:
+          <strong>{{ turn.estimatedWaitMinutes === 0 ? 'eres el siguiente' : 'unos ' + turn.estimatedWaitMinutes + ' min' }}</strong>
+        </p>
+        <p *ngIf="turn.services?.length">Servicios: {{ turn.services!.join(', ') }}</p>
+      </div>
+
+      <div class="leave-box" *ngIf="!myTurnInProgress">
+        <ng-container *ngIf="!confirmingLeave; else confirmLeave">
+          <button type="button" class="leave-button" (click)="askLeave()">Salir de la cola</button>
+        </ng-container>
+        <ng-template #confirmLeave>
+          <p class="leave-question">¿Seguro que quieres salir? Perderás tu lugar en la fila.</p>
+          <div class="leave-actions">
+            <button type="button" class="secondary" (click)="cancelLeave()" [disabled]="leaving">Seguir en la fila</button>
+            <button type="button" class="leave-button" (click)="leaveQueue()" [disabled]="leaving">
+              {{ leaving ? 'Saliendo…' : 'Sí, salir' }}
+            </button>
+          </div>
+        </ng-template>
+        <p class="leave-error" *ngIf="leaveError" role="alert">{{ leaveError }}</p>
+      </div>
+    </section>
+
+    <ng-template #noTurn>
+      <div class="message-card" *ngIf="left">Saliste de la fila. Puedes unirte de nuevo cuando quieras.</div>
+    </ng-template>
+
     <section class="summary-grid">
       <article class="summary-card">
         <span class="summary-label">Turnos en espera</span>
@@ -51,7 +87,7 @@
         <div>
           <h2>Turnos registrados</h2>
         </div>
-        <span class="turn-count">{{ data.waitingTurns.length }} turnos</span>
+        <span class="turn-count">{{ turnsLabel(data.waitingTurns.length) }}</span>
       </div>
 
       <div *ngIf="data.waitingTurns.length === 0" class="empty-state">
@@ -63,21 +99,21 @@
           <thead>
             <tr>
               <th>Turno</th>
-              <th>Cliente</th>
+              <th>Quién</th>
               <th>Duración</th>
               <th>Estado</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr *ngFor="let turn of waitingTurns; trackBy: trackByReservation">
+            <tr *ngFor="let turn of waitingTurns; trackBy: trackByReservation" [class.mine]="turn.mine">
 
               <td>
                 <span class="turn-number">#{{ turn.position }}</span>
               </td>
 
               <td>
-                {{ turn.customer?.name || 'Cliente no disponible' }}
+                {{ turn.mine ? 'Tú' : 'Turno #' + turn.position }}
               </td>
 
               <td>{{ turn.durationMinutes }} min</td>

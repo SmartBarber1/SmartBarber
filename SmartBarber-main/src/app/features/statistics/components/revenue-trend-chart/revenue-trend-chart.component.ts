@@ -5,6 +5,7 @@ import {
   formatCompactCurrency,
   formatCurrency,
   formatInteger,
+  formatCount,
   niceMax
 } from '../../utils/statistics-format';
 
@@ -49,6 +50,7 @@ export class RevenueTrendChartComponent {
   readonly formatCurrency = formatCurrency;
 
   readonly formatInteger = formatInteger;
+  readonly formatCount = formatCount;
 
   barHeight(point: RevenuePoint): number {
     return (point.revenue / this.axisMax()) * 100;

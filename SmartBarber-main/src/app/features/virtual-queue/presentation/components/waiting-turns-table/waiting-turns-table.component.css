@@ -172,3 +172,10 @@
   }
 
 }
+.reservation-services {
+  display: block;
+  margin-top: 2px;
+  color: #7a6a58;
+  font-size: 12px;
+  font-weight: 500;
+}

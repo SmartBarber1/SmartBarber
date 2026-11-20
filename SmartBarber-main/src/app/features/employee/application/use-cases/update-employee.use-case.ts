@@ -3,10 +3,13 @@ import { Observable } from 'rxjs';
 
 import { EmployeeRepository } from '../../domain/repositories/employee.repository';
 import { Employee } from '../../domain/models/employee.model';
-import { EmployeeDataChange, TeamMember } from '../../domain/models/team-member.model';
+import { EMPLOYEE_SPECIALTIES, EmployeeDataChange, TeamMember } from '../../domain/models/team-member.model';
 
-/** Celular colombiano: 10 dígitos (la misma regla del backend). */
-const CELL_PATTERN = /^[0-9]{10}$/;
+/** Celular colombiano: 10 dígitos que empiezan por 3 (la misma regla del registro). */
+const CELL_PATTERN = /^3[0-9]{9}$/;
+
+/** Nombre y apellido: solo letras y espacios, al menos 3 caracteres. */
+const NAME_PATTERN = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' ]{3,}$/;
 
 export const EMPLOYEE_NAME_MAX = 100;
 export const EMPLOYEE_SPECIALTY_MAX = 200;
@@ -32,16 +35,22 @@ export function validateChange(change: EmployeeDataChange): EmployeeChangeErrors
 
     if (!change.name) {
         errors.name = 'Escribe el nombre del barbero.';
+    } else if (!NAME_PATTERN.test(change.name)) {
+        errors.name = 'El nombre debe tener al menos 3 letras, sin números ni símbolos.';
     } else if (change.name.length > EMPLOYEE_NAME_MAX) {
         errors.name = `El nombre admite máximo ${EMPLOYEE_NAME_MAX} caracteres.`;
     }
 
     if (!CELL_PATTERN.test(change.cell)) {
-        errors.cell = 'El celular debe tener exactamente 10 dígitos.';
+        errors.cell = 'Ingresa un celular colombiano de 10 dígitos que empiece por 3.';
     }
 
-    if (!change.specialty) {
-        errors.specialty = 'Escribe al menos una especialidad.';
+    const specialties = change.specialty.split(',').map(item => item.trim()).filter(Boolean);
+    const allowed: readonly string[] = EMPLOYEE_SPECIALTIES;
+    if (specialties.length === 0) {
+        errors.specialty = 'Selecciona al menos una especialidad.';
+    } else if (specialties.some(item => !allowed.includes(item))) {
+        errors.specialty = 'Elige las especialidades de la lista.';
     } else if (change.specialty.length > EMPLOYEE_SPECIALTY_MAX) {
         errors.specialty = `Las especialidades admiten máximo ${EMPLOYEE_SPECIALTY_MAX} caracteres.`;
     }

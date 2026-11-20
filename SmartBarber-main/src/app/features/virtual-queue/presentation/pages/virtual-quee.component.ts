@@ -7,7 +7,7 @@ import {
   signal
 } from '@angular/core';
 
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
 
@@ -29,7 +29,7 @@ import {
   QueueErrorResponse,
 } from '../../domain/model/reservation-queue.model';
 import { QueueSnapshotResponseEvent, QueueTurn } from '../../domain/model/queue-event.model';
-import { HttpErrorResponse } from '@angular/common/http';
+import { toApiError, toUserMessage } from '../../../../core/errors';
 
 import { QueueSummaryCardComponent } from '../components/queue-summary-card/queue-summary-card.component';
 import { QueueHeaderComponent } from '../components/queue-header/queue-header.component';
@@ -141,216 +141,82 @@ export class VirtualQueueComponent implements OnInit, OnDestroy {
     this.consultStatusQueue();
   }
 
+  /**
+   * Carga la cola con una sola consulta: el barbero recibe la cola completa,
+   * también cerrada. Si nunca se ha creado, el servidor responde BQ_001.
+   */
   loadQueue(): void {
-
     this.loading.set(true);
     this.errorMessage.set('');
 
     this.getQueueUseCase
       .execute(this.employeeId)
       .subscribe({
-
         next: response => {
-
-          this.snapshot.set(response);
-
-          this.acceptingClients.set(
-            response.acceptingClients
-          );
-
-          this.currentTurn.set(
-            response.currentTurn
-          );
-
-          this.waitingTurns.set(
-            response.waitingTurns
-          );
-
-          this.waitingCount.set(
-            response.waitingTurns.length
-          );
-
+          this.applySnapshot(response);
           this.loading.set(false);
+          if (response.acceptingClients) {
+            this.connectWebsocketEvent();
+          }
         },
-
-        error: error => {
-
-          console.error(
-            'Error consultando cola',
-            error
-          );
-
-          this.errorMessage.set(
-            'No fue posible consultar la cola.'
-          );
-
+        error: (error: unknown) => {
           this.loading.set(false);
+          if (toApiError(error).code === 'BQ_001') {
+            // Sin cola creada: la plantilla ofrece "Iniciar cola virtual".
+            this.snapshot.set(null);
+            return;
+          }
+          this.errorMessage.set(toUserMessage(error, { DEFAULT: 'No fue posible consultar la cola.' }));
         }
       });
   }
 
+  /** Botón "Actualizar" y carga inicial. */
   consultStatusQueue(): void {
-    this.loading.set(true)
-
-    this.getStatusQueue.execute(this.employeeId)
-      .subscribe({
-        next: response => {
-          this.loading.set(false),
-            this.acceptingClients.set(response.acceptingClients)
-          if (response.acceptingClients) {
-            this.loadQueue();
-            this.connectWebsocketEvent()
-          }
-        },
-        error: (error: HttpErrorResponse) => {
-
-          this.loading.set(false);
-          this.acceptingClients.set(false)
-          const response: QueueErrorResponse =
-            error.error;
-
-          console.error(
-            'Error en el proceso de consulta de cola',
-            response
-          );
-
-          this.errorMessage.set(
-            response.message
-          );
-        }
-      });
-
+    this.loadQueue();
   }
 
   openQueue(): void {
-
-    this.actionLoading.set(true);
-
-    this.openQueueUseCase
-      .execute(this.employeeId)
-      .subscribe({
-        next: () => {
-
-          this.actionLoading.set(false);
-          this.loadQueue();
-          this.connectWebsocketEvent()
-        },
-        error: (error: HttpErrorResponse) => {
-
-          this.loading.set(false);
-          this.acceptingClients.set(false)
-          const response: QueueErrorResponse =
-            error.error;
-
-          console.error(
-            'Error en el proceso de consulta de cola',
-            response
-          );
-
-          this.errorMessage.set(
-            response.message
-          );
-        }
-      });
+    this.runAction(this.openQueueUseCase.execute(this.employeeId), 'No fue posible abrir la cola.');
   }
 
   closeQueue(): void {
-
-    this.actionLoading.set(true);
-
-    this.closeQueueUseCase
-      .execute(this.employeeId)
-      .subscribe({
-
-        next: () => {
-          this.actionLoading.set(false);
-          this.consultStatusQueue();
-        },
-
-        error: (error: HttpErrorResponse) => {
-
-          this.loading.set(false);
-          this.acceptingClients.set(false)
-          const response: QueueErrorResponse =
-            error.error;
-
-          console.error(
-            'Error en el proceso de consulta de cola',
-            response
-          );
-
-          this.errorMessage.set(
-            response.message
-          );
-        }
-      });
+    this.runAction(this.closeQueueUseCase.execute(this.employeeId), 'No fue posible cerrar la cola.');
   }
 
+  /** Llama al siguiente y muestra de inmediato el turno en atención. */
   nextCustomer(): void {
-
-    this.actionLoading.set(true);
-
-    this.nextCustomerUseCase
-      .execute(this.employeeId)
-      .subscribe({
-
-        next: () => {
-
-          this.actionLoading.set(false);
-          //this.loadQueue();
-        },
-
-        error: error => {
-
-          console.error(
-            'Error llamando siguiente turno',
-            error
-          );
-
-          this.actionLoading.set(false);
-        }
-      });
+    this.runAction(this.nextCustomerUseCase.execute(this.employeeId), 'No fue posible llamar al siguiente cliente.');
   }
 
   completeTurn(): void {
+    this.runAction(this.completeCurrentTurnUseCase.execute(this.employeeId), 'No fue posible finalizar el turno.');
+  }
+
+  /** Ejecuta una acción de la cola y, al terminar, vuelve a leer su estado. */
+  private runAction(action: Observable<unknown>, fallback: string): void {
+    if (this.actionLoading()) return;
 
     this.actionLoading.set(true);
+    this.errorMessage.set('');
 
-    this.completeCurrentTurnUseCase
-      .execute(this.employeeId)
-      .subscribe({
-
-        next: () => {
-
-          this.actionLoading.set(false);
-          this.loadQueue();
-        },
-
-        error: (error: HttpErrorResponse) => {
-
-          this.loading.set(false);
-          this.acceptingClients.set(false)
-          const response: QueueErrorResponse =
-            error.error;
-
-          console.error(
-            'Error en el proceso de consulta de cola',
-            response
-          );
-
-          this.errorMessage.set(
-            response.message
-          );
-        }
-      });
+    action.subscribe({
+      next: () => {
+        this.actionLoading.set(false);
+        this.loadQueue();
+      },
+      error: (error: unknown) => {
+        this.actionLoading.set(false);
+        this.errorMessage.set(toUserMessage(error, { DEFAULT: fallback }));
+        // El estado pudo cambiar (por ejemplo, otro dispositivo llamó al siguiente).
+        this.loadQueue();
+      }
+    });
   }
 
   connectWebsocketEvent(): void {
-    console.log('Entree WS')
-    console.log('CONECTANDO SOCKET');
 
     if (this.websocketSubscription) {
-      console.log('SOCKET YA EXISTE');
       return;
     }
 
@@ -375,19 +241,22 @@ export class VirtualQueueComponent implements OnInit, OnDestroy {
             switch (event.type) {
 
               case 'QUEUE_SNAPSHOT':
+                this.applySnapshot(event.payload);
+                break;
+
+              // Cambios en la cola: se relee por REST, donde el barbero
+              // recibe la cola completa con los datos de sus clientes.
               case 'QUEUE_NEXT_CUSTOMER':
               case 'QUEUE_ADD_CUSTOMER':
+              case 'QUEUE_CUSTOMER_LEFT':
               case 'QUEUE_COMPLETED_CURRENT_TURN':
-
-                this.updateSnapshot(event.payload);
+              case 'QUEUE_OPENED':
+              case 'QUEUE_CLOSED':
+                this.refreshSilently();
                 break;
 
               default:
-
-                console.warn(
-                  'Evento no manejado:',
-                  event.type
-                );
+                this.refreshSilently();
             }
           },
 
@@ -406,6 +275,20 @@ export class VirtualQueueComponent implements OnInit, OnDestroy {
             this.websocketSubscription = undefined;
           }
         });
+  }
+
+    /** Relee la cola sin mostrar el indicador de carga (eventos en tiempo real). */
+  private refreshSilently(): void {
+    this.getQueueUseCase.execute(this.employeeId).subscribe({
+      next: response => this.applySnapshot(response),
+      error: () => undefined
+    });
+  }
+
+  private applySnapshot(
+    payload: QueueSnapshotResponseEvent
+  ): void {
+    this.updateSnapshot(payload);
   }
 
   private updateSnapshot(

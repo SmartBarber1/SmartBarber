@@ -122,3 +122,32 @@
   color: #ffffff;
   border-color: #a63a3a;
 }
+
+.status-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1ece5;
+  color: #7a6a58;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.delete-confirm {
+  margin-top: 0.6rem;
+  padding: 0.7rem;
+  border: 1px solid #e0a59b;
+  border-radius: 8px;
+  background: #fbecea;
+  color: #8a2f22;
+  font-size: 0.82rem;
+}
+
+.delete-confirm p {
+  margin: 0 0 0.5rem;
+}
+
+.card-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

@@ -21,8 +21,23 @@ export class QueueActionsComponent {
   @Input()
   actionLoading = false;
 
-  @Input()
+    @Input()
   hasCurrentTurn = false;
+
+  /** Clientes en espera: sin clientes no se puede llamar al siguiente. */
+  @Input()
+  waitingCount = 0;
+
+  /** Se puede llamar al siguiente: hay clientes y no hay un turno en atención. */
+  get canCallNext(): boolean {
+    return this.waitingCount > 0 && !this.hasCurrentTurn;
+  }
+
+  get nextHint(): string {
+    if (this.hasCurrentTurn) return 'Finaliza el turno actual antes de llamar al siguiente.';
+    if (this.waitingCount === 0) return 'No hay clientes en espera.';
+    return '';
+  }
 
   @Output()
   openQueue = new EventEmitter<void>();

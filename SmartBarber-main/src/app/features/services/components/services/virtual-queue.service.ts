@@ -22,8 +22,14 @@ export interface QueueTurn {
   } | null;
   position: number;
   estimatedWaitMinutes: number;
-  durationMinutes: number;
+    durationMinutes: number;
   status: string;
+  /** Servicios del turno (solo visibles en el turno propio). */
+  services?: string[];
+  notes?: string | null;
+  reservationType?: string | null;
+  /** El turno es del cliente que consulta (lo marca el servidor). */
+  mine?: boolean;
 }
 
 export interface EmployeeQueueResponse {

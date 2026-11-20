@@ -181,7 +181,7 @@
                     <li>
                       <span class="peak-rank">{{ i + 1 }}</span>
                       <span class="peak-label">{{ slot.label }}</span>
-                      <span class="peak-value">{{ slot.reservations }} reservas</span>
+                      <span class="peak-value">{{ slot.reservations }}</span>
                     </li>
                   }
                 </ol>
@@ -211,7 +211,7 @@
             <article class="panel">
               <header class="panel-header">
                 <h3>Comportamiento del cliente</h3>
-                <span class="panel-meta">{{ formatInteger(data.customerBehavior.total) }} reservas programadas</span>
+                <span class="panel-meta">{{ formatCount(data.customerBehavior.total, 'reserva programada', 'reservas programadas') }}</span>
               </header>
 
               @if (behaviorSegments().length) {
@@ -315,7 +315,7 @@
                 <span class="kpi-label">Espacios recuperados</span>
                 <strong class="kpi-value">{{ formatInteger(data.virtualQueue.recoveredSlots) }}</strong>
                 <span class="kpi-hint">
-                  de {{ formatInteger(data.virtualQueue.freedSlots) }} espacios liberados · {{ formatPercent(recoveryRate()) }}
+                  de {{ formatCount(data.virtualQueue.freedSlots, 'espacio liberado', 'espacios liberados') }} · {{ formatPercent(recoveryRate()) }}
                 </span>
                 <div class="track" aria-hidden="true">
                   <span class="fill" [style.width.%]="recoveryRate() * 100"></span>

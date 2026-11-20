@@ -10,7 +10,12 @@ import { BarberServicePayload } from '../models/servicio.model';
   styleUrls: ['./servicio-card.component.css']
 })
 export class ServicioCardComponent {
-  @Input({ required: true }) servicio!: BarberServicePayload;
+    @Input({ required: true }) servicio!: BarberServicePayload;
+  /** Hay una acción en curso sobre este servicio. */
+  @Input() ocupado = false;
+
+  /** Se pidió eliminar y falta confirmar. */
+  confirmando = false;
 
   @Output() editar = new EventEmitter<void>();
   @Output() alternarEstado = new EventEmitter<void>();

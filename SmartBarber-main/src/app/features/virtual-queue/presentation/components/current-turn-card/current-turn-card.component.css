@@ -182,3 +182,11 @@
   }
 
 }
+.detail-item--wide {
+  grid-column: 1 / -1;
+}
+
+.turn-notes {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}

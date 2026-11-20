@@ -78,8 +78,8 @@
 
     @if (currentTurn; as turn) {
 
-      <strong class="metric-value metric-value-id">
-        #{{ turn.customer.name }}
+      <strong class="metric-value metric-value-id" [attr.title]="turn.customer?.name">
+        #{{ turn.position || 1 }} · {{ turn.customer?.name || 'Cliente' }}
       </strong>
 
       <span class="metric-caption">

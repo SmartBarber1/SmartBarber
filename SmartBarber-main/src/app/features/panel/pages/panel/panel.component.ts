@@ -222,17 +222,34 @@ export class PanelComponent
     );
 
   /** Accesos rápidos: los módulos disponibles del rol, sin Inicio ni Mi perfil. */
+  /**
+   * Acciones frecuentes por rol, en orden de uso. El acceso rápido no repite
+   * el menú completo: muestra solo estas (si están disponibles y sin bloqueo).
+   */
+  private static readonly QUICK_ACCESS_IDS: Readonly<Record<string, readonly string[]>> = {
+    ADMIN: ['admin-agenda', 'reservations-history', 'barbers', 'services', 'schedules', 'statistics'],
+    BARBER: ['agenda', 'barber-queue', 'barber-reservations', 'barber-clients'],
+    CUSTOMER: ['reservations', 'virtual-queue', 'reservation-history', 'notifications']
+  };
+
   readonly quickItems =
-    computed<PanelNavigationItem[]>(() =>
-      this.navigationGroups()
+    computed<PanelNavigationItem[]>(() => {
+      const available = this.navigationGroups()
         .flatMap(group => group.items)
         .filter(item =>
           item.status === 'AVAILABLE' &&
           !item.locked &&
           item.id !== 'dashboard' &&
           item.id !== 'profile'
-        )
-    );
+        );
+      const preferred = PanelComponent.QUICK_ACCESS_IDS[this.homeRole() ?? ''];
+      if (!preferred) {
+        return available.slice(0, 6);
+      }
+      return preferred
+        .map(id => available.find(item => item.id === id))
+        .filter((item): item is PanelNavigationItem => !!item);
+    });
 
   /** Tres indicadores del Inicio, distintos para cada rol. */
   readonly homeMetrics =
@@ -524,7 +541,7 @@ export class PanelComponent
     }
 
     const currentUrl =
-      this.router.url.split('?')[0];
+      PanelComponent.canonicalRoute(this.router.url.split(/[?#]/)[0]);
 
     return (
       this.navigationGroups()
@@ -536,6 +553,18 @@ export class PanelComponent
           )
         ) ?? null
     );
+  }
+
+    /**
+   * Pantallas que pertenecen a una opción del menú sin tener entrada propia:
+   * el seguimiento del turno es parte de "Cola virtual" del cliente.
+   */
+  private static readonly ROUTE_ALIASES: Readonly<Record<string, string>> = {
+    '/panel/virtual-queue-tracking': '/panel/virtual-queue-available'
+  };
+
+  private static canonicalRoute(url: string): string {
+    return PanelComponent.ROUTE_ALIASES[url] ?? url;
   }
 
   get currentModuleId(): string {
@@ -563,11 +592,8 @@ export class PanelComponent
   get currentModuleSubtitle(): string {
 
     if (this.isPanelHome()) {
-
-      return (
-        this.summary()?.subtitle ??
-        'Bienvenido a SmartBarber.'
-      );
+      // La tarjeta de bienvenida ya muestra el subtítulo del resumen; aquí no se repite.
+      return 'Resumen de tu actividad';
     }
 
     return (
@@ -821,7 +847,7 @@ export class PanelComponent
 
     // Solo se marca la opción cuya ruta coincide de forma más específica con la
     // dirección actual: /panel/subscription/status no marca también /panel/subscription.
-    const url = this.router.url.split(/[?#]/)[0];
+    const url = PanelComponent.canonicalRoute(this.router.url.split(/[?#]/)[0]);
     const matches = (candidate: string | null | undefined): candidate is string =>
       !!candidate && (url === candidate || url.startsWith(`${candidate}/`));
 

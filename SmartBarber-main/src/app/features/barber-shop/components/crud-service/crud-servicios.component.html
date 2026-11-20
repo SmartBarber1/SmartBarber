@@ -21,12 +21,16 @@
     <section class="list-section">
       <div class="list-header">
         <h2>Catálogo de Servicios</h2>
-        <span class="counter-badge">{{ servicesList.length }} registrados</span>
+        <span class="counter-badge">
+          {{ cargando ? 'Cargando…' : servicesList.length + (servicesList.length === 1 ? ' registrado' : ' registrados') }}
+        </span>
       </div>
 
 
       <app-catalogo-servicios
         [servicios]="servicesList"
+        [cargando]="cargando"
+        [ocupadoId]="ocupadoId"
         (editar)="editService($event)"
         (alternarEstado)="toggleServiceStatus($event)"
         (eliminar)="deleteService($event)">

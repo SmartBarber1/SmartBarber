@@ -93,6 +93,23 @@ export class HorariosAtencionComponent implements OnInit {
         false
       ]
     });
+
+    // En vacaciones la jornada no se usa: los campos se bloquean, pero el
+    // horario se conserva para cuando el barbero regrese.
+    this.horarioForm.get('vacaciones')?.valueChanges.subscribe((enVacaciones: boolean) =>
+      this.toggleScheduleFields(Boolean(enVacaciones))
+    );
+  }
+
+  private toggleScheduleFields(enVacaciones: boolean): void {
+    for (const name of ['horaInicio', 'horaFin', 'horaInicioAlmuerzo', 'horaFinAlmuerzo']) {
+      const control = this.horarioForm.get(name);
+      if (enVacaciones) {
+        control?.disable({ emitEvent: false });
+      } else {
+        control?.enable({ emitEvent: false });
+      }
+    }
   }
 
   private loadEmployees(): void {
@@ -293,7 +310,9 @@ export class HorariosAtencionComponent implements OnInit {
     this.formError = '';
     this.successMessage = '';
 
+    // En vacaciones no se valida la jornada (se conserva tal como está).
     if (
+      !formValue.vacaciones &&
       formValue.horaInicio >=
       formValue.horaFin
     ) {
@@ -306,7 +325,7 @@ export class HorariosAtencionComponent implements OnInit {
     const tieneFinAlmuerzo = Boolean(formValue.horaFinAlmuerzo);
 
     // El servidor exige el almuerzo completo (SH_003).
-    if (!tieneInicioAlmuerzo || !tieneFinAlmuerzo) {
+    if (!formValue.vacaciones && (!tieneInicioAlmuerzo || !tieneFinAlmuerzo)) {
       this.formError =
         'Indica el inicio y el fin del almuerzo.';
       return;
@@ -316,7 +335,8 @@ export class HorariosAtencionComponent implements OnInit {
       formValue.horaInicioAlmuerzo &&
       formValue.horaFinAlmuerzo &&
       formValue.horaInicioAlmuerzo >=
-      formValue.horaFinAlmuerzo
+      formValue.horaFinAlmuerzo &&
+      !formValue.vacaciones
     ) {
       this.formError =
         'El inicio del almuerzo debe ser anterior a su finalización.';
@@ -325,6 +345,7 @@ export class HorariosAtencionComponent implements OnInit {
 
     // El almuerzo debe quedar dentro de la jornada laboral.
     if (
+      !formValue.vacaciones &&
       tieneInicioAlmuerzo &&
       (
         formValue.horaInicioAlmuerzo < formValue.horaInicio ||

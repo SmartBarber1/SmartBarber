@@ -34,6 +34,7 @@ import {
   formatKpi,
   formatMinutes,
   formatPercent,
+  formatCount,
   formatRating
 } from '../../utils/statistics-format';
 
@@ -153,7 +154,7 @@ export class StatisticsDashboardComponent {
         label: item.name,
         value: item.revenue,
         valueLabel: formatCurrency(item.revenue),
-        detail: `${formatInteger(item.count)} servicios · ${formatPercent(total ? item.revenue / total : 0)} del total`
+        detail: `${formatCount(item.count, 'servicio', 'servicios')} · ${formatPercent(total ? item.revenue / total : 0)} del total`
       }));
   });
 
@@ -162,7 +163,7 @@ export class StatisticsDashboardComponent {
       id: item.serviceId,
       label: item.name,
       value: item.count,
-      valueLabel: `${formatInteger(item.count)} solicitudes`
+      valueLabel: formatCount(item.count, 'solicitud', 'solicitudes')
     }))
   );
 
@@ -180,7 +181,7 @@ export class StatisticsDashboardComponent {
     (this.dashboard()?.peakSlots ?? []).map(slot => ({
       key: `${slot.weekday}-${slot.hour}`,
       label: `${WEEKDAY_LONG[slot.weekday]} · ${formatHour(slot.hour)} – ${formatHour(slot.hour + 1)}`,
-      reservations: formatInteger(slot.reservations)
+      reservations: formatCount(slot.reservations, 'reserva', 'reservas')
     }))
   );
 
@@ -228,6 +229,7 @@ export class StatisticsDashboardComponent {
   readonly formatMinutes = formatMinutes;
 
   readonly formatPercent = formatPercent;
+  readonly formatCount = formatCount;
 
   readonly formatRating = formatRating;
 
@@ -289,7 +291,7 @@ export class StatisticsDashboardComponent {
   }
 
   formatKpiValue(kpi: StatisticsKpi): string {
-    return formatKpi(kpi.value, kpi.format);
+    return kpi.noData ? '—' : formatKpi(kpi.value, kpi.format);
   }
 
   /** Variación frente al periodo anterior: puntos porcentuales para tasas, % relativo para el resto. */

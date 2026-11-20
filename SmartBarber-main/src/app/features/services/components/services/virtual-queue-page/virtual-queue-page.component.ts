@@ -6,6 +6,8 @@ import {
   NgZone
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReservationService } from '../../../../reservations/services/reservation.service';
+import { toApiError, toUserMessage } from '../../../../../core/errors';
 
 import {
   VirtualQueueService,
@@ -39,10 +41,66 @@ export class VirtualQueuePageComponent
   private connection: { close: () => void } | null = null;
   private destroyed = false;
 
+    /** Confirmación en la página para salir de la fila. */
+  confirmingLeave = false;
+  leaving = false;
+  leaveError = '';
+  /** El cliente salió de la fila en esta sesión. */
+  left = false;
+
   constructor(
     private readonly virtualQueueService: VirtualQueueService,
+    private readonly reservationService: ReservationService,
     private readonly ngZone: NgZone
   ) {}
+
+  /** Turno del cliente (en espera o en atención). */
+  get myTurn(): QueueTurn | null {
+    if (this.queue?.currentTurn?.mine) {
+      return this.queue.currentTurn;
+    }
+    return this.waitingTurns.find(turn => turn.mine) ?? null;
+  }
+
+  get myTurnInProgress(): boolean {
+    return !!this.queue?.currentTurn?.mine;
+  }
+
+  /** Texto de la cantidad de turnos con el plural correcto. */
+  turnsLabel(count: number): string {
+    return `${count} ${count === 1 ? 'turno' : 'turnos'}`;
+  }
+
+  askLeave(): void {
+    this.leaveError = '';
+    this.confirmingLeave = true;
+  }
+
+  cancelLeave(): void {
+    this.confirmingLeave = false;
+  }
+
+  /** Sale de la fila: cancela el turno y la cola se actualiza para todos. */
+  leaveQueue(): void {
+    const turn = this.myTurn;
+    if (!turn || this.leaving || this.myTurnInProgress) return;
+
+    this.leaving = true;
+    this.leaveError = '';
+    this.reservationService.cancelReservation(turn.reservationId).subscribe({
+      next: () => {
+        this.leaving = false;
+        this.confirmingLeave = false;
+        this.left = true;
+      },
+      error: (error: unknown) => {
+        this.leaving = false;
+        this.leaveError = toApiError(error).code === 'RES_009'
+          ? 'Tu turno ya no está en la fila.'
+          : toUserMessage(error, { DEFAULT: 'No fue posible salir de la fila. Inténtalo nuevamente.' });
+      }
+    });
+  }
 
   get statusLabel(): string {
     switch (this.connectionStatus) {

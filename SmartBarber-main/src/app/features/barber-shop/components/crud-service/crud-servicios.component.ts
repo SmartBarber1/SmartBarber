@@ -35,7 +35,11 @@ export class BarberServiConfigComponent implements OnInit {
 
   @ViewChild(ServicioFormComponent) private formRef?: ServicioFormComponent;
 
-  servicesList: BarberServicePayload[] = [];
+    servicesList: BarberServicePayload[] = [];
+  /** Cargando el catálogo (evita mostrar "0 registrados" mientras llega la respuesta). */
+  cargando = false;
+  /** Servicio con una acción en curso. */
+  ocupadoId: number | null = null;
   /** El administrador solo gestiona los servicios de su propia barbería (sesión). */
   readonly currentBarberiaId: string = this.sessionService.getBarbershopId() ?? '';
 
@@ -57,11 +61,14 @@ export class BarberServiConfigComponent implements OnInit {
   // ───────────────────────── Carga de datos ─────────────────────────
 
   loadAllServices(): void {
+    this.cargando = true;
     this.barberService.getServicesByBarberiaId(this.currentBarberiaId).subscribe({
       next: (data: any) => {
         this.servicesList = toServiciosView(data);
+        this.cargando = false;
       },
       error: (err: any) => {
+        this.cargando = false;
         console.error('❌ Error al obtener los servicios del servidor:', err);
       }
     });
@@ -114,19 +121,46 @@ export class BarberServiConfigComponent implements OnInit {
     this.editando = null; // el formulario se limpia al ver el cambio
   }
 
-  // TODO: solo cambia el estado en pantalla; falta persistirlo en el backend
+  /** Activa o desactiva el servicio en el servidor; un servicio inactivo no se ofrece a los clientes. */
   toggleServiceStatus(servicio: BarberServicePayload): void {
-    servicio.isActive = !(servicio.isActive ?? true);
+    if (servicio.id == null || this.ocupadoId !== null) return;
+
+    const activar = servicio.isActive === false;
+    this.ocupadoId = servicio.id;
+    this.barberService.changeStatus(servicio.id, activar).subscribe({
+      next: () => {
+        this.ocupadoId = null;
+        servicio.isActive = activar;
+        this.mostrarAviso('exito', activar
+          ? `${servicio.name} está activo y se ofrece a los clientes.`
+          : `${servicio.name} quedó inactivo: ya no se ofrece a los clientes.`);
+      },
+      error: (err: unknown) => {
+        this.ocupadoId = null;
+        this.mostrarAviso('error', toUserMessage(err, { DEFAULT: 'No fue posible cambiar el estado del servicio.' }), false);
+      }
+    });
   }
 
-  // TODO: solo quita el servicio de la lista; falta el DELETE en el backend
+  /** Elimina el servicio en el servidor (la confirmación se hace en la tarjeta). */
   deleteService(servicio: BarberServicePayload): void {
-    if (!confirm('¿Estás seguro de eliminar este servicio?')) return;
+    if (servicio.id == null || this.ocupadoId !== null) return;
 
-    this.servicesList = this.servicesList.filter(s => s !== servicio);
-    if (this.editando?.id === servicio.id) {
-      this.cancelEdit();
-    }
+    this.ocupadoId = servicio.id;
+    this.barberService.deleteService(servicio.id).subscribe({
+      next: () => {
+        this.ocupadoId = null;
+        this.servicesList = this.servicesList.filter(s => s.id !== servicio.id);
+        if (this.editando?.id === servicio.id) {
+          this.cancelEdit();
+        }
+        this.mostrarAviso('exito', `${servicio.name} fue eliminado.`);
+      },
+      error: (err: unknown) => {
+        this.ocupadoId = null;
+        this.mostrarAviso('error', toUserMessage(err, { DEFAULT: 'No fue posible eliminar el servicio.' }), false);
+      }
+    });
   }
 
   cerrarAviso(): void {

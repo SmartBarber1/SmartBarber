@@ -78,7 +78,7 @@
 
       </div>
 
-      @for (turn of waitingTurns; track turn.customer.name) {
+      @for (turn of waitingTurns; track turn.reservationId) {
 
         <div
           class="waiting-row"
@@ -88,19 +88,20 @@
             class="reservation-id"
             role="cell">
 
-            {{ turn.customer.name }}
+            #{{ turn.position }} · {{ turn.customer?.name || 'Cliente' }}
+            @if (turn.services?.length) {
+              <small class="reservation-services">{{ turn.services!.join(', ') }}</small>
+            }
 
           </strong>
 
-          <!--
           <span
             class="reservation-type"
             role="cell">
 
-            {{ turn.reservationType }}
+            {{ typeLabel(turn.reservationType) }}
 
           </span>
-          -->
 
           <span
             class="reservation-duration"

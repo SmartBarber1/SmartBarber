@@ -107,3 +107,11 @@
   }
 
 }
+/* El nombre del turno y "Sin turno" no se cortan */
+.metric-value-id,
+.metric-value-muted {
+  font-size: 19px;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

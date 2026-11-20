@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-import { QueueTurn } from '../../../domain/model/queue-event.model';
+import { QueueTurn, reservationTypeLabel } from '../../../domain/model/queue-event.model';
 
 @Component({
   selector: 'app-waiting-turns-table',
@@ -18,4 +18,6 @@ export class WaitingTurnsTableComponent {
   @Input()
   waitingCount = 0;
 
+
+  readonly typeLabel = reservationTypeLabel;
 }

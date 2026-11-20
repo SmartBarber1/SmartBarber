@@ -41,7 +41,9 @@
       <button
         type="button"
         class="primary-button action-button"
-        [disabled]="actionLoading"
+        [disabled]="actionLoading || !canCallNext"
+        [attr.title]="nextHint || null"
+        [attr.aria-describedby]="nextHint ? 'next-hint' : null"
         (click)="onNextCustomer()">
 
         <span
@@ -55,8 +57,10 @@
         <span>
           Llamar siguiente
         </span>
-
       </button>
+      @if (nextHint) {
+        <small id="next-hint" class="action-hint">{{ nextHint }}</small>
+      }
 
       <button
         type="button"

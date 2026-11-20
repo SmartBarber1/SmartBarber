@@ -47,6 +47,7 @@ import {
     AccessAction,
     AccountStatus,
     BLOCK_REASON_MAX,
+    EMPLOYEE_SPECIALTIES,
     EmployeeDataChange,
     TeamMember
 } from '../../domain/models/team-member.model';
@@ -148,7 +149,10 @@ export class EmployeeListComponent implements OnChanges {
     readonly editDraft = signal<EmployeeDataChange>({ name: '', cell: '', specialty: '' });
     /** Errores por campo; se muestran después de intentar guardar. */
     readonly editErrors = signal<EmployeeChangeErrors>({});
-    readonly savingEdit = signal(false);
+        readonly savingEdit = signal(false);
+
+    /** Las mismas especialidades que al registrar un barbero. */
+    readonly specialtyOptions = EMPLOYEE_SPECIALTIES;
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['barberiaId']) {
@@ -291,6 +295,26 @@ export class EmployeeListComponent implements OnChanges {
         if (Object.keys(this.editErrors()).length > 0) {
             this.editErrors.set(validateChange(normalizeChange(this.editDraft())));
         }
+    }
+
+        hasEditErrors(): boolean {
+        return Object.keys(this.editErrors()).length > 0;
+    }
+
+    hasDraftSpecialty(option: string): boolean {
+        return this.draftSpecialties().includes(option);
+    }
+
+    toggleDraftSpecialty(option: string, checked: boolean): void {
+        const current = this.draftSpecialties().filter(item => item !== option);
+        const next = checked ? [...current, option] : current;
+        // Se conserva el orden de la lista oficial.
+        const ordered = this.specialtyOptions.filter(item => next.includes(item));
+        this.updateDraft('specialty', ordered.join(', '));
+    }
+
+    private draftSpecialties(): string[] {
+        return this.editDraft().specialty.split(',').map(item => item.trim()).filter(Boolean);
     }
 
     saveEdit(member: TeamMember): void {

@@ -35,8 +35,17 @@ export function formatInteger(value: number): string {
   return integer.format(value);
 }
 
+/** Porcentaje; los valores positivos menores a 1 % se muestran como "<1 %" en vez de "0 %". */
 export function formatPercent(value: number): string {
+  if (value > 0 && value < 0.01) {
+    return `<${percent.format(0.01)}`;
+  }
   return percent.format(value);
+}
+
+/** "1 servicio" / "3 servicios" con el número en formato es-CO. */
+export function formatCount(value: number, singular: string, plural: string): string {
+  return `${integer.format(value)} ${value === 1 ? singular : plural}`;
 }
 
 export function formatMinutes(value: number): string {

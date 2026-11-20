@@ -1,9 +1,15 @@
-<div class="services-scroll">
-  <app-servicio-card
-    *ngFor="let item of servicios"
-    [servicio]="item"
-    (editar)="editar.emit(item)"
-    (alternarEstado)="alternarEstado.emit(item)"
-    (eliminar)="eliminar.emit(item)">
-  </app-servicio-card>
+<div class="services-scroll" [attr.aria-busy]="cargando">
+  <p class="catalog-state" *ngIf="cargando">Cargando servicios…</p>
+  <p class="catalog-state" *ngIf="!cargando && servicios.length === 0">Aún no tienes servicios registrados.</p>
+
+  <ng-container *ngIf="!cargando">
+    <app-servicio-card
+      *ngFor="let item of servicios; trackBy: trackById"
+      [servicio]="item"
+      [ocupado]="ocupadoId !== null && ocupadoId === item.id"
+      (editar)="editar.emit(item)"
+      (alternarEstado)="alternarEstado.emit(item)"
+      (eliminar)="eliminar.emit(item)">
+    </app-servicio-card>
+  </ng-container>
 </div>

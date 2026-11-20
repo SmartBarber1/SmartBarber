@@ -16,8 +16,10 @@
 
 .crud-card {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  /* Dos columnas solo si cada una tiene al menos 380 px; si no, una debajo de otra. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
   width: 100%;
+  min-width: 0;
   max-width: 1150px;
   background: #fbf9f4; /* Fondo marfil/beige */
   border: 1px solid #d4c9b3;
@@ -26,14 +28,14 @@
   box-shadow: 0 15px 35px rgba(61, 50, 40, 0.12);
 }
 
-@media (max-width: 900px) {
-  .crud-card {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 600px) {
+  .crud-wrapper { padding: 1rem 0; }
+  .list-section { padding: 1.5rem 1rem; border-left: none; border-top: 1px solid #d4c9b3; }
 }
 
 /* Lado derecho: catálogo */
 .list-section {
+  min-width: 0;
   background: linear-gradient(145deg, #f5f1e8 0%, #eae3d2 100%);
   padding: 2.5rem 2rem;
   border-left: 1px solid #d4c9b3;

@@ -34,7 +34,7 @@
           [style.left.%]="tooltipLeft(activeIndex() ?? 0)">
           <strong>{{ point.label }}</strong>
           <span>{{ formatCurrency(point.revenue) }}</span>
-          <small>{{ formatInteger(point.services) }} servicios finalizados</small>
+          <small>{{ formatCount(point.services, 'servicio finalizado', 'servicios finalizados') }}</small>
         </div>
       }
     </div>

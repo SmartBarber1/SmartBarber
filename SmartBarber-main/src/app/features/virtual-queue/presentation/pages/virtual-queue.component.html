@@ -46,7 +46,7 @@
       </app-current-turn-card>
      
       <app-queue-actions [acceptingClients]="acceptingClients()" [actionLoading]="actionLoading()"
-        [hasCurrentTurn]="!!currentTurn()" (openQueue)="openQueue()" (nextCustomer)="nextCustomer()"
+        [hasCurrentTurn]="!!currentTurn()" [waitingCount]="waitingCount()" (openQueue)="openQueue()" (nextCustomer)="nextCustomer()"
         (completeTurn)="completeTurn()" (closeQueue)="closeQueue()">
       </app-queue-actions>
 

@@ -11,7 +11,14 @@ import { ServicioCardComponent } from '../servicio-card/servicio-card.component'
   styleUrls: ['./catalogo-servicios.component.css']
 })
 export class CatalogoServiciosComponent {
-  @Input() servicios: BarberServicePayload[] = [];
+    @Input() servicios: BarberServicePayload[] = [];
+  @Input() cargando = false;
+  /** Servicio con una acción en curso (activar, desactivar o eliminar). */
+  @Input() ocupadoId: number | string | null | undefined = null;
+
+  trackById(_: number, item: BarberServicePayload): unknown {
+    return item.id ?? item.name;
+  }
 
   @Output() editar = new EventEmitter<BarberServicePayload>();
   @Output() alternarEstado = new EventEmitter<BarberServicePayload>();

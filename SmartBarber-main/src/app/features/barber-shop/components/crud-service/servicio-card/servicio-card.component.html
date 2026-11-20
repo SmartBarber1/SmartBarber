@@ -1,6 +1,7 @@
 <div class="service-item-card" [class.inactive]="servicio.isActive === false">
   <div class="card-top">
     <h3 class="service-title">{{ servicio.name }}</h3>
+    <span class="status-tag" *ngIf="servicio.isActive === false">INACTIVO</span>
     <span class="offer-tag" *ngIf="servicio.offert">OFERTA</span>
   </div>
 
@@ -9,17 +10,30 @@
   <div class="card-meta">
     <span>⏱️ {{ servicio.duration }} min</span>
     <div class="price-box">
-      <span class="old-price" *ngIf="servicio.offert">${{ servicio.price }}</span>
-      <span class="main-price">${{ servicio.offert ? servicio.special_price : servicio.price }}</span>
+      <span class="old-price" *ngIf="servicio.offert">${{ servicio.price | number: '1.0-0' }}</span>
+      <span class="main-price">${{ (servicio.offert ? servicio.special_price : servicio.price) | number: '1.0-0' }}</span>
     </div>
   </div>
 
-  <!-- Botones de Modificar, Desactivar/Activar y Eliminar -->
-  <div class="card-actions">
-    <button class="btn-action-text edit" (click)="editar.emit()">✏️ Modificar</button>
-    <button class="btn-action-text toggle" (click)="alternarEstado.emit()">
-      {{ servicio.isActive !== false ? '🚫 Desactivar' : '✅ Activar' }}
-    </button>
-    <button class="btn-delete" (click)="eliminar.emit()">🗑️ Eliminar</button>
+  <!-- Confirmación en la misma tarjeta (sin ventanas del navegador) -->
+  <div class="delete-confirm" *ngIf="confirmando; else actions" role="group"
+       [attr.aria-label]="'Confirmar eliminación de ' + servicio.name">
+    <p>¿Eliminar <strong>{{ servicio.name }}</strong>? Esta acción no se puede deshacer.</p>
+    <div class="card-actions">
+      <button type="button" class="btn-action-text" (click)="confirmando = false" [disabled]="ocupado">Cancelar</button>
+      <button type="button" class="btn-delete" (click)="eliminar.emit()" [disabled]="ocupado">
+        {{ ocupado ? 'Eliminando…' : 'Sí, eliminar' }}
+      </button>
+    </div>
   </div>
+
+  <ng-template #actions>
+    <div class="card-actions">
+      <button type="button" class="btn-action-text edit" (click)="editar.emit()" [disabled]="ocupado">✏️ Modificar</button>
+      <button type="button" class="btn-action-text toggle" (click)="alternarEstado.emit()" [disabled]="ocupado">
+        {{ ocupado ? 'Guardando…' : (servicio.isActive !== false ? '🚫 Desactivar' : '✅ Activar') }}
+      </button>
+      <button type="button" class="btn-delete" (click)="confirmando = true" [disabled]="ocupado">🗑️ Eliminar</button>
+    </div>
+  </ng-template>
 </div>

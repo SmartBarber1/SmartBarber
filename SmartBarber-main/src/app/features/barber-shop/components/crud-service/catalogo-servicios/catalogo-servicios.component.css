@@ -10,3 +10,9 @@
   overflow-y: auto;
   padding-right: 0.25rem;
 }
+
+.catalog-state {
+  margin: 0.75rem 0;
+  color: #7a6a58;
+  font-size: 0.88rem;
+}

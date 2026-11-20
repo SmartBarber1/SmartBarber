@@ -33,6 +33,8 @@
 /* Header & Titulares Creativos */
 .creative-header {
   display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 2.5rem;
@@ -329,4 +331,29 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+/* Móvil: el título ocupa todo el ancho y "Sincronizar" queda debajo, alineado y completo. */
+.creative-header .header-content {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.btn-refresh-luxury {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .creative-header {
+    align-items: stretch;
+  }
+
+  .title-highlight {
+    font-size: 1.75rem;
+  }
+
+  .btn-refresh-luxury {
+    width: 100%;
+    justify-content: center;
+  }
 }

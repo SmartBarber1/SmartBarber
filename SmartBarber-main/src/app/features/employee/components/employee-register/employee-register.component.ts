@@ -1,3 +1,4 @@
+import { EMPLOYEE_SPECIALTIES } from '../../domain/models/team-member.model';
 import {
     CommonModule
 } from '@angular/common';
@@ -155,12 +156,7 @@ export class EmployeeRegisterComponent {
 
     readonly nameMaxLength = NAME_MAX_LENGTH;
 
-    readonly specialties = [
-        'Cortes',
-        'Barba',
-        'Colorimetría',
-        'Tratamientos capilares'
-    ] as const;
+    readonly specialties = EMPLOYEE_SPECIALTIES;
 
     readonly form =
         this.fb.nonNullable.group({

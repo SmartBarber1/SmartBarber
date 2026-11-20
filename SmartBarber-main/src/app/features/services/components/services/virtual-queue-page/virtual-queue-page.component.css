@@ -219,3 +219,73 @@ td {
     padding: 12px 9px;
   }
 }
+
+/* Mi turno */
+.my-turn-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 18px 20px;
+  border: 1px solid #e5d5bb;
+  border-left: 4px solid #8b683b;
+  border-radius: 12px;
+  background: #fbf7ef;
+}
+
+.my-turn-card h2 {
+  margin: 4px 0 6px;
+}
+
+.my-turn-card p {
+  margin: 2px 0;
+}
+
+.leave-box {
+  display: grid;
+  gap: 8px;
+  max-width: 320px;
+}
+
+.leave-button,
+.leave-actions .secondary {
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.leave-button {
+  border: 1px solid #e0a59b;
+  background: #fff;
+  color: #a33a2b;
+}
+
+.leave-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.leave-actions .secondary {
+  border: 1px solid #d8cbb8;
+  background: #fff;
+  color: #5b4b39;
+}
+
+.leave-question,
+.leave-error {
+  font-size: 13px;
+}
+
+.leave-error {
+  color: #a33a2b;
+}
+
+tr.mine td {
+  background: #fbf7ef;
+  font-weight: 600;
+}

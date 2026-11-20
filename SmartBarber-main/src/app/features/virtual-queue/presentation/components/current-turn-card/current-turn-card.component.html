@@ -27,8 +27,8 @@
     <div class="current-turn-content">
 
       <div class="turn-number">
-        <span>Reserva</span>
-        <strong>#{{ turn.customer.name }}</strong>
+        <span>Turno #{{ turn.position || 1 }}</span>
+        <strong>{{ turn.customer?.name || 'Cliente' }}</strong>
       </div>
 
       <div class="turn-details">
@@ -42,8 +42,20 @@
 
         <div class="detail-item">
           <span>Tipo de reserva</span>
-          <!-- <strong>{{ turn.reservationType }}</strong> -->
+          <strong>{{ typeLabel(turn.reservationType) }}</strong>
         </div>
+
+        <div class="detail-item detail-item--wide">
+          <span>Servicios</span>
+          <strong>{{ turn.services?.length ? turn.services!.join(', ') : 'Sin servicios registrados' }}</strong>
+        </div>
+
+        @if (turn.notes) {
+          <div class="detail-item detail-item--wide">
+            <span>Nota del cliente</span>
+            <strong class="turn-notes">{{ turn.notes }}</strong>
+          </div>
+        }
 
       </div>
 

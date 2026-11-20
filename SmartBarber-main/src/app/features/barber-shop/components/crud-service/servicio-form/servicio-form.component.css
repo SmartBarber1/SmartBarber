@@ -148,3 +148,17 @@
   color: #a33a2b;
   font-size: 0.78rem;
 }
+
+/* El formulario se adapta al ancho disponible */
+:host,
+.form-section,
+.input-group,
+.input-wrapper,
+.styled-input {
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .form-section { padding: 1.5rem 1rem; }
+  .form-row { grid-template-columns: 1fr; }
+}
