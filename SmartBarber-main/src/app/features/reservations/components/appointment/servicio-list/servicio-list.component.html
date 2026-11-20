@@ -7,7 +7,7 @@
   </div>
 
   <!-- Mensaje si no hay servicios -->
-  <div *ngIf="!loading && servicios.length === 0" class="alert alert-warning py-2 text-center">
+  <div *ngIf="!loading && servicios.length === 0" class="services-empty">
     <small>No hay servicios disponibles para esta barbería.</small>
   </div>
 
@@ -37,9 +37,9 @@
       </span>
 
       <span class="service-price-badge">
-        <span class="price-amount">COP {{ (servicio.special_price || servicio.price) | number }}</span>
+        <span class="price-amount">${{ (servicio.special_price || servicio.price) | number: '1.0-0' }}</span>
         <small class="old-price" *ngIf="servicio.offert && servicio.special_price && servicio.price > servicio.special_price">
-          <span class="visually-hidden">Precio anterior: </span>COP {{ servicio.price | number }}
+          <span class="visually-hidden">Precio anterior: </span>${{ servicio.price | number: '1.0-0' }}
         </small>
       </span>
     </label>

@@ -56,6 +56,13 @@ export class HorariosAtencionComponent implements OnInit {
 
   errorMessage = '';
 
+  /** Error del formulario, mostrado junto al botón de guardar. */
+  formError = '';
+
+  /** Confirmación de guardado (se oculta sola). */
+  successMessage = '';
+  private successTimer?: ReturnType<typeof setTimeout>;
+
   ngOnInit(): void {
     this.initForm();
     this.loadEmployees();
@@ -282,15 +289,24 @@ export class HorariosAtencionComponent implements OnInit {
     const formValue =
       this.horarioForm.getRawValue();
 
+    this.formError = '';
+    this.successMessage = '';
+
     if (
       formValue.horaInicio >=
       formValue.horaFin
     ) {
+      this.formError =
+        'La hora de inicio de la jornada debe ser anterior a la hora de finalización.';
+      return;
+    }
 
-      alert(
-        'La hora de inicio debe ser anterior a la hora de finalización.'
-      );
+    const tieneInicioAlmuerzo = Boolean(formValue.horaInicioAlmuerzo);
+    const tieneFinAlmuerzo = Boolean(formValue.horaFinAlmuerzo);
 
+    if (tieneInicioAlmuerzo !== tieneFinAlmuerzo) {
+      this.formError =
+        'Indica el inicio y el fin del almuerzo, o deja ambos vacíos.';
       return;
     }
 
@@ -300,11 +316,21 @@ export class HorariosAtencionComponent implements OnInit {
       formValue.horaInicioAlmuerzo >=
       formValue.horaFinAlmuerzo
     ) {
+      this.formError =
+        'El inicio del almuerzo debe ser anterior a su finalización.';
+      return;
+    }
 
-      alert(
-        'El inicio del almuerzo debe ser anterior a su finalización.'
-      );
-
+    // El almuerzo debe quedar dentro de la jornada laboral.
+    if (
+      tieneInicioAlmuerzo &&
+      (
+        formValue.horaInicioAlmuerzo < formValue.horaInicio ||
+        formValue.horaFinAlmuerzo > formValue.horaFin
+      )
+    ) {
+      this.formError =
+        `El almuerzo debe quedar dentro de la jornada (${formValue.horaInicio} a ${formValue.horaFin}).`;
       return;
     }
 
@@ -367,9 +393,9 @@ export class HorariosAtencionComponent implements OnInit {
 
         this.patchSchedule(response);
 
-        alert(
-          'Horario guardado correctamente.'
-        );
+        clearTimeout(this.successTimer);
+        this.successMessage = 'Horario guardado correctamente.';
+        this.successTimer = setTimeout(() => (this.successMessage = ''), 4000);
       },
 
       error: (error: unknown) => {
@@ -381,9 +407,8 @@ export class HorariosAtencionComponent implements OnInit {
           error
         );
 
-        alert(
-          'No fue posible guardar el horario.'
-        );
+        this.formError =
+          'No fue posible guardar el horario. Intenta de nuevo.';
       }
     });
   }

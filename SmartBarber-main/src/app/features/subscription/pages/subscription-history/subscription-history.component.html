@@ -50,7 +50,7 @@
         <div class="card-icon-box gold-accent">💎</div>
         <div class="card-info">
           <span class="card-label">Inversión Total</span>
-          <span class="card-value">${{ totalSpent | number: '1.2-2' }}</span>
+          <span class="card-value">${{ totalSpent | number: '1.0-0' }}</span>
         </div>
       </div>
     </section>
@@ -103,13 +103,13 @@
                   'chip-expired': item.status === 'EXPIRED' || item.status === 'DECLINED'
                 }">
                   <span class="chip-dot"></span>
-                  {{ item.status }}
+                  {{ statusLabel(item.status) }}
                 </span>
               </td>
               <td class="date-text">{{ item.startDate ? (item.startDate | date: 'dd/MM/yyyy') : 'N/A' }}</td>
               <td class="date-text">{{ item.expirationDate ? (item.expirationDate | date: 'dd/MM/yyyy') : 'N/A' }}</td>
-              <td class="price-text">${{ item.price | number: '1.2-2' }}</td>
-              <td class="date-text muted">{{ item.createdAt | date: 'mediumDate' }}</td>
+              <td class="price-text">${{ item.price | number: '1.0-0' }}</td>
+              <td class="date-text muted">{{ item.createdAt | date: 'dd/MM/yyyy' }}</td>
             </tr>
           </tbody>
         </table>

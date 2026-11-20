@@ -1,8 +1,8 @@
 <div class="calendar-widget">
   <div class="calendar-header-nav">
-    <button class="cal-nav-btn" type="button" (click)="cambioMes.emit(-1)">&lt;</button>
+    <button class="cal-nav-btn" type="button" aria-label="Mes anterior" [disabled]="esMesActual" (click)="cambioMes.emit(-1)">&lt;</button>
     <span class="cal-month-title">{{ mes.titulo }}</span>
-    <button class="cal-nav-btn" type="button" (click)="cambioMes.emit(1)">&gt;</button>
+    <button class="cal-nav-btn" type="button" aria-label="Mes siguiente" (click)="cambioMes.emit(1)">&gt;</button>
   </div>
   <div class="calendar-days-grid">
     <span class="day-label">L</span><span class="day-label">M</span><span class="day-label">M</span><span class="day-label">J</span><span class="day-label">V</span><span class="day-label">S</span><span class="day-label">D</span>
@@ -14,8 +14,10 @@
       class="cal-day-cell"
       [class.active-day]="selectedDia === d"
       [class.closed-day]="diasCerrados.has(d)"
-      [attr.title]="diasCerrados.has(d) ? 'La barbería no atiende este día' : null"
-      [attr.aria-label]="diasCerrados.has(d) ? d + ', la barbería no atiende' : null"
+      [class.past-day]="diasPasados.has(d)"
+      [disabled]="diasPasados.has(d)"
+      [attr.title]="diasPasados.has(d) ? 'Día pasado' : (diasCerrados.has(d) ? 'La barbería no atiende este día' : null)"
+      [attr.aria-label]="diasPasados.has(d) ? d + ', día pasado' : (diasCerrados.has(d) ? d + ', la barbería no atiende' : null)"
       type="button"
       (click)="diaSeleccionado.emit(d)"
     >

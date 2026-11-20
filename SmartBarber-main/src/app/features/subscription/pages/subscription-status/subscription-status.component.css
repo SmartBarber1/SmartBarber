@@ -897,3 +897,13 @@
     margin-bottom: 18px;
   }
 }
+
+/*
+ * La etiqueta va dentro del flujo (no superpuesta): así nunca tapa el texto
+ * "Suscripción para tu barbería", sea cual sea el ancho de la ventana.
+ */
+.plan-summary-box .popular-pill {
+  position: static;
+  align-self: flex-start;
+  margin-bottom: 14px;
+}

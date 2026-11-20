@@ -72,3 +72,18 @@
   color: #c4ab80;
   font-weight: bold;
 }
+/* Bloque de funciones futuras */
+.coming-soon-box { margin-top: 20px; opacity: 0.92; }
+.soon-tag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.coming-soon-note { margin: 12px 0 0; font-size: 12px; opacity: 0.75; }

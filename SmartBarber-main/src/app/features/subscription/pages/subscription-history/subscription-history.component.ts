@@ -6,6 +6,21 @@ import { SessionService } from '../../../../core/auth/services/session.service';
 import { FirebaseAuthService } from '../../../../core/auth/services/firebase-auth.service';
 import { environment } from '../../../../../environments/environment';
 
+/** Estados que corresponden a un pago aprobado. */
+const PAID_STATUSES: ReadonlySet<string> = new Set(['ACTIVE', 'APPROVED', 'EXPIRED']);
+
+/** Nombre corto en español de cada estado de la suscripción. */
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  ACTIVE: 'Activa',
+  APPROVED: 'Aprobada',
+  PENDING: 'Pendiente',
+  DECLINED: 'Rechazada',
+  EXPIRED: 'Vencida',
+  REFUNDED: 'Reembolsada',
+  CANCELED: 'Cancelada',
+  NOT_SUBSCRIPTION: 'Sin suscripción'
+};
+
 export interface SubscriptionHistoryItem {
   id: string;
   barbershopId?: string;
@@ -104,11 +119,18 @@ export class SubscriptionHistoryComponent implements OnInit, OnDestroy {
     return this.historyList.filter(item => item.status === 'ACTIVE' || item.status === 'APPROVED').length;
   }
 
+  /** Solo suman los periodos pagados: los pendientes, rechazados o reembolsados no. */
   get totalSpent(): number {
-    return this.historyList.reduce((acc, item) => {
+    return this.historyList
+      .filter(item => PAID_STATUSES.has(item.status))
+      .reduce((acc, item) => {
       const priceVal = Number(item.subscriptionPrice ?? item.price ?? 0);
       return acc + (isNaN(priceVal) ? 0 : priceVal);
     }, 0);
+  }
+
+    statusLabel(status: string): string {
+    return STATUS_LABELS[status] ?? status;
   }
 
   /** Repinta la vista de forma segura (necesario si la app corre sin zone.js). */

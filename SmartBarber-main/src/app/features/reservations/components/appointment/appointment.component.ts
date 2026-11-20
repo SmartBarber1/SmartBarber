@@ -85,8 +85,12 @@ export class AppointmentComponent implements OnInit {
   errorHorario: string = '';
   avisoOcupacion: string = '';
 
-  // Reserva
+    // Reserva
   isLoading: boolean = false;
+
+  /** Aviso dentro de la página (reemplaza las ventanas emergentes del navegador). */
+  aviso: { tipo: 'exito' | 'error'; texto: string } | null = null;
+  private avisoTimer?: ReturnType<typeof setTimeout>;
 
   // Estado interno del día/barbero consultado (permite recalcular slots sin volver al backend)
   private turnoActual: Turno | null = null;
@@ -235,7 +239,7 @@ export class AppointmentComponent implements OnInit {
 
     if (yaElegido) {
       if (this.selectedServicesIds.length <= 1) {
-        alert('Debes mantener al menos un servicio seleccionado.');
+        this.mostrarAviso('error', 'Debes mantener al menos un servicio seleccionado.');
         return;
       }
       this.selectedServicesIds = this.selectedServicesIds.filter(id => id !== servicio.id);
@@ -388,19 +392,20 @@ export class AppointmentComponent implements OnInit {
 
   crearReserva(): void {
     if (this.isLoading) return;
+    this.cerrarAviso();
 
     if (!this.currentUser.uid) {
-      alert('⚠️ El perfil de usuario aún se está sincronizando. Por favor espera un segundo.');
+      this.mostrarAviso('error', 'Tu perfil aún se está cargando. Espera un momento e inténtalo de nuevo.');
       return;
     }
 
     if (!this.selectedBarbero || !this.selectedHora || !this.selectedFecha) {
-      alert('Por favor selecciona un barbero, una fecha y un horario válido.');
+      this.mostrarAviso('error', 'Selecciona un barbero, una fecha y un horario disponible.');
       return;
     }
 
     if (this.selectedServicesIds.length === 0) {
-      alert('⚠️ Debes seleccionar al menos un servicio para la reserva.');
+      this.mostrarAviso('error', 'Selecciona al menos un servicio para la reserva.');
       return;
     }
 
@@ -414,7 +419,7 @@ export class AppointmentComponent implements OnInit {
     });
 
     if (!resultado.ok) {
-      alert(resultado.mensaje);
+      this.mostrarAviso('error', resultado.mensaje);
       return;
     }
 
@@ -425,15 +430,29 @@ export class AppointmentComponent implements OnInit {
     this.reservationService.createReservation(payload).subscribe({
       next: () => {
         this.isLoading = false;
-        alert('¡Reserva creada exitosamente!');
+        this.mostrarAviso('exito', '¡Reserva creada correctamente!');
         this.selectedHora = '';
         this.generarHorariosDisponibles(); // vuelve a leer la BD y marca el slot como ocupado
       },
       error: (err: any) => {
         this.isLoading = false;
         console.error('❌ Error al crear reserva:', err.status, err.error, '\nPayload enviado:', payload);
-        alert(mensajeErrorReserva(err));
+        this.mostrarAviso('error', mensajeErrorReserva(err));
       }
     });
+  }
+
+  cerrarAviso(): void {
+    clearTimeout(this.avisoTimer);
+    this.aviso = null;
+  }
+
+  /** Los avisos de éxito se ocultan solos; los de error quedan hasta cerrarlos. */
+  private mostrarAviso(tipo: 'exito' | 'error', texto: string): void {
+    clearTimeout(this.avisoTimer);
+    this.aviso = { tipo, texto };
+    if (tipo === 'exito') {
+      this.avisoTimer = setTimeout(() => (this.aviso = null), 6000);
+    }
   }
 }

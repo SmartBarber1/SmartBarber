@@ -62,14 +62,9 @@ export class NavbarComponent {
       fragment: 'opiniones'
     },
     {
-      label: 'Blog',
-      route: '/',
-      fragment: 'blog'
-    },
-    {
+      // SmartBarber no tiene canal de contacto: la opción lleva a reservar.
       label: 'Contacto',
-      route: '/',
-      fragment: 'reservar',
+      route: '/reservar',
       sublinks: [
         {
           label: 'Suscripción / Planes',

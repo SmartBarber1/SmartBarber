@@ -3,12 +3,12 @@
 
     <!-- Logo -->
     <a routerLink="/" class="logo" aria-label="SmartBarber, ir al inicio" (click)="closeMenu()">
-      <img src="/logo.png" alt="" class="logo-icon-img" />
+      <img src="/logo.png" alt="SmartBarber" class="logo-icon-img" />
 
       <div class="logo-text">
         SMARTBARBER
         <span class="logo-sub">
-          Barbería &amp; Salón desde 1992
+          Plataforma para barberías
         </span>
       </div>
     </a>
@@ -47,7 +47,7 @@
     <!-- Accesos de sesión (escritorio) -->
     <div class="auth-buttons-group">
       <a [routerLink]="['/auth/login']" class="btn nav-cta">
-        Inicio
+        Iniciar sesión
       </a>
       <a [routerLink]="['/auth/register']" class="btn nav-cta">
         Registro

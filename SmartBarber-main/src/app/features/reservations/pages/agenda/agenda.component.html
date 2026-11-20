@@ -1,9 +1,16 @@
 <div class="agenda-container">
   <header class="agenda-header">
     <div>
-      <span class="agenda-tag">✦ PANEL DE BARBERO</span>
-      <h1 class="agenda-title">Mi <span class="agenda-accent">Agenda</span></h1>
-      <p class="agenda-subtitle">Tus citas organizadas por día. Para confirmar, cancelar o calificar usa el historial de reservas.</p>
+      <span class="agenda-tag">✦ {{ isAdmin ? 'PANEL DE ADMINISTRACIÓN' : 'PANEL DE BARBERO' }}</span>
+      <h1 class="agenda-title" *ngIf="isAdmin; else barberTitle">Agenda de la <span class="agenda-accent">barbería</span></h1>
+      <ng-template #barberTitle>
+        <h1 class="agenda-title">Mi <span class="agenda-accent">Agenda</span></h1>
+      </ng-template>
+      <p class="agenda-subtitle">
+        {{ isAdmin
+          ? 'Las citas de todos los barberos organizadas por día. Para confirmar o cancelar usa el Historial General de Reservas.'
+          : 'Tus citas organizadas por día. Para confirmar o cancelar usa «Mis reservas».' }}
+      </p>
     </div>
     <button type="button" class="btn-refresh" (click)="load()">Sincronizar</button>
   </header>
@@ -25,7 +32,7 @@
 
   <main *ngIf="!isLoading && !errorMessage">
     <div *ngIf="days.length === 0" class="state-box">
-      {{ activeView === 'PROXIMAS' ? 'No tienes citas próximas.' : 'No hay citas anteriores.' }}
+      {{ activeView === 'PROXIMAS' ? (isAdmin ? 'No hay citas próximas en la barbería.' : 'No tienes citas próximas.') : 'No hay citas anteriores.' }}
     </div>
 
     <section class="day-group" *ngFor="let day of days">
@@ -49,7 +56,7 @@
             </span>
           </div>
 
-          <span class="status-chip" [ngClass]="statusClass(item.status)">{{ item.status }}</span>
+          <span class="status-chip" [ngClass]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
         </li>
       </ul>
     </section>

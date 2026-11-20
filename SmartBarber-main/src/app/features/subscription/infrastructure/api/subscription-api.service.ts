@@ -58,13 +58,13 @@ export class SubscriptionApiService extends SubscriptionRepository {
   }
 
   getActualBarbershopSubscription(
-    barberId: string
+    barbershopId: string
   ): Observable<ActualBarbershopSubscription> {
-    const id = barberId.trim();
+    const id = barbershopId.trim();
 
     if (!id) {
       return throwError(
-        () => new Error('Se requiere el ID del empleado para consultar la suscripción actual.')
+        () => new Error('Se requiere el ID de la barbería para consultar la suscripción actual.')
       );
     }
 
@@ -74,7 +74,7 @@ export class SubscriptionApiService extends SubscriptionRepository {
   }
 
   private readonly unsupported = {
-    current: 'La consulta heredada espera un modelo distinto al DTO de GET /subscription-barbershop-service/actual-subscription/{barberId}. Usa getActualBarbershopSubscription con el ID del empleado.',
+    current: 'La consulta heredada espera un modelo distinto al DTO de GET /subscription-barbershop-service/actual-subscription/{barberId}. Usa getActualBarbershopSubscription con el ID de la barbería.',
     plans: 'El catálogo del backend usa un DTO distinto al que espera el cliente legado de suscripciones.',
     change: 'El backend actual no documenta una operación para cambiar el plan de una suscripción.',
     cancel: 'El backend actual no documenta una operación para cancelar una suscripción.',

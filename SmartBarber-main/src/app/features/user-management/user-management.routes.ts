@@ -34,6 +34,9 @@ import {
 import {
     SearchEmployeeUseCase
 } from '../employee/application/use-cases/search-employee.use-case';
+import {
+    UpdateEmployeeUseCase
+} from '../employee/application/use-cases/update-employee.use-case';
 
 
 export const USER_MANAGEMENT_ROUTES:
@@ -64,7 +67,8 @@ export const USER_MANAGEMENT_ROUTES:
                 CreateEmployeeUseCase,
                 GetTeamUseCase,
                 ChangeEmployeeAccessUseCase,
-                SearchEmployeeUseCase
+                SearchEmployeeUseCase,
+                UpdateEmployeeUseCase
             ],
 
             loadComponent: () =>

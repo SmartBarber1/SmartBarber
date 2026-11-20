@@ -1,6 +1,8 @@
 
 import { Routes } from '@angular/router';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
+import { authGuard } from './core/auth/guards/auth.guard';
+import { roleGuard } from './core/auth/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -27,6 +29,10 @@ export const routes: Routes = [
       },
       {
         path: 'reservar',
+        // Solo los clientes reservan: sin sesión se pide iniciar sesión y
+        // los demás roles vuelven a su panel.
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['CLIENT'] },
         loadChildren: () =>
           import('./features/reservations/reservations.routes')
             .then(m => m.RESERVATION_ROUTES)
@@ -42,6 +48,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/authentication/authentication.routes')
             .then(m => m.AUTHENTICATION_ROUTES)
+      },
+      {
+        path: 'pagina-no-encontrada',
+        title: 'Página no encontrada | SmartBarber',
+        loadComponent: () =>
+          import('./features/landing/pages/not-found/not-found.component')
+            .then(m => m.NotFoundComponent)
       },
       {
         path: 'legal',
@@ -64,7 +77,8 @@ export const routes: Routes = [
         .then(m => m.PROFILE_ROUTES)
   },
   {
+    // Cualquier dirección inexistente muestra la página "Página no encontrada".
     path: '**',
-    redirectTo: ''
+    redirectTo: 'pagina-no-encontrada'
   }
 ];

@@ -15,7 +15,11 @@
                 </h1>
 
                 <p class="subtitle">
-                    Consulta la información de tu cuenta y actualiza los datos permitidos.
+                    {{
+                        canEditProfile()
+                            ? 'Consulta la información de tu cuenta y actualiza los datos permitidos.'
+                            : 'Consulta la información de tu cuenta.'
+                    }}
                 </p>
 
             </div>

@@ -134,9 +134,10 @@ export class SubscriptionDashboardComponent implements OnInit {
 
           if (
             this.subscriptionStatus().status === 'active' &&
-            session.barberId
+            session.barbershopId
           ) {
-            this.loadActualSubscription(session.barberId);
+            // El backend busca la suscripción por el id de la BARBERÍA, no del empleado.
+            this.loadActualSubscription(session.barbershopId);
           }
         },
         error: (error: unknown) => {
@@ -177,17 +178,18 @@ export class SubscriptionDashboardComponent implements OnInit {
     }
   }
 
-  private loadActualSubscription(barberId: string): void {
+  private loadActualSubscription(barbershopId: string): void {
     this.subscriptionDetailsLoading.set(true);
     this.subscriptionDetailsError.set('');
 
-    this.subscriptionApi.getActualBarbershopSubscription(barberId)
+    this.subscriptionApi.getActualBarbershopSubscription(barbershopId)
       .pipe(finalize(() => this.subscriptionDetailsLoading.set(false)))
       .subscribe({
         next: subscription => {
-          if (subscription.barberId !== barberId) {
+          // En la respuesta, "barberId" es el id de la barbería suscrita.
+          if (subscription.barberId !== barbershopId) {
             this.subscriptionDetailsError.set(
-              'La suscripción recibida no corresponde al empleado autenticado.'
+              'La suscripción recibida no corresponde a tu barbería.'
             );
             return;
           }

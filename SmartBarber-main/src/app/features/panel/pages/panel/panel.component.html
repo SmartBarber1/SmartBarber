@@ -502,11 +502,11 @@
                         </span>
 
                         <strong class="metric-value">
-                            —
+                            {{ homeData.todayTurns().loading ? '…' : homeData.todayTurns().data.length }}
                         </strong>
 
                         <small>
-                            Datos pendientes de integración
+                            {{ homeData.todayTurns().error || 'Reservas activas para hoy' }}
                         </small>
 
                     </article>
@@ -608,13 +608,22 @@
 
                             </div>
 
-                            <span class="card-link">
-                                Próximamente
-                            </span>
+                            <a *ngIf="summary()?.roleLabel !== 'Cliente'" routerLink="/panel/agenda" class="card-link">
+                                Ver agenda
+                            </a>
 
                         </div>
 
 
+                        <ul class="today-turns" *ngIf="homeData.todayTurns().data.length > 0; else noTurns">
+                            <li *ngFor="let turn of homeData.todayTurns().data" class="today-turn">
+                                <strong>{{ turn.start | date: 'HH:mm' }} – {{ turn.end | date: 'HH:mm' }}</strong>
+                                <span>{{ turn.barberName || 'Reserva' }}</span>
+                                <span class="today-turn__status">{{ turn.statusLabel }}</span>
+                            </li>
+                        </ul>
+
+                        <ng-template #noTurns>
                         <div class="empty-state">
 
                             <span class="empty-state-icon">
@@ -631,15 +640,19 @@
                             </span>
 
                             <strong>
-                                Tu agenda aparecerá aquí
+                                {{
+                                    homeData.todayTurns().loading
+                                        ? 'Cargando los turnos de hoy…'
+                                        : (homeData.todayTurns().error || 'No hay turnos para hoy')
+                                }}
                             </strong>
 
                             <p>
-                                Cuando se integre el servicio de reservas,
-                                podrás consultar los turnos y sus estados.
+                                Las reservas del día aparecen aquí con su hora y su estado.
                             </p>
 
                         </div>
+                        </ng-template>
 
                     </article>
 
@@ -671,39 +684,34 @@
 
                         <div class="schedule-placeholder">
 
-                            <div class="schedule-row">
-                                <span>Lunes</span>
-                                <span>Sin datos</span>
+                            <p class="schedule-note" *ngIf="homeData.workdays().data.length > 0">
+                                Jornada de lunes a domingo, excepto los días no laborables.
+                            </p>
+
+                            <div class="schedule-row" *ngFor="let day of homeData.workdays().data">
+                                <span>{{ day.name }}</span>
+                                <span>
+                                    {{
+                                        day.vacation
+                                            ? 'De vacaciones'
+                                            : (day.workday
+                                                ? day.workday + (day.lunch ? ' · almuerzo ' + day.lunch : '')
+                                                : 'Sin horario')
+                                    }}
+                                </span>
                             </div>
 
-                            <div class="schedule-row">
-                                <span>Martes</span>
-                                <span>Sin datos</span>
-                            </div>
-
-                            <div class="schedule-row">
-                                <span>Miércoles</span>
-                                <span>Sin datos</span>
-                            </div>
-
-                            <div class="schedule-row">
-                                <span>Jueves</span>
-                                <span>Sin datos</span>
-                            </div>
-
-                            <div class="schedule-row">
-                                <span>Viernes</span>
-                                <span>Sin datos</span>
-                            </div>
-
-                            <div class="schedule-row">
-                                <span>Sábado</span>
-                                <span>Sin datos</span>
-                            </div>
-
-                            <div class="schedule-row">
-                                <span>Domingo</span>
-                                <span>Por configurar</span>
+                            <div class="schedule-row" *ngIf="homeData.workdays().data.length === 0">
+                                <span>
+                                    {{
+                                        homeData.workdays().loading
+                                            ? 'Cargando horarios…'
+                                            : (homeData.workdays().error
+                                                || (summary()?.roleLabel === 'Cliente'
+                                                    ? 'Consulta el horario de cada barbero al reservar.'
+                                                    : 'Aún no hay horarios configurados.'))
+                                    }}
+                                </span>
                             </div>
 
                         </div>

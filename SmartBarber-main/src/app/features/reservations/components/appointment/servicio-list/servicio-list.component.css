@@ -112,3 +112,14 @@
   color: #a0aec0;
   text-decoration: line-through;
 }
+
+/* Aviso cuando la barbería no tiene servicios: con contraste suficiente */
+.services-empty {
+  padding: 10px 12px;
+  border: 1px solid #d9b26a;
+  border-radius: 8px;
+  background: #fff6e5;
+  color: #6b4a12;
+  text-align: center;
+  font-size: 13px;
+}

@@ -528,3 +528,41 @@ button:focus-visible {
         text-transform: uppercase;
     }
 }
+
+/* Edición de los datos del barbero */
+.row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.edit-row td {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.edit-form {
+    display: grid;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.edit-title {
+    margin: 0;
+}
+
+.edit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.edit-field {
+    display: grid;
+    gap: 4px;
+    font-size: 0.8rem;
+}
+
+.edit-field--wide {
+    grid-column: 1 / -1;
+}

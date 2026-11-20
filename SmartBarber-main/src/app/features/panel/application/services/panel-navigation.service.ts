@@ -102,7 +102,7 @@ export class PanelNavigationService {
             label: 'Mi perfil',
 
             description:
-              'Consulta y administra tu información personal.',
+              'Consulta tu información personal.',
 
             icon: 'profile',
 
@@ -264,7 +264,32 @@ export class PanelNavigationService {
             ],
 
             status:
-              'COMING_SOON',
+              'AVAILABLE',
+
+            visible:
+              true
+          },
+
+
+          {
+            id: 'barber-reservations',
+
+            label: 'Mis reservas',
+
+            description:
+              'Confirma o cancela las reservas que te asignaron.',
+
+            icon: 'history',
+
+            route:
+              '/panel/reservations-history',
+
+            roles: [
+              'BARBER'
+            ],
+
+            status:
+              'AVAILABLE',
 
             visible:
               true
@@ -398,7 +423,7 @@ export class PanelNavigationService {
             visible: false
           },
 {
-  id: 'agenda',
+  id: 'admin-agenda',
   label: 'Agenda de reservas',
   description: 'Historial, confirmación, cancelación y calificación de reservas.',
   icon: 'calendar',

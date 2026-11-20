@@ -161,8 +161,9 @@ export const PANEL_ROUTES: Routes = [
       {
   path: 'reservations-history',
   canActivate: [authGuard, roleGuard],
+  // El administrador ve toda la barbería; el barbero solo sus reservas.
   data: {
-    roles: ['ADMIN']
+    roles: ['ADMIN', 'BARBER']
   },
   loadComponent: () =>
     import('../reservations/pages/reservation-history-barber/reservation-history-barber.component')

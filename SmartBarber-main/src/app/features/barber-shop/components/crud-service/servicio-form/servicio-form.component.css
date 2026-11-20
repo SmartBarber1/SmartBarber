@@ -140,3 +140,11 @@
   box-shadow: 0 6px 16px rgba(89, 68, 53, 0.3);
   transform: translateY(-1px);
 }
+
+/* Error en línea bajo cada campo */
+.field-error {
+  display: block;
+  margin-top: 4px;
+  color: #a33a2b;
+  font-size: 0.78rem;
+}

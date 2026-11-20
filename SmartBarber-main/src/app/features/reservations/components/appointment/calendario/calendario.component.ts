@@ -22,9 +22,29 @@ export class CalendarioComponent implements OnChanges {
 
   mes: MesCalendario = construirMes(new Date());
 
+  /** Días del mes visible anteriores a hoy (no se pueden reservar). */
+  diasPasados: ReadonlySet<number> = new Set<number>();
+
+  /** El mes visible es el actual: no se puede retroceder a meses pasados. */
+  esMesActual = true;
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentDate']) {
       this.mes = construirMes(this.currentDate);
+      this.calcularDiasPasados();
     }
+  }
+
+  private calcularDiasPasados(): void {
+    const hoy = new Date();
+    const inicioHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).getTime();
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+
+    this.diasPasados = new Set(
+      this.mes.dias.filter(d => new Date(year, month, d).getTime() < inicioHoy)
+    );
+    this.esMesActual = year < hoy.getFullYear()
+      || (year === hoy.getFullYear() && month <= hoy.getMonth());
   }
 }

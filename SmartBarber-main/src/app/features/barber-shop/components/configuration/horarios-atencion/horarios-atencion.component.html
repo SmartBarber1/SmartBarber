@@ -501,6 +501,16 @@
                ACCIONES
           =================================================== -->
 
+          <div class="message error" *ngIf="formError" role="alert">
+            <span class="message-icon">⚠</span>
+            <span>{{ formError }}</span>
+          </div>
+
+          <div class="message success" *ngIf="successMessage" role="status">
+            <span class="message-icon">✓</span>
+            <span>{{ successMessage }}</span>
+          </div>
+
           <div class="form-actions">
 
             <button

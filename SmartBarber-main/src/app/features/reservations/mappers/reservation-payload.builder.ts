@@ -46,7 +46,7 @@ export function buildReservationPayload(input: PayloadInput): PayloadResult {
       barbershopId,
       reservationServiceId,
       startTime: `${input.fecha}T${input.hora}:00${OFFSET_COLOMBIA}`,
-      notes: 'Reserva creada desde Angular'
+      notes: ''
     }
   };
 }

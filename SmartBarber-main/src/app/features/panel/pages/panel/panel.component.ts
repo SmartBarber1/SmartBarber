@@ -37,6 +37,7 @@ import {
 } from '../../domain/models/panel-navigation.model';
 
 import { PanelNavigationService } from '../../application/services/panel-navigation.service';
+import { PanelHomeDataService } from '../../application/services/panel-home-data.service';
 import { BarbershopSubscriptionAccessService } from '../../../subscription/application/services/barbershop-subscription-access.service';
 
 
@@ -162,6 +163,10 @@ export class PanelComponent
 
   readonly summary =
     signal<PanelSummary | null>(null);
+
+  /** Turnos de hoy y jornadas del equipo para las tarjetas del Inicio. */
+  readonly homeData =
+    inject(PanelHomeDataService);
 
 
   ngOnInit(): void {
@@ -326,10 +331,13 @@ export class PanelComponent
 
     if (!session) {
       this.summary.set(null);
+      this.homeData.reset();
 
       return;
     }
 
+
+    this.homeData.load(session);
 
     this.summary.set({
 
@@ -615,14 +623,20 @@ export class PanelComponent
     }
 
 
-    return (
+    // Solo se marca la opción cuya ruta coincide de forma más específica con la
+    // dirección actual: /panel/subscription/status no marca también /panel/subscription.
+    const url = this.router.url.split(/[?#]/)[0];
+    const matches = (candidate: string | null | undefined): candidate is string =>
+      !!candidate && (url === candidate || url.startsWith(`${candidate}/`));
 
-      this.router.url === route ||
+    if (!matches(route)) {
+      return false;
+    }
 
-      this.router.url.startsWith(
-        `${route}/`
+    return !this.navigationGroups().some(group =>
+      group.items.some(item =>
+        matches(item.route) && item.route.length > route.length
       )
-
     );
   }
 

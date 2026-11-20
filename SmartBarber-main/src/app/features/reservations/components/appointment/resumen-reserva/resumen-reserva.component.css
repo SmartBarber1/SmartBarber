@@ -62,3 +62,8 @@
 .btn-confirmar:hover {
   background-color: #c29b68;
 }
+
+.btn-confirmar:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

@@ -72,7 +72,7 @@
         <div>
           <span>Vigente hasta</span>
           <strong>
-            {{ subscription.expirationDate ? (subscription.expirationDate | date:'mediumDate') : 'Sin fecha registrada' }}
+            {{ subscription.expirationDate ? (subscription.expirationDate | date:'dd/MM/yyyy') : 'Sin fecha registrada' }}
           </strong>
         </div>
       </div>

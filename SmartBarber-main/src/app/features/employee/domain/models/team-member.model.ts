@@ -20,3 +20,11 @@ export type AccessAction = 'BLOCK' | 'UNBLOCK';
 /** Longitud del motivo de bloqueo (la misma regla del backend, EY_005). */
 export const BLOCK_REASON_MIN = 5;
 export const BLOCK_REASON_MAX = 200;
+
+/** Datos que el administrador puede corregir de un barbero. */
+export interface EmployeeDataChange {
+    name: string;
+    cell: string;
+    /** Especialidades separadas por coma. */
+    specialty: string;
+}

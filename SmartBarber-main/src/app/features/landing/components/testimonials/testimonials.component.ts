@@ -21,10 +21,6 @@ export class TestimonialsComponent implements OnInit, OnDestroy {
       author: 'Felipe Ortega, cliente frecuente'
     },
     {
-      quote: 'Me hice un balayage y quedó exactamente como lo pedí. Ana es una crack, siempre recomendándola.',
-      author: 'Laura Méndez, cliente'
-    },
-    {
       quote: 'Ambiente cómodo, buena música y siempre puntuales con las citas. Un espacio que se siente como en casa.',
       author: 'David Salazar, cliente'
     }

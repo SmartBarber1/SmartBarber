@@ -1,5 +1,11 @@
 <div class="crud-wrapper">
 
+  <div *ngIf="aviso" class="page-notice" [class.page-notice--error]="aviso.tipo === 'error'"
+    [attr.role]="aviso.tipo === 'error' ? 'alert' : 'status'">
+    <span>{{ aviso.texto }}</span>
+    <button type="button" class="page-notice__close" (click)="cerrarAviso()" aria-label="Cerrar aviso">✕</button>
+  </div>
+
   <!-- Tarjeta dividida en 2 columnas -->
   <main class="crud-card">
 
@@ -18,11 +24,6 @@
         <span class="counter-badge">{{ servicesList.length }} registrados</span>
       </div>
 
-      <app-barberia-select
-        [barberias]="barberiasList"
-        [selectedId]="currentBarberiaId"
-        (barberiaSeleccionada)="onBarberiaSelected($event)">
-      </app-barberia-select>
 
       <app-catalogo-servicios
         [servicios]="servicesList"

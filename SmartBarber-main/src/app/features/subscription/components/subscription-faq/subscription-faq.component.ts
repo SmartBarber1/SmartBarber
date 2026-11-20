@@ -23,11 +23,11 @@ export class SubscriptionFAQComponent {
     },
     {
       question: '¿Tiene permanencia? ¿Puedo cancelar?',
-      answer: 'No tenemos cláusulas de permanencia obligatoria. Puedes cancelar o cambiar de plan en cualquier momento comunicándote con nuestro soporte.'
+      answer: 'No tenemos cláusulas de permanencia obligatoria. Puedes cancelar o cambiar de plan en cualquier momento desde la sección Suscripción y pagos de tu panel.'
     },
     {
       question: '¿Qué incluye exactamente cada plan?',
-      answer: 'Cada plan detalla sus beneficios específicos en las tarjetas de precios, abarcando desde gestión de citas y recordatorios por WhatsApp hasta múltiples sucursales y roles avanzados.'
+      answer: 'Cada plan detalla sus beneficios específicos en las tarjetas de precios, abarcando la gestión de citas, barberos, servicios, horarios y cola virtual. Las funciones marcadas como "Próximamente" aún no están disponibles.'
     },
     {
       question: '¿Dónde y en qué horario puedo usar mi membresía?',
@@ -39,9 +39,4 @@ export class SubscriptionFAQComponent {
     this.openIndex = this.openIndex === index ? null : index;
   }
 
-  openWhatsApp() {
-    const phoneNumber = '573000000000'; // Reemplaza con tu número de WhatsApp de soporte
-    const message = 'Hola, tengo dudas sobre cuál membresía elegir para mi barbería. ¿Me ayudan?';
-    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
-  }
 }

@@ -36,6 +36,7 @@ import {
 
 import {
     AccessAction,
+    EmployeeDataChange,
     TeamMember
 } from '../../domain/models/team-member.model';
 
@@ -111,6 +112,28 @@ export class EmployeeApiService
                 // Sin barberos, el backend responde "no encontrado".
                 catchError(error => isNotFound(error) ? of([]) : throwError(() => error))
             );
+    }
+
+    override updateEmployee(
+        member: TeamMember,
+        change: EmployeeDataChange
+    ): Observable<Employee> {
+        // PUT /employee-service/actualizar-empleado/{id} (solo ADMIN) espera el registro completo.
+        return this.http
+            .put<EmployeeResponse>(
+                `${this.baseUrl}/employee-service/actualizar-empleado/${encodeURIComponent(member.id)}`,
+                {
+                    barberiaId: member.barberiaId,
+                    userId: member.userId,
+                    document: member.document,
+                    documentType: member.documentType,
+                    email: member.email,
+                    name: change.name,
+                    cell: change.cell,
+                    specialty: change.specialty
+                }
+            )
+            .pipe(map(mapEmployeeResponse));
     }
 
     override getTeam(): Observable<TeamMember[]> {

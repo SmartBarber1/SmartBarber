@@ -273,6 +273,19 @@ export class UserManagementComponent {
             });
     }
 
+    /**
+     * Especialidades del barbero buscado. "Administrador" es el rol que se le
+     * registra al administrador como especialidad, no una especialidad real.
+     */
+    specialtiesText(employee: Employee): string {
+        const items = (employee.specialty ?? '')
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item && item.toLowerCase() !== 'administrador');
+
+        return items.length > 0 ? items.join(', ') : 'No disponible';
+    }
+
     documentLabel(employee: Employee): string {
         return employee.documentType === 'CE' ? 'C.E.' : 'C.C.';
     }

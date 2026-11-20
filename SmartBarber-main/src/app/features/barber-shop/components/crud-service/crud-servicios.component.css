@@ -64,3 +64,30 @@
   border-radius: 12px;
   font-weight: 700;
 }
+
+/* Avisos dentro de la página */
+.page-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #9cc2a5;
+  background: #edf7ef;
+  color: #23502e;
+  font-size: 0.9rem;
+}
+.page-notice--error {
+  border-color: #e0a59b;
+  background: #fbecea;
+  color: #8a2f22;
+}
+.page-notice__close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.9rem;
+}

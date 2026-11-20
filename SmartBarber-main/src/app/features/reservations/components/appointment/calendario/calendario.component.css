@@ -80,3 +80,15 @@
     rgba(166, 71, 62, 0.08) 4px 8px
   );
 }
+
+/* Días anteriores a hoy: no se pueden elegir */
+.cal-day-cell.past-day,
+.cal-day-cell:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.cal-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

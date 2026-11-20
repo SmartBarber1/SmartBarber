@@ -1,5 +1,5 @@
 <div class="input-group">
-  <label class="input-label">Horarios Disponibles para el {{ selectedFecha }}</label>
+  <label class="input-label">Horarios disponibles para el {{ selectedFecha ? (selectedFecha + 'T00:00:00' | date: 'dd/MM/yyyy') : '' }}</label>
 
   <!-- Estado de carga -->
   <small *ngIf="loading" class="text-muted">Cargando horarios...</small>

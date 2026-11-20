@@ -12,6 +12,7 @@ import {
 
 import {
     AccessAction,
+    EmployeeDataChange,
     TeamMember
 } from '../models/team-member.model';
 
@@ -50,6 +51,15 @@ export abstract class EmployeeRepository {
         action: AccessAction,
         reason: string | null
     ): Observable<TeamMember>;
+
+    /**
+     * Corrige el nombre, el celular y las especialidades de un barbero.
+     * Los demás datos (documento, correo, cuenta) se envían sin cambios.
+     */
+    abstract updateEmployee(
+        member: TeamMember,
+        change: EmployeeDataChange
+    ): Observable<Employee>;
 
     /** Barbero por número de documento, o null si no existe. */
     abstract findByDocument(

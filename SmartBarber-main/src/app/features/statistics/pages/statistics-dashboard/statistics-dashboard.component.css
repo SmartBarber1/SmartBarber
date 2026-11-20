@@ -812,3 +812,22 @@
     animation-duration: 1.5s;
   }
 }
+
+/*
+ * Las cifras nunca se parten en dos líneas: las tarjetas pasan a otra fila
+ * cuando no caben ($ 14.857.000 a unos 1000 px de ancho).
+ */
+.kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.kpi-value {
+  white-space: nowrap;
+  font-size: clamp(20px, 2.2vw, 30px);
+}
+
+/* La regla base permite cortar en cualquier carácter: aquí se anula para las cifras. */
+.kpi-card .kpi-value {
+  overflow-wrap: normal;
+  word-break: keep-all;
+}

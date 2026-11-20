@@ -140,9 +140,7 @@
         placeholder="Ej. Smart Barber"
       />
 
-      <small *ngIf="getFieldInvalid('nombre')">
-        El nombre es obligatorio.
-      </small>
+      <small *ngIf="fieldError('nombre') as msg" role="alert">{{ msg }}</small>
 
     </div>
 
@@ -157,8 +155,11 @@
         id="razonSocial"
         type="text"
         formControlName="razonSocial"
+        [attr.aria-invalid]="fieldError('razonSocial') ? true : null"
         placeholder="Ej. Smart Barber S.A.S."
       />
+
+        <small *ngIf="fieldError('razonSocial') as msg" role="alert">{{ msg }}</small>
 
     </div>
 
@@ -174,6 +175,7 @@
         <select
           id="tipoDocumento"
           formControlName="tipoDocumento"
+        [attr.aria-invalid]="fieldError('tipoDocumento') ? true : null"
         >
 
           <option value="">
@@ -194,6 +196,8 @@
 
         </select>
 
+        <small *ngIf="fieldError('tipoDocumento') as msg" role="alert">{{ msg }}</small>
+
       </div>
 
 
@@ -207,8 +211,11 @@
           id="documento"
           type="text"
           formControlName="documento"
+        [attr.aria-invalid]="fieldError('documento') ? true : null"
           placeholder="Ej. 900123456-1"
         />
+
+        <small *ngIf="fieldError('documento') as msg" role="alert">{{ msg }}</small>
 
       </div>
 
@@ -225,8 +232,13 @@
         id="telefono"
         type="text"
         formControlName="telefono"
+        [attr.aria-invalid]="fieldError('telefono') ? true : null"
         placeholder="Ej. 3001234567"
+        inputmode="numeric"
+        maxlength="10"
       />
+
+        <small *ngIf="fieldError('telefono') as msg" role="alert">{{ msg }}</small>
 
     </div>
 
@@ -241,8 +253,11 @@
         id="ubicacion"
         type="text"
         formControlName="ubicacion"
+        [attr.aria-invalid]="fieldError('ubicacion') ? true : null"
         placeholder="Ej. Soacha, Cundinamarca"
       />
+
+        <small *ngIf="fieldError('ubicacion') as msg" role="alert">{{ msg }}</small>
 
     </div>
 
@@ -256,9 +271,12 @@
       <textarea
         id="descripcion"
         formControlName="descripcion"
+        [attr.aria-invalid]="fieldError('descripcion') ? true : null"
         rows="3"
         placeholder="Describe brevemente tu establecimiento..."
       ></textarea>
+
+        <small *ngIf="fieldError('descripcion') as msg" role="alert">{{ msg }}</small>
 
     </div>
 

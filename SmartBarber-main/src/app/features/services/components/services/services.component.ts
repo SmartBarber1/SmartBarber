@@ -29,12 +29,12 @@ export class ServicesComponent {
     {
       icon: 'users',
       title: 'Control de Equipos',
-      description: 'Administra tus barberos, asignación de sillones, horarios de trabajo y cálculo de comisiones.'
+      description: 'Registra a tus barberos, define sus horarios de trabajo y bloquea o desbloquea su acceso.'
     },
     {
       icon: 'catalog',
       title: 'Catálogo de Servicios',
-      description: 'Personaliza tu menú de cortes, precios, duraciones estimadas y ofertas especiales para tus clientes.'
+      description: 'Personaliza tu menú de cortes, precios y duraciones estimadas para tus clientes.'
     },
     {
       icon: 'chart',

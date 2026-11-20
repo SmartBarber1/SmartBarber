@@ -14,5 +14,7 @@ export class ResumenReservaComponent {
   @Input() total: number = 0;
   @Input() duracion: number = 30;
   @Input() cargando: boolean = false;
+  /** Falta elegir servicio, barbero u hora: el botón queda deshabilitado. */
+  @Input() incompleto: boolean = false;
   @Output() confirmar = new EventEmitter<void>();
 }

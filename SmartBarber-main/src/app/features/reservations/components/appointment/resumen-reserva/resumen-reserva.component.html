@@ -1,7 +1,7 @@
 <div class="service-summary-box">
   <div class="summary-row" *ngFor="let s of servicios">
     <span class="service-title-sum">{{ s.name | uppercase }}</span>
-    <span class="service-price-sum">COP {{ (s.special_price || s.price) | number }}</span>
+    <span class="service-price-sum">${{ (s.special_price || s.price) | number: '1.0-0' }}</span>
   </div>
   <div class="summary-sub">
     <span>{{ duracion }} min</span>
@@ -9,10 +9,10 @@
   <hr class="summary-divider" />
   <div class="summary-total-row">
     <strong>Total</strong>
-    <strong class="total-price">COP {{ total | number }}</strong>
+    <strong class="total-price">${{ total | number: '1.0-0' }}</strong>
   </div>
 </div>
 
-<button class="btn-confirmar" type="button" (click)="confirmar.emit()" [disabled]="cargando">
+<button class="btn-confirmar" type="button" (click)="confirmar.emit()" [disabled]="cargando || incompleto">
   {{ cargando ? 'Procesando...' : 'Confirmar Reserva' }}
 </button>

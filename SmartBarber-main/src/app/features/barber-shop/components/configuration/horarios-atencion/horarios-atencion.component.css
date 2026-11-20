@@ -856,3 +856,11 @@
     padding: 12px 0;
   }
 }
+/* Confirmación de guardado dentro de la página */
+.message.success {
+  margin-bottom: 0.5rem;
+  border: 1px solid #9cc2a5;
+  background: #edf7ef;
+  color: #23502e;
+  font-size: .9rem;
+}

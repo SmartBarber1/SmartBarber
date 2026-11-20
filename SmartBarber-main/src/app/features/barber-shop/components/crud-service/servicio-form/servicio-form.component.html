@@ -18,10 +18,12 @@
           id="name"
           type="text"
           formControlName="name"
+            [attr.aria-invalid]="errorDe('name') ? true : null"
           class="styled-input"
           placeholder="Ej. Corte clasico"
         />
       </div>
+        <small class="field-error" *ngIf="errorDe('name') as msg" role="alert">{{ msg }}</small>
     </div>
 
     <!-- Descripción -->
@@ -33,10 +35,12 @@
           id="description"
           type="text"
           formControlName="description"
+            [attr.aria-invalid]="errorDe('description') ? true : null"
           class="styled-input"
           placeholder="Ej. Corte moderno con degradado"
         />
       </div>
+        <small class="field-error" *ngIf="errorDe('description') as msg" role="alert">{{ msg }}</small>
     </div>
 
     <!-- Fila doble: Duración y Precio Regular -->
@@ -49,10 +53,12 @@
             id="duration"
             type="number"
             formControlName="duration"
+            [attr.aria-invalid]="errorDe('duration') ? true : null"
             class="styled-input"
             placeholder="15"
           />
         </div>
+        <small class="field-error" *ngIf="errorDe('duration') as msg" role="alert">{{ msg }}</small>
       </div>
 
       <div class="input-group">
@@ -63,10 +69,12 @@
             id="price"
             type="number"
             formControlName="price"
+            [attr.aria-invalid]="errorDe('price') ? true : null"
             class="styled-input"
             placeholder="1000"
           />
         </div>
+        <small class="field-error" *ngIf="errorDe('price') as msg" role="alert">{{ msg }}</small>
       </div>
     </div>
 
@@ -85,10 +93,12 @@
           id="special_price"
           type="number"
           formControlName="special_price"
+            [attr.aria-invalid]="errorDe('special_price') ? true : null"
           class="styled-input"
           placeholder="800"
         />
       </div>
+        <small class="field-error" *ngIf="errorDe('special_price') as msg" role="alert">{{ msg }}</small>
     </div>
 
     <!-- ID de Barbería (oculto) -->

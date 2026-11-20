@@ -67,16 +67,45 @@ export class ServicioFormComponent implements OnChanges {
     }
   }
 
+  /** Se intentó enviar: a partir de aquí se muestran los errores de todos los campos. */
+  intentoEnvio = false;
+
   onSubmit(): void {
+    this.intentoEnvio = true;
     if (this.serviceForm.invalid) {
-      alert('⚠️ Por favor completa todos los campos del servicio correctamente.');
+      this.serviceForm.markAllAsTouched();
       return;
     }
     this.guardar.emit(this.serviceForm.value as ServicioFormValue);
   }
 
+  /** Mensaje de error del campo, o null si es válido o aún no se ha tocado. */
+  errorDe(campo: string): string | null {
+    const control = this.serviceForm.get(campo);
+    if (!control || control.valid || !(control.touched || this.intentoEnvio)) {
+      return null;
+    }
+    const e = control.errors ?? {};
+    switch (campo) {
+      case 'name':
+        return e['required'] ? 'Escribe el nombre del servicio.' : 'El nombre debe tener al menos 3 caracteres.';
+      case 'description':
+        return 'Escribe una descripción del servicio.';
+      case 'duration':
+        return e['required'] ? 'Indica la duración en minutos.' : 'La duración debe ser de al menos 5 minutos.';
+      case 'price':
+        return e['required'] ? 'Indica el precio del servicio.' : 'El precio no puede ser negativo.';
+      case 'special_price':
+        return 'El precio de oferta debe ser mayor que 0.';
+      default:
+        return 'Revisa este campo.';
+    }
+  }
+
   /** Lo llama el padre después de crear con éxito */
   reset(): void {
+    this.intentoEnvio = false;
+    this.serviceForm.markAsUntouched();
     this.serviceForm.patchValue({
       barberiaId: this.barberiaId,
       name: '',

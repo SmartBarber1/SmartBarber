@@ -16,6 +16,16 @@ export interface AgendaDay {
 
 const INACTIVE_STATUSES = ['CANCELLED', 'EXPIRED', 'DECLINED', 'COMPLETED'];
 
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  PENDING: 'Pendiente',
+  CONFIRMED: 'Confirmada',
+  IN_PROGRESS: 'En atención',
+  COMPLETED: 'Finalizada',
+  CANCELLED: 'Cancelada',
+  WAITING: 'En espera',
+  NO_SHOW: 'No asistió'
+};
+
 @Component({
   selector: 'app-agenda',
   standalone: true,
@@ -42,6 +52,15 @@ export class AgendaComponent implements OnInit {
   upcomingDays: AgendaDay[] = [];
   pastDays: AgendaDay[] = [];
 
+  /** El administrador ve la agenda de toda la barbería; el barbero, la suya. */
+  statusLabel(status: string): string {
+    return STATUS_LABELS[status] ?? status;
+  }
+
+  get isAdmin(): boolean {
+    return this.sessionService.currentSession?.role === 'ADMIN';
+  }
+
   ngOnInit(): void {
     this.load();
   }
@@ -57,7 +76,8 @@ export class AgendaComponent implements OnInit {
     if (s?.role === 'ADMIN') {
       return { type: 'barbershop', id: s?.barbershopId };
     }
-    return { type: 'employee', id: s?.employeeId };
+    // En la sesión el id del empleado se guarda como barberId.
+    return { type: 'employee', id: s?.barberId ?? s?.employeeId };
   }
 
   setView(view: AgendaView): void {

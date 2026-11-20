@@ -42,7 +42,7 @@ footer .logo-sub {
 /* --- ESTRUCTURA DE LA GRILLA MÁS COMPACTA --- */
 .footer-grid {
   display: grid; 
-  grid-template-columns: 1.2fr 1fr 1fr 1.1fr; 
+  grid-template-columns: 1.6fr 1fr; 
   gap: 24px; /* 👈 Reducido de 40px a 24px para juntar las columnas */
   padding-bottom: 25px; /* 👈 Reducido a la mitad */
 }

@@ -8,6 +8,22 @@ import { mensajeErrorReserva } from '../../utils/http-error.utils';
 
 export type BarberHistoryTab = 'EMPLOYEE' | 'BARBER';
 
+/**
+ * Calificar una reserva le corresponde al cliente (POST /reservation-review-service/
+ * crear-resena-reserva); el barbero y el administrador no pueden hacerlo.
+ */
+const RATING_ENABLED = false;
+
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  PENDING: 'Pendiente',
+  CONFIRMED: 'Confirmada',
+  IN_PROGRESS: 'En atención',
+  COMPLETED: 'Finalizada',
+  CANCELLED: 'Cancelada',
+  WAITING: 'En espera',
+  NO_SHOW: 'No asistió'
+};
+
 export interface UnifiedReservationItem {
   id: string;
   source: BarberHistoryTab;
@@ -47,8 +63,11 @@ export class ReservationHistoryBarberComponent implements OnInit {
   // BARBER   -> todas las reservas de la barbería de la sesión (/reservation-service/barber/{barbershopId})
   activeTab: BarberHistoryTab = 'EMPLOYEE';
 
-  // La barbería se reconoce automáticamente desde la sesión
+    // La barbería se reconoce automáticamente desde la sesión
   barbershopId = '';
+
+  /** El barbero solo ve y gestiona sus propias reservas. */
+  isBarber = false;
 
   barberos: SelectOption[] = [];
   selectedEmployeeId = '';
@@ -77,7 +96,20 @@ export class ReservationHistoryBarberComponent implements OnInit {
   }
 
   private async init(): Promise<void> {
+    const session = this.sessionService.currentSession;
+    this.isBarber = session?.role === 'BARBER';
     this.barbershopId = this.resolveBarbershopId();
+
+    if (this.isBarber) {
+      this.activeTab = 'EMPLOYEE';
+      if (!session?.barberId) {
+        this.historyList = [];
+        this.isLoading = false;
+        this.errorMessage = 'No se encontró el identificador del barbero en la sesión actual.';
+        this.cdr.markForCheck();
+        return;
+      }
+    }
 
     if (!this.barbershopId) {
       this.historyList = [];
@@ -112,7 +144,12 @@ export class ReservationHistoryBarberComponent implements OnInit {
       this.barberos = [];
     }
 
-    if (this.barberos.length > 0) {
+    // El barbero siempre consulta sus propias reservas.
+    const ownId = this.isBarber ? this.sessionService.currentSession?.barberId ?? '' : '';
+    if (ownId) {
+      this.selectedEmployeeId = ownId;
+      await this.loadSelectedEmployee();
+    } else if (this.barberos.length > 0) {
       this.selectedEmployeeId = this.barberos[0].id;
       await this.loadSelectedEmployee();
     }
@@ -172,6 +209,10 @@ export class ReservationHistoryBarberComponent implements OnInit {
   barberName(employeeId?: string): string {
     if (!employeeId) return '-';
     return this.barberos.find((b) => b.id === employeeId)?.name ?? `${employeeId.slice(0, 8)}…`;
+  }
+
+  statusLabel(status: string): string {
+    return STATUS_LABELS[status] ?? status;
   }
 
   get tabTitle(): string {
@@ -268,7 +309,7 @@ export class ReservationHistoryBarberComponent implements OnInit {
   }
 
   canRate(item: UnifiedReservationItem): boolean {
-    return item.status === 'COMPLETED';
+    return RATING_ENABLED && item.status === 'COMPLETED';
   }
 
   hasActions(item: UnifiedReservationItem): boolean {

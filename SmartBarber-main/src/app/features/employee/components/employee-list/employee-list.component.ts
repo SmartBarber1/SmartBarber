@@ -32,6 +32,14 @@ import {
 } from '../../application/use-cases/change-employee-access.use-case';
 
 import {
+    EmployeeChangeErrors,
+    EMPLOYEE_NAME_MAX,
+    EMPLOYEE_SPECIALTY_MAX,
+    UpdateEmployeeUseCase,
+    normalizeChange,
+    validateChange
+} from '../../application/use-cases/update-employee.use-case';
+import {
     EmployeeAccessError
 } from '../../domain/errors/employee-access.error';
 
@@ -39,6 +47,7 @@ import {
     AccessAction,
     AccountStatus,
     BLOCK_REASON_MAX,
+    EmployeeDataChange,
     TeamMember
 } from '../../domain/models/team-member.model';
 
@@ -53,6 +62,11 @@ const LIST_ERROR_MESSAGES = {
 const ACCESS_ERROR_MESSAGES = {
     HTTP_401: 'Tu sesión expiró. Vuelve a iniciar sesión para gestionar el equipo.',
     DEFAULT: 'No fue posible cambiar el acceso del barbero. Inténtalo nuevamente.'
+} as const;
+
+const EDIT_ERROR_MESSAGES = {
+    HTTP_401: 'Tu sesión expiró. Vuelve a iniciar sesión para editar el barbero.',
+    DEFAULT: 'No fue posible guardar los datos del barbero. Inténtalo nuevamente.'
 } as const;
 
 const STATUS_LABELS: Record<AccountStatus, string> = {
@@ -92,6 +106,9 @@ export class EmployeeListComponent implements OnChanges {
     private readonly changeAccess =
         inject(ChangeEmployeeAccessUseCase);
 
+    private readonly updateEmployee =
+        inject(UpdateEmployeeUseCase);
+
     private readonly destroyRef =
         inject(DestroyRef);
 
@@ -122,6 +139,16 @@ export class EmployeeListComponent implements OnChanges {
     readonly reasonError = signal<string | null>(null);
 
     readonly reasonMax = BLOCK_REASON_MAX;
+
+    readonly nameMax = EMPLOYEE_NAME_MAX;
+    readonly specialtyMax = EMPLOYEE_SPECIALTY_MAX;
+
+    /** Barbero cuyos datos se están editando. */
+    readonly editingId = signal<string | null>(null);
+    readonly editDraft = signal<EmployeeDataChange>({ name: '', cell: '', specialty: '' });
+    /** Errores por campo; se muestran después de intentar guardar. */
+    readonly editErrors = signal<EmployeeChangeErrors>({});
+    readonly savingEdit = signal(false);
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['barberiaId']) {
@@ -234,6 +261,76 @@ export class EmployeeListComponent implements OnChanges {
             });
     }
 
+    canEditData(member: TeamMember): boolean {
+        return this.updateEmployee.canEdit(member);
+    }
+
+    isEditing(member: TeamMember): boolean {
+        return this.editingId() === member.id;
+    }
+
+    startEdit(member: TeamMember): void {
+        this.feedback.set(null);
+        this.pendingChange.set(null);
+        this.editErrors.set({});
+        this.editDraft.set({
+            name: member.name,
+            cell: member.cell,
+            specialty: member.specialty
+        });
+        this.editingId.set(member.id);
+    }
+
+    cancelEdit(): void {
+        this.editingId.set(null);
+        this.editErrors.set({});
+    }
+
+    updateDraft(field: keyof EmployeeDataChange, value: string): void {
+        this.editDraft.update(draft => ({ ...draft, [field]: value }));
+        if (Object.keys(this.editErrors()).length > 0) {
+            this.editErrors.set(validateChange(normalizeChange(this.editDraft())));
+        }
+    }
+
+    saveEdit(member: TeamMember): void {
+        if (this.savingEdit()) {
+            return;
+        }
+
+        const errors = validateChange(normalizeChange(this.editDraft()));
+        this.editErrors.set(errors);
+        if (Object.keys(errors).length > 0) {
+            return;
+        }
+
+        this.savingEdit.set(true);
+        this.updateEmployee
+            .execute(member, this.editDraft())
+            .pipe(
+                finalize(() => this.savingEdit.set(false)),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe({
+                next: updated => {
+                    this.employees.update(list =>
+                        list.map(item => item.id === member.id
+                            ? { ...item, name: updated.name, cell: updated.cell, specialty: updated.specialty }
+                            : item)
+                    );
+                    this.editingId.set(null);
+                    this.feedback.set({
+                        kind: 'success',
+                        text: `Se actualizaron los datos de ${updated.name}.`
+                    });
+                },
+                error: error => this.feedback.set({
+                    kind: 'error',
+                    text: toApiError(error, EDIT_ERROR_MESSAGES).message
+                })
+            });
+    }
+
     statusLabel(member: TeamMember): string {
         return STATUS_LABELS[member.status];
     }
@@ -246,11 +343,16 @@ export class EmployeeListComponent implements OnChanges {
         return member.documentType === 'CE' ? 'C.E.' : 'C.C.';
     }
 
+    /**
+     * Especialidades del miembro. Al administrador se le registra "Administrador"
+     * como especialidad: eso es su rol (ya se muestra bajo el nombre), no una especialidad.
+     */
     specialtiesOf(member: TeamMember): string[] {
         return member.specialty
             .split(',')
             .map(item => item.trim())
-            .filter(Boolean);
+            .filter(Boolean)
+            .filter(item => !(member.role === 'ADMIN' && item.toLowerCase() === 'administrador'));
     }
 
     formatCell(cell: string): string {
