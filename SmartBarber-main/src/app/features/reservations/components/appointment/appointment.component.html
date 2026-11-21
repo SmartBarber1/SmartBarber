@@ -50,7 +50,10 @@
           [barberos]="barberosFiltrados"
           [selected]="selectedBarbero"
           [locked]="!!reprogramando"
-          (barberoSeleccionado)="onBarberoSelect($event)">
+          [loading]="cargandoBarberos"
+          [error]="errorBarberos"
+          (barberoSeleccionado)="onBarberoSelect($event)"
+          (reintentar)="reintentarBarberos()">
         </app-barbero-list>
 
         <p class="reschedule-services" *ngIf="reprogramando as cita">

@@ -1,4 +1,4 @@
-<div class="barberos-grid" role="group" aria-label="Barberos disponibles">
+<div class="barberos-grid" role="group" *ngIf="!loading && !error" aria-label="Barberos disponibles">
   <button
     type="button"
     *ngFor="let barbero of barberos"
@@ -22,4 +22,13 @@
   </button>
 </div>
 
-<p class="barbers-empty" *ngIf="barberos.length === 0">Esta barbería no tiene barberos disponibles para reservar.</p>
+<p class="barbers-empty" *ngIf="loading" aria-busy="true">Cargando barberos…</p>
+
+<div class="barbers-empty barbers-empty--error" *ngIf="!loading && error" role="alert">
+  <span>{{ error }}</span>
+  <button type="button" class="barbers-retry" (click)="reintentar.emit()">Reintentar</button>
+</div>
+
+<p class="barbers-empty" *ngIf="!loading && !error && barberos.length === 0">
+  Esta barbería aún no tiene barberos disponibles para reservar. Prueba con otra barbería o vuelve más tarde.
+</p>

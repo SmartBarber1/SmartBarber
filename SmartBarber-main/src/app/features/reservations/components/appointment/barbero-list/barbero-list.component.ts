@@ -14,5 +14,10 @@ export class BarberoListComponent {
   @Input() selected: Barbero | null = null;
   /** Solo se puede usar el barbero elegido (al reprogramar una cita). */
   @Input() locked = false;
+  /** Consultando los barberos de la barbería. */
+  @Input() loading = false;
+  /** Motivo por el que no se pudieron consultar (null si no hubo error). */
+  @Input() error: string | null = null;
   @Output() barberoSeleccionado = new EventEmitter<Barbero>();
+  @Output() reintentar = new EventEmitter<void>();
 }

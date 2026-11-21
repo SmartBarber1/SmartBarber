@@ -74,6 +74,8 @@ export class AppointmentComponent implements OnInit {
   // Sede y barberos
   barberias: Barberia[] = [];
   barberosFiltrados: Barbero[] = [];
+  cargandoBarberos = false;
+  errorBarberos: string | null = null;
   selectedBarberiaId: string = '';
   selectedBarbero: Barbero | null = null;
 
@@ -161,8 +163,12 @@ export class AppointmentComponent implements OnInit {
     if (!barberiaId) return;
 
     // Solo barberos reservables: activos y con rol de barbero (no bloqueados ni el administrador).
+    this.cargandoBarberos = true;
+    this.errorBarberos = null;
     this.reservationService.getBookableBarbers(barberiaId).subscribe({
       next: (res: any) => {
+        if (this.selectedBarberiaId !== barberiaId) return; // respuesta de otra barbería
+        this.cargandoBarberos = false;
         this.barberosFiltrados = extraerLista(res).map(toBarbero);
 
         // Ningún barbero queda elegido por defecto: el cliente lo escoge. Solo
@@ -176,7 +182,12 @@ export class AppointmentComponent implements OnInit {
         }
       },
       error: (err: any) => {
+        if (this.selectedBarberiaId !== barberiaId) return;
         console.error('Error al cargar empleados para la barbería:', err);
+        this.cargandoBarberos = false;
+        this.errorBarberos = toUserMessage(err, {
+          DEFAULT: 'No fue posible consultar los barberos de esta barbería.'
+        });
         this.barberosFiltrados = [];
         this.selectedBarbero = null;
         this.slotsHorarios = [];
@@ -255,6 +266,12 @@ export class AppointmentComponent implements OnInit {
       this.cargarDiasNoLaborables(barberiaId);
       this.cargarEmpleados(barberiaId);
       this.cargarServicios(barberiaId);
+    }
+  }
+
+  reintentarBarberos(): void {
+    if (this.selectedBarberiaId) {
+      this.cargarEmpleados(this.selectedBarberiaId);
     }
   }
 
