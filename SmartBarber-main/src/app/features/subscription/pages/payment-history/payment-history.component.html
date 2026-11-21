@@ -250,7 +250,7 @@
                 </th>
 
                 <th scope="col">
-                  Referencia de transacción
+                  Referencia
                 </th>
 
                 <th scope="col">
@@ -323,9 +323,18 @@
 
 
                   <td data-label="Concepto">
-
-                    {{ payment.description }}
-
+                    <strong>{{ payment.description }}</strong>
+                    @if (payment.periodStart && payment.periodEnd && payment.status === 'PAID') {
+                      <small class="concept-detail">
+                        Vigencia: {{ formatDate(payment.periodStart) }} – {{ formatDate(payment.periodEnd) }}
+                      </small>
+                    }
+                    @if (payment.discount && payment.discount > 0) {
+                      <small class="concept-detail">
+                        Precio {{ formatCurrency(payment.subtotal ?? 0, payment.currency) }} ·
+                        descuento {{ formatCurrency(payment.discount, payment.currency) }}
+                      </small>
+                    }
                   </td>
 
                 </tr>
@@ -391,11 +400,9 @@
     <div class="back-link-wrapper">
 
       <a
-        routerLink="../change-plan"
+        routerLink="/panel/subscription"
         class="back-link">
-
-        Volver a gestión de plan
-
+        Volver a suscripción
       </a>
 
     </div>

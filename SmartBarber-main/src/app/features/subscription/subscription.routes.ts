@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 import { SubscriptionApiService } from './infrastructure/api/subscription-api.service';
+import { PaymentApiService } from './infrastructure/api/payment-api.service';
+import { PaymentRepository } from './domain/repositories/payment.repository';
+import { GetPaymentHistoryUseCase } from './application/use-cases/get-payment-history.use-case';
 
 export const SUBSCRIPTION_ROUTES: Routes = [
   {
@@ -24,14 +27,13 @@ export const SUBSCRIPTION_ROUTES: Routes = [
   },
   {
     path: 'payment-history',
-    data: {
-      title: 'Historial de pagos',
-      description: 'Consulta los pagos relacionados con el plan de tu barbería.',
-      availability: 'El historial detallado de pagos estará disponible próximamente.'
-    },
+    providers: [
+      GetPaymentHistoryUseCase,
+      { provide: PaymentRepository, useClass: PaymentApiService }
+    ],
     loadComponent: () =>
-      import('./pages/subscription-module/subscription-module.component')
-        .then(m => m.SubscriptionModuleComponent)
+      import('./pages/payment-history/payment-history.component')
+        .then(m => m.PaymentHistoryComponent)
   },
   {
   path: 'subscription-history',

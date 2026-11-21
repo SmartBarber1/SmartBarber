@@ -524,3 +524,14 @@ tbody tr:hover {
 .back-link:hover {
   color: #e6d2b4;
 }
+/* Detalle del concepto: vigencia y descuento bajo el nombre del plan. */
+.concept-detail {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.reference {
+  word-break: break-all;
+}

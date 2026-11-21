@@ -11,6 +11,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { toUserMessage } from '../../../../core/errors/api-error.mapper';
+
 import {
     GetPaymentHistoryUseCase
 } from '../../application/use-cases/get-payment-history.use-case';
@@ -339,33 +341,8 @@ export class PaymentHistoryComponent implements OnInit {
     private getErrorMessage(
         error: unknown
     ): string {
-        const response = error as {
-            error?: {
-                code?: string;
-                message?: string;
-            };
-        };
-
-        switch (response.error?.code) {
-            case 'SUBSCRIPTION_NOT_FOUND':
-                return (
-                    'No se encontró la suscripción de la barbería.'
-                );
-
-            case 'PAYMENT_HISTORY_UNAVAILABLE':
-                return (
-                    'No fue posible consultar el historial de pagos.'
-                );
-
-            case 'UNAUTHORIZED':
-                return (
-                    'No tienes autorización para consultar el historial de pagos.'
-                );
-
-            default:
-                return (
-                    'No fue posible cargar el historial de pagos.'
-                );
-        }
+        return toUserMessage(error, {
+            NETWORK: 'No hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.'
+        });
     }
 }

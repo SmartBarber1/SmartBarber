@@ -55,6 +55,8 @@ export const BACKEND_ERROR_MESSAGES: Readonly<Record<string, string>> = {
     SB_005: 'Ya tienes una suscripción activa, pendiente de pago o aprobada. Espera a que termine ese proceso antes de solicitar otra.',
     SB_006: 'El tipo de operación de la suscripción no es válido.',
     SB_007: 'La barbería ya tiene una suscripción activa.',
+    SB_008: 'Solo el administrador de la barbería puede consultar su historial de pagos.',
+    SB_009: 'Revisa los filtros: la fecha inicial no puede ser posterior a la final.',
 
     // Planes
     ST_001: 'Ese plan ya existe.',

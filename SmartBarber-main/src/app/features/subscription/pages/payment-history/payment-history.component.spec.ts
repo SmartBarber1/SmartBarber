@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ComponentFixture,
   TestBed
@@ -480,11 +481,9 @@ describe(
 
         executeSpy.and.returnValue(
           throwError(
-            () => ({
-              error: {
-                code:
-                  'PAYMENT_HISTORY_UNAVAILABLE'
-              }
+            () => new HttpErrorResponse({
+              status: 400,
+              error: { code: 'SB_008', message: 'forbidden' }
             })
           )
         );
@@ -503,7 +502,7 @@ describe(
           component.errorMessage()
         )
           .toBe(
-            'No fue posible consultar el historial de pagos.'
+            'Solo el administrador de la barbería puede consultar su historial de pagos.'
           );
 
       }

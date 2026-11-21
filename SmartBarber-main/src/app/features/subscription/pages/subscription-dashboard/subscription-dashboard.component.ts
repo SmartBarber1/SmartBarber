@@ -72,11 +72,11 @@ export class SubscriptionDashboardComponent implements OnInit {
     },
     {
       title: 'Historial de pagos',
-      description: 'La consulta detallada de pagos aún no está disponible.',
+      description: 'Consulta los pagos de tu plan: valor, estado, referencia y vigencia.',
       route: 'payment-history',
       icon: '▤',
-      state: 'Próximamente',
-      available: false
+      state: 'Disponible',
+      available: true
     },
   ];
 
