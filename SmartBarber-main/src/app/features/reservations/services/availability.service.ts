@@ -50,25 +50,27 @@ export class AvailabilityService {
 
   /**
    * GET /schedule-service/empleado/{idEmpleado}.
-   * Se guarda en caché (también cuando no tiene horario). 404/409 = sin horario configurado.
+   * Solo se guarda en caché un horario encontrado: "sin horario" (404/409 o
+   * respuesta vacía) se vuelve a consultar, porque el administrador puede
+   * configurarlo mientras el cliente está reservando.
    */
   private obtenerSchedule(b: Barbero): Observable<ScheduleResultado> {
     if (this.scheduleCache.has(b.id)) {
-      const cacheado = this.scheduleCache.get(b.id);
-      return of<ScheduleResultado>({ schedule: cacheado, fallo: false, sinHorario: cacheado === null });
+      return of<ScheduleResultado>({ schedule: this.scheduleCache.get(b.id), fallo: false, sinHorario: false });
     }
 
     return this.reservationService.getScheduleById(b.id).pipe(
       map((res: any): ScheduleResultado => {
         const raw = res?.data ?? res;
         const tieneDatos = !!raw && (!Array.isArray(raw) || raw.length > 0);
-        const schedule = tieneDatos ? res : null;
-        this.scheduleCache.set(b.id, schedule);
-        return { schedule, fallo: false, sinHorario: !tieneDatos };
+        if (!tieneDatos) {
+          return { schedule: null, fallo: false, sinHorario: true };
+        }
+        this.scheduleCache.set(b.id, res);
+        return { schedule: res, fallo: false, sinHorario: false };
       }),
       catchError((err: any) => {
         if (err?.status === 404 || err?.status === 409) {
-          this.scheduleCache.set(b.id, null);
           return of<ScheduleResultado>({ schedule: null, fallo: false, sinHorario: true });
         }
         console.error('No se pudo cargar el horario del barbero:', err?.status);

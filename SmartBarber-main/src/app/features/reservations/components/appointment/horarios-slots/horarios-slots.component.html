@@ -7,7 +7,11 @@
   <!-- Error o barbero sin turno -->
   <small *ngIf="!loading && error" class="text-danger">{{ error }}</small>
 
-  <div class="slots-container" *ngIf="!loading">
+  <small *ngIf="!loading && !error && slots.length === 0" class="text-muted">
+    No hay franjas para este día. Elige otra fecha.
+  </small>
+
+  <div class="slots-container" *ngIf="!loading && slots.length" role="group" aria-label="Franjas horarias">
     <button
       type="button"
       *ngFor="let slot of slots"
@@ -15,9 +19,11 @@
       [class.active]="selectedHora === slot.hora"
       [class.disabled]="!slot.disponible"
       [disabled]="!slot.disponible"
+      [attr.aria-pressed]="selectedHora === slot.hora"
       (click)="horaSeleccionada.emit(slot)"
     >
-      {{ slot.hora }} {{ !slot.disponible ? '(' + slot.motivoOcupado + ')' : '' }}
+      <span class="slot-hora">{{ slot.hora }}</span>
+      <span class="slot-motivo" *ngIf="!slot.disponible">{{ slot.motivoOcupado }}</span>
     </button>
   </div>
 </div>

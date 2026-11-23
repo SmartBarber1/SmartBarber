@@ -2,6 +2,9 @@ import { RangoOcupado, SlotHorario } from '../models/reservation.model';
 import { EstadoBarbero, Turno } from '../models/schedule.model';
 import { ahoraEnMinutos, hoyColombia, horaAMinutos, isoAMinutosLocal, minutosAHora } from './time.utils';
 
+/** Separación entre franjas reservables, en minutos. */
+export const INTERVALO_FRANJA_MIN = 60;
+
 /** Acepta objeto o lista, distintos nombres de campo y turnos por día de la semana. */
 export function extraerTurno(schedule: any, fecha: string): Turno | null {
   const raw = schedule?.data ?? schedule;
@@ -82,8 +85,9 @@ export function construirSlots(
   const diaPasado = fecha < hoy; // formato YYYY-MM-DD: la comparación de texto es válida
   const ahora = ahoraEnMinutos();
 
+  // Franjas cada hora desde el inicio de la jornada (ej. 6:00, 7:00, 8:00...).
   const slots: SlotHorario[] = [];
-  for (let min = start; min + 30 <= end; min += 30) {
+  for (let min = start; min + INTERVALO_FRANJA_MIN <= end; min += INTERVALO_FRANJA_MIN) {
     const pasado = diaPasado || (esHoy && min <= ahora);
     const noCabe = min + duracion > end;
     // Choca si el servicio completo [min, min + duracion) se cruza con una reserva existente o con el almuerzo

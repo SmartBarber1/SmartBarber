@@ -127,6 +127,9 @@ export class AppointmentComponent implements OnInit {
   private ocupadosActuales: RangoOcupado[] = [];
 
   ngOnInit(): void {
+    // El servicio de disponibilidad vive toda la sesión: al entrar se descartan
+    // horarios en caché que el administrador pudo crear o cambiar después.
+    this.availability.clearCache();
     this.actualizarMes();
     this.cargarBarberias();
     this.cargarCitas();
