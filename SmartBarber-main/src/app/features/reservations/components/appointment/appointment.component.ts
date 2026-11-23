@@ -127,6 +127,13 @@ export class AppointmentComponent implements OnInit {
   cargandoCitas = false;
   errorCitas = '';
   citaOcupadaId: string | null = null;
+  /** Cita que el cliente está por cancelar (diálogo de confirmación). */
+  citaPorCancelar: CitaCliente | null = null;
+  /**
+   * Resultado de la cancelación: queda en pantalla hasta que el cliente pulse
+   * "Aceptar", así no se pierde si el aviso está lejos de la lista de citas.
+   */
+  resultadoCancelacion: { tipo: 'exito' | 'error'; titulo: string; texto: string } | null = null;
   /** Cita que se está reprogramando: barbería, barbero y servicios quedan fijos. */
   reprogramando: CitaCliente | null = null;
   /** Barbero que se debe seleccionar cuando termine de cargar la lista. */
@@ -621,21 +628,61 @@ export class AppointmentComponent implements OnInit {
     });
   }
 
+  /** Pide confirmación antes de cancelar (diálogo en la página). */
   cancelarCita(cita: CitaCliente): void {
-    if (this.citaOcupadaId || !window.confirm('¿Seguro que deseas cancelar esta cita?')) return;
+    if (this.citaOcupadaId) return;
+    this.resultadoCancelacion = null;
+    this.citaPorCancelar = cita;
+  }
+
+  volverDeCancelar(): void {
+    if (this.citaOcupadaId) return;
+    this.citaPorCancelar = null;
+  }
+
+  /** Cancela la cita confirmada y muestra el resultado hasta que el cliente lo acepte. */
+  confirmarCancelacion(): void {
+    const cita = this.citaPorCancelar;
+    if (!cita || this.citaOcupadaId) return;
 
     this.citaOcupadaId = cita.id;
     this.reservationService.cancelReservation(cita.id).subscribe({
       next: () => {
         this.citaOcupadaId = null;
-        this.mostrarAviso('exito', 'Cita cancelada.');
+        this.citaPorCancelar = null;
+        // La cita sale de la lista de inmediato; luego se confirma con el servidor.
+        this.citas = this.citas.filter(item => item.id !== cita.id);
+        this.resultadoCancelacion = {
+          tipo: 'exito',
+          titulo: 'Cita cancelada',
+          texto: `Cancelaste tu cita del ${this.formatoCita(cita.start)} en ${cita.barbershopName}. `
+            + 'No cuenta como inasistencia y te enviamos la confirmación por correo.'
+        };
         this.cargarCitas();
         if (this.selectedBarbero && this.selectedFecha) this.generarHorariosDisponibles();
       },
       error: err => {
         this.citaOcupadaId = null;
-        this.mostrarAviso('error', toUserMessage(err, { DEFAULT: 'No fue posible cancelar la cita.' }));
+        this.citaPorCancelar = null;
+        this.resultadoCancelacion = {
+          tipo: 'error',
+          titulo: 'No se pudo cancelar la cita',
+          texto: toUserMessage(err, { DEFAULT: 'No fue posible cancelar la cita. Inténtalo nuevamente.' })
+        };
+        // El estado pudo cambiar (por ejemplo, la barbería ya la canceló).
+        this.cargarCitas();
       }
+    });
+  }
+
+  /** "Aceptar": cierra y limpia el aviso de la cancelación. */
+  aceptarResultadoCancelacion(): void {
+    this.resultadoCancelacion = null;
+  }
+
+  private formatoCita(fecha: Date): string {
+    return fecha.toLocaleString('es-CO', {
+      weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit'
     });
   }
 

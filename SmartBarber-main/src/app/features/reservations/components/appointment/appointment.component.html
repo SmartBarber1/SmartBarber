@@ -20,6 +20,40 @@
       (reintentar)="cargarCitas()">
     </app-mis-citas>
 
+    <!-- Confirmar cancelación y resultado (se limpia al pulsar Aceptar) -->
+    <div class="dialog-backdrop" *ngIf="citaPorCancelar || resultadoCancelacion">
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"
+           *ngIf="citaPorCancelar as cita; else resultado">
+        <h3 id="dialog-title">¿Cancelar esta cita?</h3>
+        <p>
+          {{ cita.start | date: "EEEE d 'de' MMMM, h:mm a" }} en <strong>{{ cita.barbershopName }}</strong>.
+          Cancelar a tiempo no cuenta como inasistencia.
+        </p>
+        <div class="dialog__actions">
+          <button type="button" class="dialog__btn" (click)="volverDeCancelar()" [disabled]="citaOcupadaId !== null">
+            Volver
+          </button>
+          <button type="button" class="dialog__btn dialog__btn--danger" (click)="confirmarCancelacion()"
+                  [disabled]="citaOcupadaId !== null">
+            {{ citaOcupadaId ? 'Cancelando…' : 'Sí, cancelar' }}
+          </button>
+        </div>
+      </div>
+
+      <ng-template #resultado>
+        <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dialog-result-title"
+             *ngIf="resultadoCancelacion as res" [class.dialog--error]="res.tipo === 'error'">
+          <h3 id="dialog-result-title">{{ res.titulo }}</h3>
+          <p>{{ res.texto }}</p>
+          <div class="dialog__actions">
+            <button type="button" class="dialog__btn dialog__btn--primary" (click)="aceptarResultadoCancelacion()">
+              Aceptar
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
     <!-- Inasistencias vigentes y restricciones por barbería (RF-85) -->
     <app-penalty-status [standings]="estadosPenalizacion"></app-penalty-status>
 
