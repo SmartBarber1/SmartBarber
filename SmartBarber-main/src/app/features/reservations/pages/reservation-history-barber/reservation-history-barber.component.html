@@ -161,6 +161,9 @@
                   <button type="button" class="btn-outline" *ngIf="canMarkNoShow(item)"
                           [disabled]="busyId === item.id" (click)="markNoShow(item)">No asistió</button>
 
+                  <button type="button" class="btn-outline" *ngIf="canRevertNoShow(item)"
+                          [disabled]="busyId === item.id" (click)="revertNoShow(item)">Corregir inasistencia</button>
+
                   <button type="button" class="btn-danger" *ngIf="canCancel(item)"
                           [disabled]="busyId === item.id" (click)="cancel(item)">Cancelar</button>
 

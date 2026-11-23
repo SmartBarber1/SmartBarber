@@ -2,7 +2,7 @@
   <header class="citas__header">
     <h3 id="mis-citas-title">Mis próximas citas</h3>
     <span class="citas__hint">
-      Puedes cancelar o reprogramar hasta {{ avisoMinutos }} minutos antes de la cita.
+      Cancelar a tiempo no cuenta como inasistencia. Cada barbería define con cuánta anticipación puedes hacerlo.
     </span>
   </header>
 
@@ -28,19 +28,22 @@
         <span class="cita__status" [attr.data-status]="cita.status">{{ cita.statusLabel }}</span>
 
         <div class="cita__actions" *ngIf="cita.modifiable; else locked">
-          <button type="button" class="citas__btn"
+          <button type="button" class="citas__btn" *ngIf="cita.reschedulable"
                   [disabled]="busyId !== null || (reprogramandoId !== null && reprogramandoId !== cita.id)"
                   (click)="reprogramar.emit(cita)">
             {{ cita.id === reprogramandoId ? 'Reprogramando…' : 'Reprogramar' }}
           </button>
-          <button type="button" class="citas__btn citas__btn--danger"
+          <button type="button" class="citas__btn citas__btn--danger" *ngIf="cita.cancelable"
                   [disabled]="busyId !== null || reprogramandoId !== null"
                   (click)="cancelar.emit(cita)">
             {{ busyId === cita.id ? 'Cancelando…' : 'Cancelar' }}
           </button>
+          <span class="cita__note" *ngIf="cita.cancelable">Hasta {{ cita.cancelNoticeHours }} h antes</span>
         </div>
         <ng-template #locked>
-          <span class="cita__locked">Ya no se puede modificar</span>
+          <span class="cita__locked">
+            Ya pasó el límite de {{ cita.cancelNoticeHours }} h para cancelar. Si no puedes asistir, avisa a la barbería.
+          </span>
         </ng-template>
       </li>
     </ul>

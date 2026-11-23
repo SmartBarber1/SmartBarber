@@ -6,6 +6,11 @@ import { ReservationService } from '../../services/reservation.service';
 import { ReservationHistoryItem } from '../../models/reservation.model';
 import { mensajeErrorReserva } from '../../utils/http-error.utils';
 import { toUserMessage } from '../../../../core/errors';
+import { PenaltyApiService } from '../../../penalty/infrastructure/api/penalty-api.service';
+import { DEFAULT_PENALTY_POLICY } from '../../../penalty/domain/models/penalty.model';
+
+/** Plazo para que el administrador corrija una inasistencia (PEN-14). */
+const NO_SHOW_CORRECTION_MS = 48 * 3_600_000;
 
 export type BarberHistoryTab = 'EMPLOYEE' | 'BARBER';
 
@@ -38,6 +43,8 @@ export interface UnifiedReservationItem {
   startTime: string;
   duration?: number;
   creationDate?: string;
+  /** Última modificación (para una inasistencia, cuándo se marcó). */
+  updatedDate?: string;
   customerId?: string;
   employeeId?: string;
 }
@@ -64,6 +71,7 @@ export class ReservationHistoryBarberComponent implements OnInit {
   private readonly reservationService = inject(ReservationService);
   private readonly sessionService = inject(SessionService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly penaltyApi = inject(PenaltyApiService);
 
   // EMPLOYEE -> reservas del barbero seleccionado (/reservation-service/employee/{employeeId})
   // BARBER   -> todas las reservas de la barbería de la sesión (/reservation-service/barber/{barbershopId})
@@ -74,6 +82,10 @@ export class ReservationHistoryBarberComponent implements OnInit {
 
   /** El barbero solo ve y gestiona sus propias reservas. */
   isBarber = false;
+  /** Solo el administrador corrige inasistencias marcadas por error. */
+  isAdmin = false;
+  /** Minutos de tolerancia de la barbería antes de poder marcar "No asistió" (RF-82). */
+  toleranceMinutes = DEFAULT_PENALTY_POLICY.toleranceMinutes;
 
   barberos: SelectOption[] = [];
   selectedEmployeeId = '';
@@ -104,7 +116,15 @@ export class ReservationHistoryBarberComponent implements OnInit {
   private async init(): Promise<void> {
     const session = this.sessionService.currentSession;
     this.isBarber = session?.role === 'BARBER';
+    this.isAdmin = session?.role === 'ADMIN';
     this.barbershopId = this.resolveBarbershopId();
+
+    if (this.barbershopId) {
+      this.penaltyApi.policyOf(this.barbershopId).subscribe(policy => {
+        this.toleranceMinutes = policy.toleranceMinutes;
+        this.cdr.markForCheck();
+      });
+    }
 
     if (this.isBarber) {
       this.activeTab = 'EMPLOYEE';
@@ -287,6 +307,7 @@ export class ReservationHistoryBarberComponent implements OnInit {
       startTime: item.startTime || item.date || new Date().toISOString(),
       duration: item.duration || 0,
       creationDate: item.creationDate || item.createdAt || new Date().toISOString(),
+      updatedDate: item.updatedDate || undefined,
       customerId: item.customerId,
       employeeId: item.employeeId
     };
@@ -338,14 +359,44 @@ export class ReservationHistoryBarberComponent implements OnInit {
     return ['CONFIRMED', 'IN_PROGRESS'].includes(item.status) && this.hasStarted(item);
   }
 
-  /** El cliente no llegó: pendiente o confirmada, y ya pasó la hora. */
+  /**
+   * El cliente no llegó (PEN-01): solo una cita agendada y confirmada, y una
+   * vez pasada la hora de inicio más la tolerancia de la barbería.
+   */
   canMarkNoShow(item: UnifiedReservationItem): boolean {
-    return ['PENDING', 'CONFIRMED'].includes(item.status) && this.hasStarted(item);
+    const start = new Date(item.startTime).getTime();
+    return item.status === 'CONFIRMED'
+      && item.reservationType !== 'VIRTUAL_QUEUE'
+      && !isNaN(start)
+      && start + this.toleranceMinutes * 60_000 <= Date.now();
+  }
+
+  /** El administrador corrige un "No asistió" dentro de las 48 horas (PEN-14). */
+  canRevertNoShow(item: UnifiedReservationItem): boolean {
+    if (!this.isAdmin || item.status !== 'NO_SHOW') return false;
+    const markedAt = new Date(item.updatedDate || item.startTime).getTime();
+    return !isNaN(markedAt) && markedAt + NO_SHOW_CORRECTION_MS >= Date.now();
   }
 
   hasActions(item: UnifiedReservationItem): boolean {
     return this.canConfirm(item) || this.canCancel(item) || this.canComplete(item)
-      || this.canMarkNoShow(item) || this.canRate(item);
+      || this.canMarkNoShow(item) || this.canRevertNoShow(item) || this.canRate(item);
+  }
+
+  async revertNoShow(item: UnifiedReservationItem): Promise<void> {
+    const reason = window.prompt('Motivo de la corrección (obligatorio, entre 5 y 200 caracteres):')?.trim() ?? '';
+    if (!reason) return;
+    if (reason.length < 5 || reason.length > 200) {
+      this.feedback = 'El motivo debe tener entre 5 y 200 caracteres.';
+      this.cdr.markForCheck();
+      return;
+    }
+    await this.runAction(
+      item,
+      () => this.penaltyApi.revertNoShow(item.id, reason),
+      'CANCELLED',
+      'Inasistencia corregida: ya no cuenta para el cliente y, si causó una restricción, esta se levantó.'
+    );
   }
 
   async complete(item: UnifiedReservationItem): Promise<void> {
@@ -358,12 +409,12 @@ export class ReservationHistoryBarberComponent implements OnInit {
   }
 
   async markNoShow(item: UnifiedReservationItem): Promise<void> {
-    if (!window.confirm('¿Confirmas que el cliente no se presentó a esta reserva?')) return;
+    if (!window.confirm('¿Confirmas que el cliente no se presentó? Cuenta para la política de inasistencias de la barbería y se le avisará.')) return;
     await this.runAction(
       item,
       () => this.reservationService.markNoShow(item.id),
       'NO_SHOW',
-      'Inasistencia registrada.'
+      'Inasistencia registrada. El cliente recibió el aviso con su conteo.'
     );
   }
 

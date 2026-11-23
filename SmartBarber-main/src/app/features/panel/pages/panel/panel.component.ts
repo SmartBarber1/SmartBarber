@@ -1053,7 +1053,11 @@ export class PanelComponent
 
 
       chart:
-        'M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3M20 16V6'
+        'M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3M20 16V6',
+
+
+      shield:
+        'M12 3 5 6v6c0 4.4 3 7.9 7 9 4-1.1 7-4.6 7-9V6l-7-3ZM9 12l2 2 4-4'
     };
 
 

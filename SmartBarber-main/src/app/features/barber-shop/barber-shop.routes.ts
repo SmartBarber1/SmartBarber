@@ -70,30 +70,13 @@ export const BARBER_SHOP_ROUTES: Routes = [
 
 
     // ============================================================
-    // POLÍTICAS DE CANCELACIÓN
+    // POLÍTICAS: ahora en /panel/politicas (features/penalty)
     // ============================================================
 
     {
         path: 'politicas-cancelacion',
-
-        canActivate: [
-            authGuard,
-            roleGuard
-        ],
-
-        data: {
-            roles: [
-                'ADMIN'
-            ]
-        },
-
-        loadComponent: () =>
-            import(
-                './components/cancellation-policies/cancellation-policies.component'
-            ).then(
-                m =>
-                    m.CancellationPoliciesComponent
-            )
+        redirectTo: '/panel/politicas',
+        pathMatch: 'full'
     },
 
 

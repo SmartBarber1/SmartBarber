@@ -1,0 +1,176 @@
+<section class="policy-page">
+  <header class="policy-header">
+    <span class="eyebrow">ADMINISTRACIÓN</span>
+    <h1>Políticas de reservas</h1>
+    <p>
+      Protege los espacios de tu agenda sin cobrar dinero: si un cliente falta varias veces sin cancelar,
+      no podrá reservar por un tiempo en tu barbería. Siempre puede usar la cola virtual.
+    </p>
+  </header>
+
+  <div class="notice notice--success" *ngIf="success()" role="status">{{ success() }}</div>
+
+  <div class="policy-grid">
+    <!-- Parámetros -->
+    <form class="card" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <h2>Parámetros</h2>
+
+      <p class="state" *ngIf="loading()">Cargando la política…</p>
+      <div class="notice notice--error" *ngIf="loadError()" role="alert">
+        <span>{{ loadError() }}</span>
+        <button type="button" class="btn btn--ghost" (click)="loadPolicy()">Reintentar</button>
+      </div>
+
+      <ng-container *ngIf="!loading() && !loadError()">
+        <label class="toggle">
+          <input type="checkbox" formControlName="enabled" />
+          <span>
+            <strong>Penalización activa</strong>
+            <small>Si la desactivas, se levantan las restricciones activas y se deja de contar.</small>
+          </span>
+        </label>
+
+        <fieldset class="fields" [disabled]="!form.controls.enabled.value">
+          <legend>Inasistencias</legend>
+
+          <label class="field" [class.field--invalid]="invalid('noShowThreshold')">
+            <span>Inasistencias para restringir</span>
+            <input type="number" formControlName="noShowThreshold"
+                   [min]="limits.noShowThreshold.min" [max]="limits.noShowThreshold.max" />
+            <small>Entre {{ limits.noShowThreshold.min }} y {{ limits.noShowThreshold.max }}.</small>
+          </label>
+
+          <label class="field" [class.field--invalid]="invalid('countingPeriodDays')">
+            <span>Periodo de conteo (días)</span>
+            <input type="number" formControlName="countingPeriodDays"
+                   [min]="limits.countingPeriodDays.min" [max]="limits.countingPeriodDays.max" />
+            <small>Entre {{ limits.countingPeriodDays.min }} y {{ limits.countingPeriodDays.max }}. Las faltas más antiguas dejan de contar solas.</small>
+          </label>
+
+          <label class="field" [class.field--invalid]="invalid('restrictionDays')">
+            <span>Duración de la restricción (días)</span>
+            <input type="number" formControlName="restrictionDays"
+                   [min]="limits.restrictionDays.min" [max]="limits.restrictionDays.max" />
+            <small>Entre {{ limits.restrictionDays.min }} y {{ limits.restrictionDays.max }}.</small>
+          </label>
+
+          <label class="field" [class.field--invalid]="invalid('toleranceMinutes')">
+            <span>Tolerancia de llegada (minutos)</span>
+            <input type="number" formControlName="toleranceMinutes"
+                   [min]="limits.toleranceMinutes.min" [max]="limits.toleranceMinutes.max" />
+            <small>Después de este tiempo se puede marcar «No asistió». Entre {{ limits.toleranceMinutes.min }} y {{ limits.toleranceMinutes.max }}.</small>
+          </label>
+        </fieldset>
+
+        <fieldset class="fields">
+          <legend>Cancelar y reprogramar</legend>
+
+          <label class="field" [class.field--invalid]="invalid('cancelNoticeHours')">
+            <span>Anticipación para cancelar (horas)</span>
+            <input type="number" formControlName="cancelNoticeHours"
+                   [min]="limits.cancelNoticeHours.min" [max]="limits.cancelNoticeHours.max" />
+            <small>Cancelar a tiempo nunca cuenta como inasistencia. Entre {{ limits.cancelNoticeHours.min }} y {{ limits.cancelNoticeHours.max }}.</small>
+          </label>
+
+          <label class="toggle toggle--inline">
+            <input type="checkbox" formControlName="allowReschedule" />
+            <span><strong>Permitir reprogramar</strong></span>
+          </label>
+
+          <label class="field" *ngIf="form.controls.allowReschedule.value"
+                 [class.field--invalid]="invalid('rescheduleNoticeHours')">
+            <span>Anticipación para reprogramar (horas)</span>
+            <input type="number" formControlName="rescheduleNoticeHours"
+                   [min]="limits.rescheduleNoticeHours.min" [max]="limits.rescheduleNoticeHours.max" />
+            <small>Entre {{ limits.rescheduleNoticeHours.min }} y {{ limits.rescheduleNoticeHours.max }}.</small>
+          </label>
+        </fieldset>
+
+        <div class="preview" aria-live="polite">
+          <span class="preview__label">Así lo verá el cliente al reservar</span>
+          <p>{{ preview() }}</p>
+        </div>
+
+        <div class="notice notice--error" *ngIf="formError()" role="alert">{{ formError() }}</div>
+
+        <div class="actions">
+          <small *ngIf="lastUpdate() as updated">Última actualización: {{ updated | date: "d 'de' MMMM, h:mm a" }}</small>
+          <button type="submit" class="btn btn--primary" [disabled]="saving()">
+            {{ saving() ? 'Guardando…' : 'Guardar política' }}
+          </button>
+        </div>
+      </ng-container>
+    </form>
+
+    <!-- Clientes -->
+    <section class="card" aria-labelledby="customers-title">
+      <div class="card__header">
+        <h2 id="customers-title">Clientes en seguimiento</h2>
+        <button type="button" class="btn btn--ghost" (click)="loadCustomers()" [disabled]="customersLoading()">
+          Actualizar
+        </button>
+      </div>
+
+      <div class="counters">
+        <span class="chip chip--restricted">{{ restrictedCount() }} restringidos</span>
+        <span class="chip chip--warned">{{ warnedCount() }} en advertencia</span>
+      </div>
+
+      <p class="state" *ngIf="customersLoading()">Consultando clientes…</p>
+      <div class="notice notice--error" *ngIf="customersError()" role="alert">{{ customersError() }}</div>
+
+      <p class="state" *ngIf="!customersLoading() && !customersError() && customers().length === 0">
+        Ningún cliente está en advertencia ni restringido.
+      </p>
+
+      <ul class="customers" *ngIf="!customersLoading() && customers().length > 0">
+        <li class="customer" *ngFor="let customer of customers(); trackBy: trackByCustomer">
+          <div class="customer__main">
+            <strong>{{ customer.customerName || 'Cliente' }}</strong>
+            <span class="chip" [class.chip--restricted]="customer.state === 'RESTRICTED'"
+                  [class.chip--warned]="customer.state === 'WARNED'">
+              {{ stateLabels[customer.state] }}
+            </span>
+          </div>
+
+          <p class="customer__detail">
+            {{ customer.noShowCount }} de {{ customer.threshold }} inasistencias vigentes.
+            <ng-container *ngIf="customer.restriction as restriction">
+              Restringido hasta el <strong>{{ restriction.endsAt | date: "d 'de' MMMM, h:mm a" }}</strong>
+              ({{ restriction.noShowCount }} inasistencias la causaron).
+            </ng-container>
+          </p>
+
+          <ul class="customer__noshows" *ngIf="customer.noShows.length > 0">
+            <li *ngFor="let noShow of customer.noShows">
+              Faltó el {{ noShow.occurredAt | date: "d MMM, h:mm a" }} · deja de contar el {{ noShow.countsUntil | date: 'd MMM' }}
+            </li>
+          </ul>
+
+          <ng-container *ngIf="customer.restriction as restriction">
+            <button type="button" class="btn btn--ghost" *ngIf="liftingId() !== restriction.id"
+                    (click)="startLift(customer)">
+              Levantar restricción
+            </button>
+
+            <div class="lift" *ngIf="liftingId() === restriction.id">
+              <label class="field">
+                <span>Motivo (obligatorio)</span>
+                <textarea rows="2" maxlength="200" [value]="liftReason()"
+                          (input)="liftReason.set($any($event.target).value)"
+                          placeholder="Ej. El cliente tuvo una emergencia y avisó"></textarea>
+              </label>
+              <p class="lift__error" *ngIf="liftError()" role="alert">{{ liftError() }}</p>
+              <div class="lift__actions">
+                <button type="button" class="btn btn--ghost" (click)="cancelLift()" [disabled]="liftBusy()">Cancelar</button>
+                <button type="button" class="btn btn--primary" (click)="confirmLift()" [disabled]="liftBusy()">
+                  {{ liftBusy() ? 'Levantando…' : 'Confirmar' }}
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </li>
+      </ul>
+    </section>
+  </div>
+</section>

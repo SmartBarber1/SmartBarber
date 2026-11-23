@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { SessionService } from '../../../../core/auth/services/session.service';
 import { ReservationService } from '../../services/reservation.service';
@@ -25,9 +25,12 @@ import { HorariosSlotsComponent } from './horarios-slots/horarios-slots.componen
 import { ResumenReservaComponent } from './resumen-reserva/resumen-reserva.component';
 import { CitaCliente, MisCitasComponent } from './mis-citas/mis-citas.component';
 import { toApiError, toUserMessage } from '../../../../core/errors';
+import { forkJoin, of } from 'rxjs';
+import { PenaltyApiService } from '../../../penalty/infrastructure/api/penalty-api.service';
+import { DEFAULT_PENALTY_POLICY, PenaltyPolicy, PenaltyStanding, policySummary } from '../../../penalty/domain/models/penalty.model';
+import { PenaltyStatusComponent } from '../../../penalty/components/penalty-status/penalty-status.component';
 
 /** Anticipación mínima para cancelar o reprogramar (la misma regla del servidor, RES_018). */
-const AVISO_MINUTOS = 60;
 
 /** Estados de una cita que todavía no ocurre y sigue activa. */
 const ESTADOS_ACTIVOS = new Set(['PENDING', 'CONFIRMED']);
@@ -55,7 +58,9 @@ const AVISO_SIN_SERVICIOS = 'Selecciona al menos un servicio para la reserva.';
     CalendarioComponent,
         HorariosSlotsComponent,
     ResumenReservaComponent,
-    MisCitasComponent
+    MisCitasComponent,
+    PenaltyStatusComponent,
+    RouterLink
   ],
   templateUrl: './appointment.component.html',
   styleUrls: ['./appointment.component.css']
@@ -67,6 +72,7 @@ export class AppointmentComponent implements OnInit {
   private readonly sessionService = inject(SessionService);
   private readonly route = inject(ActivatedRoute);
   private readonly nonWorkingDays = inject(NonWorkingDayRepository);
+  private readonly penaltyApi = inject(PenaltyApiService);
 
   /** Días no laborables de la barbería elegida: fecha (AAAA-MM-DD) → motivo. */
   private diasNoLaborables = new Map<string, string>();
@@ -108,7 +114,12 @@ export class AppointmentComponent implements OnInit {
   isLoading: boolean = false;
 
     // Mis próximas citas (cancelar / reprogramar)
-  readonly avisoMinutos = AVISO_MINUTOS;
+  /** Política de la barbería elegida: se explica junto al botón de confirmar. */
+  politicaBarberia: PenaltyPolicy | null = null;
+  /** Estado del cliente en la barbería elegida (advertencia o restricción). */
+  estadoPenalizacion: PenaltyStanding | null = null;
+  /** Barberías donde el cliente tiene inasistencias vigentes o restricción. */
+  estadosPenalizacion: PenaltyStanding[] = [];
   citas: CitaCliente[] = [];
   cargandoCitas = false;
   errorCitas = '';
@@ -133,6 +144,7 @@ export class AppointmentComponent implements OnInit {
     this.actualizarMes();
     this.cargarBarberias();
     this.cargarCitas();
+    this.cargarEstadosPenalizacion();
   }
 
   // ───────────────────────── Carga de datos ─────────────────────────
@@ -156,6 +168,7 @@ export class AppointmentComponent implements OnInit {
         }
 
         if (this.selectedBarberiaId) {
+          this.cargarPenalizacion(this.selectedBarberiaId);
           this.cargarDiasNoLaborables(this.selectedBarberiaId);
           this.cargarEmpleados(this.selectedBarberiaId);
           this.cargarServicios(this.selectedBarberiaId);
@@ -269,6 +282,7 @@ export class AppointmentComponent implements OnInit {
     this.selectedHora = '';
     this.availability.clearCache();
     if (barberiaId) {
+      this.cargarPenalizacion(barberiaId);
       this.cargarDiasNoLaborables(barberiaId);
       this.cargarEmpleados(barberiaId);
       this.cargarServicios(barberiaId);
@@ -506,6 +520,11 @@ export class AppointmentComponent implements OnInit {
         this.isLoading = false;
         console.error('❌ Error al crear reserva:', err.status, err.error, '\nPayload enviado:', payload);
         this.mostrarAviso('error', mensajeErrorReserva(err));
+        if (toApiError(err).code === 'PEN_003') {
+          // La restricción pudo crearse mientras el cliente reservaba.
+          this.cargarPenalizacion(this.selectedBarberiaId);
+          this.cargarEstadosPenalizacion();
+        }
       }
     });
   }
@@ -536,19 +555,66 @@ export class AppointmentComponent implements OnInit {
     this.reservationService.getReservationHistory('customer', clienteId).subscribe({
       next: items => {
         const ahora = Date.now();
-        const limite = ahora + AVISO_MINUTOS * 60_000;
-        this.citas = items
-          .filter(item => ESTADOS_ACTIVOS.has(String(item.status).toUpperCase()))
-          .map(item => this.aCita(item, limite))
-          .filter(cita => cita.end.getTime() >= ahora)
-          .sort((a, b) => a.start.getTime() - b.start.getTime());
-        this.cargandoCitas = false;
+        const activas = items
+          .filter(item => ESTADOS_ACTIVOS.has(String(item.status).toUpperCase()));
+        const barberiaIds = [...new Set(activas.map(item => item.barbershopId).filter(Boolean))];
+
+        // Cada barbería define con cuánta anticipación se cancela o reprograma.
+        const politicas$ = barberiaIds.length
+          ? forkJoin(barberiaIds.map(id => this.penaltyApi.policyOf(id)))
+          : of([] as PenaltyPolicy[]);
+
+        politicas$.subscribe(politicas => {
+          const porBarberia = new Map(barberiaIds.map((id, index) => [id, politicas[index]]));
+          this.citas = activas
+            .map(item => this.aCita(item, porBarberia.get(item.barbershopId) ?? DEFAULT_PENALTY_POLICY, ahora))
+            .filter(cita => cita.end.getTime() >= ahora)
+            .sort((a, b) => a.start.getTime() - b.start.getTime());
+          this.cargandoCitas = false;
+        });
       },
       error: err => {
         this.citas = [];
         this.errorCitas = toUserMessage(err, { DEFAULT: 'No fue posible cargar tus citas.' });
         this.cargandoCitas = false;
       }
+    });
+  }
+
+  // ───────────────────────── Penalización por inasistencias ─────────────────────────
+
+  /** Texto de la política junto al botón de confirmar (nadie queda restringido sin saberlo). */
+  get resumenPolitica(): string {
+    return this.politicaBarberia ? policySummary(this.politicaBarberia) : '';
+  }
+
+  /** El cliente no puede crear reservas en la barbería elegida (sí reprogramar las que tiene). */
+  get restringido(): boolean {
+    return !this.reprogramando && !!this.estadoPenalizacion?.restriction;
+  }
+
+  /** Política y estado del cliente en la barbería elegida. */
+  private cargarPenalizacion(barberiaId: string): void {
+    this.politicaBarberia = null;
+    this.estadoPenalizacion = null;
+    if (!barberiaId) return;
+
+    this.penaltyApi.policyOf(barberiaId).subscribe(politica => {
+      if (this.selectedBarberiaId === barberiaId) this.politicaBarberia = politica;
+    });
+    this.penaltyApi.myStanding(barberiaId).subscribe({
+      next: estado => {
+        if (this.selectedBarberiaId === barberiaId) this.estadoPenalizacion = estado;
+      },
+      // Si no se puede consultar, el servidor igual valida la restricción al reservar.
+      error: () => undefined
+    });
+  }
+
+  cargarEstadosPenalizacion(): void {
+    this.penaltyApi.myStandings().subscribe({
+      next: estados => (this.estadosPenalizacion = estados),
+      error: () => (this.estadosPenalizacion = [])
     });
   }
 
@@ -624,7 +690,7 @@ export class AppointmentComponent implements OnInit {
     });
   }
 
-  private aCita(item: ReservationHistoryItem, limiteModificacion: number): CitaCliente {
+  private aCita(item: ReservationHistoryItem, politica: PenaltyPolicy, ahora: number): CitaCliente {
     const start = new Date(item.startTime);
     const end = item.endTime ? new Date(item.endTime) : new Date(start.getTime() + (Number(item.duration) || 0) * 60_000);
     const status = String(item.status).toUpperCase();
@@ -641,7 +707,22 @@ export class AppointmentComponent implements OnInit {
       status,
       statusLabel: ETIQUETAS_ESTADO[status] ?? status,
       services: item.services ?? [],
-      modifiable: start.getTime() >= limiteModificacion && item.reservationType !== 'VIRTUAL_QUEUE'
+      ...this.permisosCita(start, item.reservationType, politica, ahora)
+    };
+  }
+
+  /** Cancelar y reprogramar según la anticipación de la barbería (RN-16, RN-47). */
+  private permisosCita(start: Date, tipo: string, politica: PenaltyPolicy, ahora: number)
+    : Pick<CitaCliente, 'cancelable' | 'reschedulable' | 'modifiable' | 'cancelNoticeHours'> {
+    const agendada = tipo !== 'VIRTUAL_QUEUE';
+    const cancelable = agendada && start.getTime() >= ahora + politica.cancelNoticeHours * 3_600_000;
+    const reschedulable = agendada && politica.allowReschedule
+      && start.getTime() >= ahora + politica.rescheduleNoticeHours * 3_600_000;
+    return {
+      cancelable,
+      reschedulable,
+      modifiable: cancelable || reschedulable,
+      cancelNoticeHours: politica.cancelNoticeHours
     };
   }
 }

@@ -1,0 +1,39 @@
+<section class="penalty" *ngIf="standings.length > 0" aria-labelledby="penalty-title">
+  <header class="penalty__header">
+    <h3 id="penalty-title">Mis inasistencias</h3>
+    <span>Cada barbería cuenta por separado y las faltas antiguas dejan de contar solas.</span>
+  </header>
+
+  <ul class="penalty__list">
+    <li class="shop" *ngFor="let standing of standings; trackBy: trackByShop"
+        [class.shop--restricted]="standing.state === 'RESTRICTED'"
+        [class.shop--warned]="standing.state === 'WARNED'">
+      <div class="shop__top">
+        <strong>{{ standing.barbershopName }}</strong>
+        <span class="shop__chip">{{ labels[standing.state] }}</span>
+      </div>
+
+      <p class="shop__text" *ngIf="standing.restriction as restriction; else counter">
+        No puedes reservar aquí hasta el <strong>{{ restriction.endsAt | date: "d 'de' MMMM, h:mm a" }}</strong>.
+        Tus citas actuales se mantienen y puedes
+        <a routerLink="/panel/virtual-queue-available">unirte a su cola virtual</a>.
+      </p>
+      <ng-template #counter>
+        <p class="shop__text">
+          Llevas <strong>{{ standing.noShowCount }} de {{ standing.threshold }}</strong> inasistencias en los
+          últimos {{ standing.policy.countingPeriodDays }} días.
+          <ng-container *ngIf="standing.state === 'WARNED'">
+            Una más y no podrás reservar aquí durante {{ standing.policy.restrictionDays }} días.
+          </ng-container>
+        </p>
+      </ng-template>
+
+      <ul class="shop__noshows" *ngIf="standing.noShows.length > 0">
+        <li *ngFor="let noShow of standing.noShows">
+          Faltaste el {{ noShow.occurredAt | date: "d 'de' MMMM" }} · deja de contar el
+          {{ noShow.countsUntil | date: "d 'de' MMMM" }}
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>

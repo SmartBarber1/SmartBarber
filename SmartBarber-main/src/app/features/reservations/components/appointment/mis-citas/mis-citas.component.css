@@ -141,3 +141,10 @@
   .citas { padding: 1rem; }
   .cita { grid-template-columns: 1fr; }
 }
+
+.cita__note {
+  align-self: center;
+  color: #7a7168;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}

@@ -137,3 +137,42 @@
   color: #666;
   font-size: 0.88rem;
 }
+
+/* Penalización: restricción, advertencia y texto de la política */
+.penalty-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  margin: 12px 0;
+  border-radius: 8px;
+  line-height: 1.45;
+  font-size: 0.92rem;
+}
+
+.penalty-notice a {
+  color: inherit;
+  font-weight: 700;
+}
+
+.penalty-notice--restricted {
+  border: 1px solid #f0c3bb;
+  border-left: 4px solid #c0392b;
+  background: #fdf0ee;
+  color: #8f2f22;
+}
+
+.penalty-notice--warned {
+  border: 1px solid #f1d9a6;
+  border-left: 4px solid #d99a1e;
+  background: #fffaf0;
+  color: #7a5200;
+}
+
+.policy-line {
+  margin: 10px 0 0;
+  color: #6f675e;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  text-align: center;
+}

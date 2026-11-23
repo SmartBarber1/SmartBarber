@@ -13,8 +13,14 @@ export interface CitaCliente {
   status: string;
   statusLabel: string;
   services: string[];
-  /** Se puede cancelar o reprogramar (respeta la anticipación mínima). */
+  /** Se puede cancelar o reprogramar (respeta la anticipación de la barbería). */
   modifiable: boolean;
+  /** Aún está dentro del plazo para cancelar sin que cuente como inasistencia. */
+  cancelable: boolean;
+  /** La barbería permite reprogramar y aún está dentro del plazo. */
+  reschedulable: boolean;
+  /** Horas de anticipación para cancelar en esa barbería. */
+  cancelNoticeHours: number;
 }
 
 /**
@@ -37,8 +43,6 @@ export class MisCitasComponent {
   @Input() busyId: string | null = null;
   /** Cita que se está reprogramando. */
   @Input() reprogramandoId: string | null = null;
-  /** Anticipación mínima, en minutos, para mostrarla al cliente. */
-  @Input() avisoMinutos = 60;
 
   @Output() cancelar = new EventEmitter<CitaCliente>();
   @Output() reprogramar = new EventEmitter<CitaCliente>();

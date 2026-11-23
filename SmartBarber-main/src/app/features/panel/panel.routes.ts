@@ -110,6 +110,31 @@ export const PANEL_ROUTES: Routes = [
 
 
       // ========================================================
+      // POLÍTICAS DE RESERVA (penalización por inasistencias)
+      // ========================================================
+
+      {
+        path: 'politicas',
+
+        canActivate: [
+          authGuard,
+          roleGuard
+        ],
+
+        data: {
+          roles: ['ADMIN']
+        },
+
+        loadComponent: () =>
+          import(
+            '../penalty/pages/penalty-policy/penalty-policy.component'
+          ).then(
+            m => m.PenaltyPolicyComponent
+          )
+      },
+
+
+      // ========================================================
       // HORARIOS
       // ========================================================
 

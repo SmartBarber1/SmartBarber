@@ -456,6 +456,30 @@ export class PanelNavigationService {
           },
 
           {
+            id: 'policies',
+
+            label: 'Políticas de reservas',
+
+            description:
+              'Inasistencias, restricciones y anticipación para cancelar o reprogramar.',
+
+            icon: 'shield',
+
+            route:
+              '/panel/politicas',
+
+            roles: [
+              'ADMIN'
+            ],
+
+            status:
+              'AVAILABLE',
+
+            visible:
+              true
+          },
+
+          {
             id: 'schedules',
 
             label: 'Horarios',
