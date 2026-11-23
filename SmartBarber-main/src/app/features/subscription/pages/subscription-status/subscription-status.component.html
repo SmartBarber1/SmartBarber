@@ -89,14 +89,19 @@
         </button>
       </div>
 
-      <div *ngIf="createdSubscription()" class="form-alert form-alert-success" role="status">
+      <!-- Mientras el pago está en proceso; al tener resultado manda el estado actual del plan. -->
+      <div *ngIf="createdSubscription() && !paymentSettled()" class="form-alert form-alert-success" role="status">
         Solicitud creada con estado: {{ statusLabel(createdSubscription()?.status) }}.
         @if (createdSubscription()?.orderId) {
           Referencia de pago: {{ createdSubscription()?.orderId }}
         }
       </div>
 
-      <div *ngIf="paymentMessage()" class="form-alert form-alert-info" role="status" aria-live="polite">
+      <div *ngIf="paymentSettled() && accessState().status === 'declined'" class="form-alert form-alert-error" role="alert">
+        El pago fue rechazado y la suscripción no se activó. Puedes intentarlo de nuevo con otro medio de pago.
+      </div>
+
+      <div *ngIf="paymentMessage() && !paymentSettled()" class="form-alert form-alert-info" role="status" aria-live="polite">
         {{ paymentMessage() }}
       </div>
 

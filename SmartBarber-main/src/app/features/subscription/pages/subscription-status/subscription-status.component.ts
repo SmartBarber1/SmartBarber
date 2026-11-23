@@ -56,6 +56,17 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
   readonly paymentDelayNotice = signal(false);
   readonly createdSubscription = signal<SubscriptionCreationResponse | null>(null);
 
+  /**
+   * El pago de la solicitud creada en esta pantalla ya tiene resultado
+   * (activa, aprobada, rechazada, reembolsada o vencida). Desde ese momento
+   * los avisos "Solicitud creada / Pendiente de pago" y los eventos de la
+   * pasarela quedan desactualizados: manda el estado actual del plan.
+   */
+  readonly paymentSettled = computed(() =>
+    this.createdSubscription() !== null &&
+    ['active', 'approved', 'declined', 'refunded', 'expired'].includes(this.accessState().status)
+  );
+
   ngOnInit(): void {
     this.loadPlans();
   }
@@ -245,7 +256,6 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
 
     this.paymentSubscription = this.subscriptionWs.getPaymentStatus().subscribe({
       next: event => {
-        console.log('Evento de pago recibido:', event); // temporal: quitar al terminar de probar
         this.paymentMessage.set(this.getPaymentUpdateMessage(event));
         this.subscriptionAccess.refresh();
       },
@@ -275,8 +285,7 @@ export class SubscriptionStatusComponent implements OnInit, OnDestroy {
   }
 
   showPaymentDelayNotice(): boolean {
-    const status = this.accessState().status;
-    return this.paymentDelayNotice() && status !== 'active' && status !== 'approved';
+    return this.paymentDelayNotice() && !this.paymentSettled();
   }
 
   private startPaymentTimeout(): void {
