@@ -40,6 +40,8 @@ export class VirtualQueuePageComponent
 
   private connection: { close: () => void } | null = null;
   private destroyed = false;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly RECONNECT_DELAY_MS = 3_000;
 
     /** Confirmación en la página para salir de la fila. */
   confirmingLeave = false;
@@ -92,6 +94,7 @@ export class VirtualQueuePageComponent
         this.leaving = false;
         this.confirmingLeave = false;
         this.left = true;
+        this.virtualQueueService.forgetEmployee();
       },
       error: (error: unknown) => {
         this.leaving = false;
@@ -129,12 +132,22 @@ export class VirtualQueuePageComponent
     this.employeeId =
       this.virtualQueueService.getLastEmployeeId();
 
-    if (!this.employeeId) {
-      this.connectionStatus = 'disconnected';
+    if (this.employeeId) {
+      this.connectToQueue();
       return;
     }
 
-    this.connectToQueue();
+    // Pestaña nueva u otro dispositivo: el turno vigente se recupera del servidor.
+    this.virtualQueueService.findActiveTurn().subscribe(active => {
+      if (this.destroyed) return;
+      if (!active) {
+        this.connectionStatus = 'disconnected';
+        return;
+      }
+      this.employeeId = active.employeeId;
+      this.virtualQueueService.rememberEmployee(active.employeeId);
+      this.connectToQueue();
+    });
   }
 
   private connectToQueue(): void {
@@ -159,6 +172,7 @@ export class VirtualQueuePageComponent
           this.ngZone.run(() => {
             if (!this.destroyed) {
               this.connectionStatus = 'error';
+              this.scheduleReconnect();
             }
           });
         },
@@ -167,10 +181,25 @@ export class VirtualQueuePageComponent
           this.ngZone.run(() => {
             if (!this.destroyed) {
               this.connectionStatus = 'disconnected';
+              this.scheduleReconnect();
             }
           });
         }
       );
+  }
+
+  /**
+   * El servidor o un proxy pueden cerrar el WebSocket (inactividad, redeploy):
+   * se reconecta solo y el servidor reenvía la foto actual de la cola.
+   */
+  private scheduleReconnect(): void {
+    if (this.destroyed || this.reconnectTimer || this.left) return;
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      if (this.destroyed) return;
+      this.connection?.close();
+      this.connectToQueue();
+    }, VirtualQueuePageComponent.RECONNECT_DELAY_MS);
   }
 
   trackByReservation(
@@ -201,6 +230,10 @@ export class VirtualQueuePageComponent
 
   ngOnDestroy(): void {
     this.destroyed = true;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     this.connection?.close();
     this.connection = null;
   }

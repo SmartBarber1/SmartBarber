@@ -18,12 +18,16 @@
     </span>
   </header>
 
-  <div *ngIf="connectionError" class="notice notice--row" role="alert">
+  <div *ngIf="!checkingActiveTurn && connectionError" class="notice notice--row" role="alert">
     <span>No se pudo conectar con las colas en tiempo real. Se reintentará automáticamente.</span>
     <button type="button" class="notice__retry" (click)="retryConnection()">Reintentar ahora</button>
   </div>
 
-  <div *ngIf="availableQueues.length === 0" class="empty-state">
+  <div *ngIf="checkingActiveTurn" class="empty-state" role="status" aria-live="polite">
+    <p>Verificando si ya tienes un turno en alguna cola...</p>
+  </div>
+
+  <div *ngIf="!checkingActiveTurn && availableQueues.length === 0" class="empty-state">
     <h2>No hay colas disponibles</h2>
     <p>
       Cuando una barbería abra su cola virtual, aparecerá aquí automáticamente.

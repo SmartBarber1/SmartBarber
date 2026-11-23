@@ -1,9 +1,22 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../../../src/environments/environment';
 import { getAuth } from 'firebase/auth';
+import { ReservationService } from '../../../reservations/services/reservation.service';
+import { SessionService } from '../../../../core/auth/services/session.service';
+
+/** Turno de cola virtual del cliente que sigue vigente en el servidor. */
+export interface ActiveQueueTurn {
+  reservationId: string;
+  employeeId: string;
+  barbershopId: string;
+}
+
+/** Estados en los que el turno sigue en la cola (en espera o en atención). */
+const ACTIVE_QUEUE_STATUSES = ['WAITING', 'IN_PROGRESS'];
 
 export interface JoinQueuePayload {
   customerId: string;
@@ -53,7 +66,54 @@ export class VirtualQueueService {
 
   private readonly employeeStorageKey = 'smartbarber.virtualQueue.employeeId';
 
-  constructor(private readonly http: HttpClient) { }
+  constructor(
+    private readonly http: HttpClient,
+    private readonly reservationService: ReservationService,
+    private readonly sessionService: SessionService
+  ) { }
+
+  /**
+   * Turno de cola virtual vigente del cliente, leído del servidor (fuente de
+   * verdad). Permite retomar el seguimiento al volver al módulo o desde otro
+   * dispositivo, en vez de depender del almacenamiento de la pestaña.
+   * Devuelve null si no tiene turno o si la consulta falla.
+   */
+  findActiveTurn(): Observable<ActiveQueueTurn | null> {
+    const customerId = this.sessionService.getClientId();
+    if (!customerId) {
+      return of(null);
+    }
+
+    return this.reservationService.getReservationHistory('customer', customerId).pipe(
+      map(reservations => {
+        const active = reservations.find(reservation =>
+          reservation.reservationType === 'VIRTUAL_QUEUE' &&
+          ACTIVE_QUEUE_STATUSES.includes(String(reservation.status).toUpperCase())
+        );
+        return active
+          ? { reservationId: active.id, employeeId: active.employeeId, barbershopId: active.barbershopId }
+          : null;
+      }),
+      catchError(() => of(null))
+    );
+  }
+
+  /** Recuerda la cola que sigue el cliente en esta pestaña. */
+  rememberEmployee(employeeId: string): void {
+    try {
+      sessionStorage.setItem(this.employeeStorageKey, employeeId);
+    } catch {
+      // La aplicación puede continuar aunque no haya almacenamiento.
+    }
+  }
+
+  forgetEmployee(): void {
+    try {
+      sessionStorage.removeItem(this.employeeStorageKey);
+    } catch {
+      // Sin almacenamiento no hay nada que limpiar.
+    }
+  }
 
   joinQueue(payload: JoinQueuePayload): Observable<unknown> {
     return new Observable(observer => {
@@ -62,14 +122,7 @@ export class VirtualQueueService {
         .subscribe({
           next: response => {
             // Recordamos qué cola acaba de seleccionar el cliente.
-            try {
-              sessionStorage.setItem(
-                this.employeeStorageKey,
-                payload.employeeId
-              );
-            } catch {
-              // La aplicación puede continuar aunque no haya almacenamiento.
-            }
+            this.rememberEmployee(payload.employeeId);
 
             observer.next(response);
             observer.complete();

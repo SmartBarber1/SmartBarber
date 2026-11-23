@@ -54,12 +54,19 @@ import { QueueStatusCardComponent } from '../components/queue-status-card/queue-
 })
 export class VirtualQueueComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
-
+    this.destroyed = true;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     this.websocketSubscription?.unsubscribe();
     this.websocketEvents.disconnect();
   }
 
   private websocketSubscription?: Subscription;
+  private destroyed = false;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly RECONNECT_DELAY_MS = 3_000;
 
   private readonly session =
     inject(SessionService);
@@ -214,67 +221,52 @@ export class VirtualQueueComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Escucha la cola en tiempo real: cuando un cliente se une, sale o cambia
+   * su turno, el servidor avisa y la cola se relee sin pulsar "Actualizar".
+   * Si el socket se cierra (inactividad del proxy, redeploy), se reconecta.
+   */
   connectWebsocketEvent(): void {
-
-    if (this.websocketSubscription) {
+    if (this.websocketSubscription || this.destroyed) {
       return;
     }
 
-
-    this.websocketSubscription =
-      this.websocketEvents
-        .connectWebsocket(this.employeeId)
-        .subscribe({
-
-          next: event => {
-            console.log(
-              'EVENTO RECIBIDO DEL WS',
-              event
-            );
-
-            console.log(
-              '[QUEUE EVENT]',
-              event.type,
-              event
-            );
-
-            switch (event.type) {
-
-              case 'QUEUE_SNAPSHOT':
-                this.applySnapshot(event.payload);
-                break;
-
-              // Cambios en la cola: se relee por REST, donde el barbero
-              // recibe la cola completa con los datos de sus clientes.
-              case 'QUEUE_NEXT_CUSTOMER':
-              case 'QUEUE_ADD_CUSTOMER':
-              case 'QUEUE_CUSTOMER_LEFT':
-              case 'QUEUE_COMPLETED_CURRENT_TURN':
-              case 'QUEUE_OPENED':
-              case 'QUEUE_CLOSED':
-                this.refreshSilently();
-                break;
-
-              default:
-                this.refreshSilently();
-            }
-          },
-
-          error: error => {
-
-            console.error(
-              'Error WebSocket:',
-              error
-            );
-
-            this.websocketSubscription = undefined;
-          },
-
-          complete: () => {
-
-            this.websocketSubscription = undefined;
+    this.websocketSubscription = this.websocketEvents
+      .connectWebsocket(this.employeeId)
+      .subscribe({
+        next: event => {
+          if (event.type === 'QUEUE_SNAPSHOT') {
+            // Foto inicial (y tras cada reconexión): se relee por REST, donde
+            // el barbero recibe la cola completa con los datos de sus clientes.
+            this.refreshSilently();
+            return;
           }
-        });
+          // QUEUE_ADD_CUSTOMER, QUEUE_CUSTOMER_LEFT, QUEUE_NEXT_CUSTOMER,
+          // QUEUE_COMPLETED_CURRENT_TURN, QUEUE_OPENED, QUEUE_CLOSED...
+          this.refreshSilently();
+        },
+        error: error => {
+          console.error('[VirtualQueueWS] Conexión fallida:', error);
+          this.websocketSubscription = undefined;
+          this.scheduleReconnect();
+        },
+        complete: () => {
+          this.websocketSubscription = undefined;
+          this.scheduleReconnect();
+        }
+      });
+  }
+
+  private scheduleReconnect(): void {
+    if (this.destroyed || this.reconnectTimer || !this.acceptingClients()) {
+      return;
+    }
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      if (!this.destroyed && this.acceptingClients()) {
+        this.connectWebsocketEvent();
+      }
+    }, VirtualQueueComponent.RECONNECT_DELAY_MS);
   }
 
     /** Relee la cola sin mostrar el indicador de carga (eventos en tiempo real). */

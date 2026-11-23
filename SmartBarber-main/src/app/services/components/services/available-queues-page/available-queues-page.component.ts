@@ -76,9 +76,22 @@ export class AvailableQueuesPageComponent implements OnInit, OnDestroy {
     private readonly ngZone: NgZone
   ) { }
 
+  /** Mientras se confirma con el servidor si el cliente ya está en una cola. */
+  checkingActiveTurn = true;
+
   ngOnInit(): void {
-    console.log('AvailableQueuesPageComponent inicializado');
-    this.connectToNotifications();
+    // Si el cliente ya tiene un turno (en espera o en atención), se retoma su
+    // seguimiento: salir del módulo no lo saca de la cola.
+    this.virtualQueueService.findActiveTurn().subscribe(active => {
+      if (this.destroyed) return;
+      if (active) {
+        this.virtualQueueService.rememberEmployee(active.employeeId);
+        void this.router.navigate(['/panel/virtual-queue-tracking'], { replaceUrl: true });
+        return;
+      }
+      this.checkingActiveTurn = false;
+      this.connectToNotifications();
+    });
   }
 
   ngOnDestroy(): void {
