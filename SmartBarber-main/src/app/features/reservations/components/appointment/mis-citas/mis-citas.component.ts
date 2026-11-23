@@ -17,7 +17,7 @@ export interface CitaCliente {
   modifiable: boolean;
   /** Aún está dentro del plazo para cancelar sin que cuente como inasistencia. */
   cancelable: boolean;
-  /** La barbería permite reprogramar y aún está dentro del plazo. */
+  /** Aún se puede reprogramar (hasta 60 minutos antes). */
   reschedulable: boolean;
   /** Horas de anticipación para cancelar en esa barbería. */
   cancelNoticeHours: number;

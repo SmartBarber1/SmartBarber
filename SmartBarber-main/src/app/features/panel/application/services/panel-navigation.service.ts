@@ -461,7 +461,7 @@ export class PanelNavigationService {
             label: 'Políticas de reservas',
 
             description:
-              'Inasistencias, restricciones y anticipación para cancelar o reprogramar.',
+              'Inasistencias, restricciones y anticipación para cancelar.',
 
             icon: 'shield',
 

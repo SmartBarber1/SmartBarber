@@ -2,7 +2,7 @@
   <header class="citas__header">
     <h3 id="mis-citas-title">Mis próximas citas</h3>
     <span class="citas__hint">
-      Cancelar a tiempo no cuenta como inasistencia. Cada barbería define con cuánta anticipación puedes hacerlo.
+      Cancelar a tiempo no cuenta como inasistencia. Puedes reprogramar hasta 60 minutos antes.
     </span>
   </header>
 
@@ -42,7 +42,7 @@
         </div>
         <ng-template #locked>
           <span class="cita__locked">
-            Ya pasó el límite de {{ cita.cancelNoticeHours }} h para cancelar. Si no puedes asistir, avisa a la barbería.
+            Ya no se puede cancelar ni reprogramar. Si no puedes asistir, avisa a la barbería.
           </span>
         </ng-template>
       </li>

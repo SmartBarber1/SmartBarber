@@ -63,7 +63,7 @@
         </fieldset>
 
         <fieldset class="fields">
-          <legend>Cancelar y reprogramar</legend>
+          <legend>Cancelaciones</legend>
 
           <label class="field" [class.field--invalid]="invalid('cancelNoticeHours')">
             <span>Anticipación para cancelar (horas)</span>
@@ -72,18 +72,6 @@
             <small>Cancelar a tiempo nunca cuenta como inasistencia. Entre {{ limits.cancelNoticeHours.min }} y {{ limits.cancelNoticeHours.max }}.</small>
           </label>
 
-          <label class="toggle toggle--inline">
-            <input type="checkbox" formControlName="allowReschedule" />
-            <span><strong>Permitir reprogramar</strong></span>
-          </label>
-
-          <label class="field" *ngIf="form.controls.allowReschedule.value"
-                 [class.field--invalid]="invalid('rescheduleNoticeHours')">
-            <span>Anticipación para reprogramar (horas)</span>
-            <input type="number" formControlName="rescheduleNoticeHours"
-                   [min]="limits.rescheduleNoticeHours.min" [max]="limits.rescheduleNoticeHours.max" />
-            <small>Entre {{ limits.rescheduleNoticeHours.min }} y {{ limits.rescheduleNoticeHours.max }}.</small>
-          </label>
         </fieldset>
 
         <div class="preview" aria-live="polite">

@@ -33,6 +33,9 @@ import { PenaltyStatusComponent } from '../../../penalty/components/penalty-stat
 /** Anticipación mínima para cancelar o reprogramar (la misma regla del servidor, RES_018). */
 
 /** Estados de una cita que todavía no ocurre y sigue activa. */
+/** Anticipación mínima para reprogramar (igual que el servidor). */
+const REPROGRAMAR_MINUTOS = 60;
+
 const ESTADOS_ACTIVOS = new Set(['PENDING', 'CONFIRMED']);
 
 const ETIQUETAS_ESTADO: Readonly<Record<string, string>> = {
@@ -711,13 +714,15 @@ export class AppointmentComponent implements OnInit {
     };
   }
 
-  /** Cancelar y reprogramar según la anticipación de la barbería (RN-16, RN-47). */
+  /**
+   * Cancelar según la anticipación de la política de la barbería (RN-16).
+   * Reprogramar no hace parte de la política: conserva su propio límite.
+   */
   private permisosCita(start: Date, tipo: string, politica: PenaltyPolicy, ahora: number)
     : Pick<CitaCliente, 'cancelable' | 'reschedulable' | 'modifiable' | 'cancelNoticeHours'> {
     const agendada = tipo !== 'VIRTUAL_QUEUE';
     const cancelable = agendada && start.getTime() >= ahora + politica.cancelNoticeHours * 3_600_000;
-    const reschedulable = agendada && politica.allowReschedule
-      && start.getTime() >= ahora + politica.rescheduleNoticeHours * 3_600_000;
+    const reschedulable = agendada && start.getTime() >= ahora + REPROGRAMAR_MINUTOS * 60_000;
     return {
       cancelable,
       reschedulable,

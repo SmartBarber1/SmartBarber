@@ -17,7 +17,7 @@ import { PenaltyApiService } from '../../infrastructure/api/penalty-api.service'
 
 /**
  * Políticas (RF-22, RF-83): el administrador ajusta la penalización por
- * inasistencias y la anticipación para cancelar y reprogramar, ve la vista
+ * inasistencias y la anticipación para cancelar, ve la vista
  * previa del texto que leerá el cliente y gestiona a los clientes en
  * advertencia o restringidos (RF-84, RN-46).
  */
@@ -43,9 +43,7 @@ export class PenaltyPolicyComponent implements OnInit {
     noShowThreshold: [DEFAULT_PENALTY_POLICY.noShowThreshold, this.range('noShowThreshold')],
     countingPeriodDays: [DEFAULT_PENALTY_POLICY.countingPeriodDays, this.range('countingPeriodDays')],
     restrictionDays: [DEFAULT_PENALTY_POLICY.restrictionDays, this.range('restrictionDays')],
-    cancelNoticeHours: [DEFAULT_PENALTY_POLICY.cancelNoticeHours, this.range('cancelNoticeHours')],
-    allowReschedule: [DEFAULT_PENALTY_POLICY.allowReschedule],
-    rescheduleNoticeHours: [DEFAULT_PENALTY_POLICY.rescheduleNoticeHours, this.range('rescheduleNoticeHours')]
+    cancelNoticeHours: [DEFAULT_PENALTY_POLICY.cancelNoticeHours, this.range('cancelNoticeHours')]
   });
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
@@ -195,9 +193,7 @@ export class PenaltyPolicyComponent implements OnInit {
       noShowThreshold: policy.noShowThreshold,
       countingPeriodDays: policy.countingPeriodDays,
       restrictionDays: policy.restrictionDays,
-      cancelNoticeHours: policy.cancelNoticeHours,
-      allowReschedule: policy.allowReschedule,
-      rescheduleNoticeHours: policy.rescheduleNoticeHours
+      cancelNoticeHours: policy.cancelNoticeHours
     });
     this.lastUpdate.set(policy.updatedAt ?? null);
   }

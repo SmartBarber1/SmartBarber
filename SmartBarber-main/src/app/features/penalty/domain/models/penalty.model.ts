@@ -11,8 +11,6 @@ export interface PenaltyPolicy {
   countingPeriodDays: number;
   restrictionDays: number;
   cancelNoticeHours: number;
-  allowReschedule: boolean;
-  rescheduleNoticeHours: number;
   updatedAt?: string | null;
 }
 
@@ -24,8 +22,7 @@ export const PENALTY_LIMITS = {
   noShowThreshold: { min: 2, max: 5 },
   countingPeriodDays: { min: 15, max: 90 },
   restrictionDays: { min: 1, max: 30 },
-  cancelNoticeHours: { min: 1, max: 72 },
-  rescheduleNoticeHours: { min: 1, max: 72 }
+  cancelNoticeHours: { min: 1, max: 72 }
 } as const;
 
 export const DEFAULT_PENALTY_POLICY: PenaltyPolicy = {
@@ -35,9 +32,7 @@ export const DEFAULT_PENALTY_POLICY: PenaltyPolicy = {
   noShowThreshold: 3,
   countingPeriodDays: 30,
   restrictionDays: 15,
-  cancelNoticeHours: 24,
-  allowReschedule: true,
-  rescheduleNoticeHours: 24
+  cancelNoticeHours: 24
 };
 
 export type PenaltyState = 'ACTIVE' | 'WITH_NO_SHOWS' | 'WARNED' | 'RESTRICTED';
