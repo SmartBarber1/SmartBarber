@@ -123,3 +123,13 @@
   text-align: center;
   font-size: 13px;
 }
+
+.services-required {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border: 1px solid #d9b26a;
+  border-radius: 8px;
+  background: #fff6e5;
+  color: #6b4a12;
+  font-size: 0.9rem;
+}

@@ -37,6 +37,9 @@ const ETIQUETAS_ESTADO: Readonly<Record<string, string>> = {
   CONFIRMED: 'Confirmada'
 };
 
+/** Aviso al confirmar sin servicios; se retira solo al elegir uno. */
+const AVISO_SIN_SERVICIOS = 'Selecciona al menos un servicio para la reserva.';
+
 /**
  * Componente contenedor (smart): guarda el estado de la pantalla y orquesta a los hijos.
  * La lógica de horarios vive en utils/ + AvailabilityService; los hijos solo pintan.
@@ -295,6 +298,11 @@ export class AppointmentComponent implements OnInit {
 
     this.recalcularResumen();
     this.recalcularSlots(); // la duración cambió: algunos huecos dejan de caber
+
+    // El aviso de "sin servicios" deja de aplicar en cuanto hay uno elegido.
+    if (this.selectedServicesIds.length > 0 && this.aviso?.texto === AVISO_SIN_SERVICIOS) {
+      this.cerrarAviso();
+    }
   }
 
   cambiarMes(delta: number): void {
@@ -461,7 +469,7 @@ export class AppointmentComponent implements OnInit {
     }
 
     if (this.selectedServicesIds.length === 0) {
-      this.mostrarAviso('error', 'Selecciona al menos un servicio para la reserva.');
+      this.mostrarAviso('error', AVISO_SIN_SERVICIOS);
       return;
     }
 

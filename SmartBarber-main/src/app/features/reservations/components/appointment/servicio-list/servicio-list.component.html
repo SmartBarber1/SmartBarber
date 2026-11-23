@@ -44,4 +44,10 @@
       </span>
     </label>
   </div>
+
+  <!-- Validación en vivo: aparece sin servicios elegidos y se va al marcar uno. -->
+  <p *ngIf="!loading && servicios.length > 0 && selectedIds.length === 0"
+     class="services-required" role="status" aria-live="polite">
+    Selecciona al menos un servicio para continuar con la reserva.
+  </p>
 </div>
