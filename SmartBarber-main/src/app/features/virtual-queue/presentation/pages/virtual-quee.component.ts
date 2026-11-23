@@ -55,6 +55,7 @@ import { QueueStatusCardComponent } from '../components/queue-status-card/queue-
 export class VirtualQueueComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed = true;
+    this.stopPolling();
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
@@ -67,6 +68,13 @@ export class VirtualQueueComponent implements OnInit, OnDestroy {
   private destroyed = false;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private static readonly RECONNECT_DELAY_MS = 3_000;
+  /**
+   * Respaldo del tiempo real: mientras la cola está abierta se relee cada
+   * cierto tiempo, por si el WebSocket no llega a conectar (red, proxy) o se
+   * pierde un evento. No muestra indicador de carga.
+   */
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private static readonly POLL_INTERVAL_MS = 10_000;
 
   private readonly session =
     inject(SessionService);
@@ -281,6 +289,27 @@ export class VirtualQueueComponent implements OnInit, OnDestroy {
     payload: QueueSnapshotResponseEvent
   ): void {
     this.updateSnapshot(payload);
+    if (payload.acceptingClients) {
+      this.startPolling();
+    } else {
+      this.stopPolling();
+    }
+  }
+
+  private startPolling(): void {
+    if (this.pollTimer || this.destroyed) return;
+    this.pollTimer = setInterval(() => {
+      // Pestaña oculta: no se consulta; al volver se actualiza en el siguiente ciclo.
+      if (typeof document !== 'undefined' && document.hidden) return;
+      if (!this.actionLoading()) this.refreshSilently();
+    }, VirtualQueueComponent.POLL_INTERVAL_MS);
+  }
+
+  private stopPolling(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
   }
 
   private updateSnapshot(
