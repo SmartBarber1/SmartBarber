@@ -65,9 +65,26 @@
     </section>
 
     <ng-template #noTurn>
-      <div class="message-card" *ngIf="left" role="status">
-        Saliste de la fila. Puedes unirte de nuevo cuando quieras.
-        <button type="button" class="secondary" (click)="goToAvailableQueues()">Ver colas disponibles</button>
+      <div class="message-card turn-outcome" role="status" aria-live="polite">
+        <ng-container [ngSwitch]="left ? 'left' : outcome">
+          <ng-container *ngSwitchCase="'left'">
+            <h2>Saliste de la fila</h2>
+            <p>Puedes unirte de nuevo cuando quieras.</p>
+          </ng-container>
+          <ng-container *ngSwitchCase="'finished'">
+            <h2>¡Tu atención finalizó!</h2>
+            <p>Gracias por visitarnos. Si necesitas otro servicio, puedes unirte de nuevo a una cola.</p>
+          </ng-container>
+          <ng-container *ngSwitchCase="'removed'">
+            <h2>Tu turno ya no está en la fila</h2>
+            <p>La barbería retiró tu turno. Si aún necesitas el servicio, puedes unirte de nuevo.</p>
+          </ng-container>
+          <ng-container *ngSwitchDefault>
+            <h2>No tienes un turno en esta cola</h2>
+            <p>Elige una barbería disponible para tomar un turno.</p>
+          </ng-container>
+        </ng-container>
+        <button type="button" class="turn-outcome__action" (click)="goToAvailableQueues()">Ver colas disponibles</button>
       </div>
     </ng-template>
 

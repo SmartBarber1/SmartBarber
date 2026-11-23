@@ -289,3 +289,51 @@ tr.mine td {
   background: #fbf7ef;
   font-weight: 600;
 }
+
+
+/* Resultado del turno: salió, finalizó o fue retirado. */
+.turn-outcome {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.turn-outcome h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.turn-outcome p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.turn-outcome__action {
+  margin-top: 6px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.turn-outcome__action:focus-visible {
+  outline: 2px solid #c29b68;
+  outline-offset: 2px;
+}
+
+@media (max-width: 650px) {
+  .turn-outcome {
+    padding: 22px;
+  }
+
+  .turn-outcome__action {
+    width: 100%;
+  }
+}

@@ -50,6 +50,14 @@ export class VirtualQueuePageComponent
   leaveError = '';
   /** El cliente salió de la fila en esta sesión. */
   left = false;
+  /**
+   * Qué pasó con el turno que el cliente tenía y ya no aparece en la cola:
+   * 'finished' si estaba en atención (el barbero finalizó) y 'removed' si
+   * estaba en espera (lo retiró la barbería o no se presentó).
+   */
+  outcome: 'finished' | 'removed' | null = null;
+  /** Último estado visto del turno propio (WAITING / IN_PROGRESS). */
+  private lastMyTurnStatus: string | null = null;
 
   constructor(
     private readonly virtualQueueService: VirtualQueueService,
@@ -126,10 +134,33 @@ export class VirtualQueuePageComponent
     if (this.employeeId) {
       this.virtualQueueService.getQueue(this.employeeId).subscribe({
         next: queue => {
-          if (!this.destroyed) this.queue = queue;
+          if (!this.destroyed) this.applyQueue(queue);
         },
         error: () => undefined
       });
+    }
+  }
+
+  /**
+   * Aplica la cola recibida y detecta cuándo desaparece el turno propio
+   * (atención finalizada o turno retirado) para explicárselo al cliente.
+   */
+  private applyQueue(queue: EmployeeQueueResponse): void {
+    this.queue = queue;
+    if (this.left) return;
+
+    const mine = this.myTurn;
+    if (mine) {
+      this.lastMyTurnStatus = mine.status;
+      this.outcome = null;
+      return;
+    }
+
+    if (this.lastMyTurnStatus) {
+      this.outcome = this.lastMyTurnStatus === 'IN_PROGRESS' ? 'finished' : 'removed';
+      this.lastMyTurnStatus = null;
+      this.confirmingLeave = false;
+      this.virtualQueueService.forgetEmployee();
     }
   }
 
@@ -195,7 +226,7 @@ export class VirtualQueuePageComponent
 
         (message: QueueSocketMessage) => {
           this.ngZone.run(() => {
-            this.queue = message.payload;
+            this.applyQueue(message.payload);
             this.connectionStatus = 'connected';
           });
         },
