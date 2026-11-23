@@ -318,31 +318,6 @@ export class PanelNavigationService {
 
             visible:
               true
-          },
-
-
-          {
-            id: 'barber-clients',
-
-            label: 'Clientes',
-
-            description:
-              'Consulta clientes relacionados con tus servicios.',
-
-            icon: 'users',
-
-            route:
-              '/panel/clients',
-
-            roles: [
-              'BARBER'
-            ],
-
-            status:
-              'COMING_SOON',
-
-            visible:
-              true
           }
         ]
       },

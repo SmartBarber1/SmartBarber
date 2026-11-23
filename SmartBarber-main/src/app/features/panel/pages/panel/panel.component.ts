@@ -228,7 +228,7 @@ export class PanelComponent
    */
   private static readonly QUICK_ACCESS_IDS: Readonly<Record<string, readonly string[]>> = {
     ADMIN: ['admin-agenda', 'reservations-history', 'barbers', 'services', 'schedules', 'statistics'],
-    BARBER: ['agenda', 'barber-queue', 'barber-reservations', 'barber-clients'],
+    BARBER: ['agenda', 'barber-queue', 'barber-reservations'],
     CUSTOMER: ['reservations', 'virtual-queue', 'reservation-history', 'notifications']
   };
 
