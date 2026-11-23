@@ -65,7 +65,10 @@
     </section>
 
     <ng-template #noTurn>
-      <div class="message-card" *ngIf="left">Saliste de la fila. Puedes unirte de nuevo cuando quieras.</div>
+      <div class="message-card" *ngIf="left" role="status">
+        Saliste de la fila. Puedes unirte de nuevo cuando quieras.
+        <button type="button" class="secondary" (click)="goToAvailableQueues()">Ver colas disponibles</button>
+      </div>
     </ng-template>
 
     <section class="summary-grid">

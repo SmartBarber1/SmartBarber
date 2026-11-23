@@ -6,6 +6,7 @@ import {
   NgZone
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ReservationService } from '../../../../reservations/services/reservation.service';
 import { toApiError, toUserMessage } from '../../../../../core/errors';
 
@@ -53,11 +54,15 @@ export class VirtualQueuePageComponent
   constructor(
     private readonly virtualQueueService: VirtualQueueService,
     private readonly reservationService: ReservationService,
-    private readonly ngZone: NgZone
+    private readonly ngZone: NgZone,
+    private readonly router: Router
   ) {}
 
   /** Turno del cliente (en espera o en atención). */
   get myTurn(): QueueTurn | null {
+    if (this.left) {
+      return null;
+    }
     if (this.queue?.currentTurn?.mine) {
       return this.queue.currentTurn;
     }
@@ -90,19 +95,46 @@ export class VirtualQueuePageComponent
     this.leaving = true;
     this.leaveError = '';
     this.reservationService.cancelReservation(turn.reservationId).subscribe({
-      next: () => {
-        this.leaving = false;
-        this.confirmingLeave = false;
-        this.left = true;
-        this.virtualQueueService.forgetEmployee();
-      },
+      next: () => this.markLeft(turn.reservationId),
       error: (error: unknown) => {
         this.leaving = false;
-        this.leaveError = toApiError(error).code === 'RES_009'
-          ? 'Tu turno ya no está en la fila.'
-          : toUserMessage(error, { DEFAULT: 'No fue posible salir de la fila. Inténtalo nuevamente.' });
+        if (toApiError(error).code === 'RES_009') {
+          // El turno ya no estaba en la fila (por ejemplo, salió desde otra
+          // pestaña): la vista se pone al día en vez de quedarse con el turno.
+          this.markLeft(turn.reservationId);
+          return;
+        }
+        this.leaveError = toUserMessage(error, { DEFAULT: 'No fue posible salir de la fila. Inténtalo nuevamente.' });
       }
     });
+  }
+
+  /** Quita el turno propio de la vista al instante y relee la cola del servidor. */
+  private markLeft(reservationId: string): void {
+    this.leaving = false;
+    this.confirmingLeave = false;
+    this.left = true;
+    this.virtualQueueService.forgetEmployee();
+
+    if (this.queue) {
+      const waitingTurns = this.queue.waitingTurns
+        .filter(turn => turn.reservationId !== reservationId)
+        .map((turn, index) => ({ ...turn, position: index + 1 }));
+      this.queue = { ...this.queue, waitingTurns };
+    }
+
+    if (this.employeeId) {
+      this.virtualQueueService.getQueue(this.employeeId).subscribe({
+        next: queue => {
+          if (!this.destroyed) this.queue = queue;
+        },
+        error: () => undefined
+      });
+    }
+  }
+
+  goToAvailableQueues(): void {
+    void this.router.navigate(['/panel/virtual-queue-available']);
   }
 
   get statusLabel(): string {

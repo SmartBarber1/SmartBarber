@@ -134,6 +134,11 @@ export class VirtualQueueService {
     });
   }
 
+  /** Cola actual vista por el cliente (su turno marcado con mine). */
+  getQueue(employeeId: string): Observable<EmployeeQueueResponse> {
+    return this.http.get<EmployeeQueueResponse>(`${this.apiUrl}/${employeeId}`);
+  }
+
   getLastEmployeeId(): string | null {
     try {
       return sessionStorage.getItem(this.employeeStorageKey);
@@ -183,12 +188,6 @@ export class VirtualQueueService {
 
           console.log('[CLIENTE WS] Evento recibido:', message);
 
-          const eventsToRefresh = [
-            'QUEUE_NEXT_CUSTOMER',
-            'QUEUE_COMPLETED_CURRENT_TURN',
-            'QUEUE_UPDATED'
-          ];
-
           if (message.type === 'QUEUE_SNAPSHOT' && message.payload) {
             onMessage({
               type: 'QUEUE_SNAPSHOT',
@@ -197,32 +196,20 @@ export class VirtualQueueService {
             return;
           }
 
-          if (eventsToRefresh.includes(message.type)) {
-            console.log('[CLIENTE WS] Actualizando información de la cola...');
-
-            this.http
-              .get<EmployeeQueueResponse>(`${this.apiUrl}/${employeeId}`)
-              .subscribe({
-                next: queue => {
-                  if (!cancelled) {
-                    console.log(
-                      '[CLIENTE WS] Cola actualizada:',
-                      queue.waitingTurns.length
-                    );
-
-                    onMessage({
-                      type: 'QUEUE_UPDATED',
-                      payload: queue
-                    });
-                  }
-                },
-                error: error => {
-                  console.error(
-                    '[CLIENTE WS] Error consultando la cola:',
-                    error
-                  );
+          // Cualquier otro cambio (alguien se une o sale, siguiente turno,
+          // turno finalizado, cola abierta o cerrada): se relee la cola por
+          // REST, donde el servidor marca el turno propio del cliente.
+          if (message.type) {
+            this.getQueue(employeeId).subscribe({
+              next: queue => {
+                if (!cancelled) {
+                  onMessage({ type: 'QUEUE_UPDATED', payload: queue });
                 }
-              });
+              },
+              error: error => {
+                console.error('[CLIENTE WS] Error consultando la cola:', error);
+              }
+            });
           }
 
         } catch (error) {
