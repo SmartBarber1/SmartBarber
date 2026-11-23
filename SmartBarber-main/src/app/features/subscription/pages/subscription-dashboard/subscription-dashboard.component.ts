@@ -71,9 +71,10 @@ export class SubscriptionDashboardComponent implements OnInit {
       available: true
     },
     {
-      title: 'Historial de pagos',
-      description: 'Consulta los pagos de tu plan: valor, estado, referencia y vigencia.',
-      route: 'payment-history',
+      // Mismo destino que "Historial de suscripción" del menú lateral.
+      title: 'Historial de suscripción',
+      description: 'Consulta los registros y cambios de suscripción de tu barbería.',
+      route: 'subscription-history',
       icon: '▤',
       state: 'Disponible',
       available: true
