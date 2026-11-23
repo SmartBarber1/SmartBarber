@@ -569,9 +569,9 @@
             </div>
 
 
-            <!-- BARBERÍA -->
+            <!-- BARBERÍA (solo administrador y barbero; el cliente no pertenece a una barbería) -->
 
-            <div class="profile-card">
+            <div *ngIf="showBarbershopSection()" class="profile-card">
 
                 <div class="section-heading simple-heading">
 

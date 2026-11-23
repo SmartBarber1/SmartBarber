@@ -437,6 +437,19 @@ export class ProfileComponent
     }
 
 
+    /**
+     * La sección "Barbería asociada" solo aplica al personal (administrador y
+     * barbero): un cliente reserva en cualquier barbería y no pertenece a una.
+     */
+    showBarbershopSection(): boolean {
+
+        const role =
+            this.profile()?.role;
+
+        return !!role && role !== 'CLIENT';
+    }
+
+
     hasBarbershop(): boolean {
 
         const profile =
